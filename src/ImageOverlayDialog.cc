@@ -38,6 +38,23 @@ ImageOverlayDialog::ImageOverlayDialog(QPixmap image, QWidget *parent)
 	raise();
 }
 
+void ImageOverlayDialog::reject()
+{
+	// needed on macOS to recover the main menu after the dialog is closed(!)
+	setWindowState(Qt::WindowNoState);
+
+	// It might be slightly cleaner to do:
+	//
+	// #ifdef Q_WS_MACX
+	// #include <Carbon/Carbon.h>
+	// ShowMenuBar();
+	// #endif
+	//
+	// ...but there's a chance other platforms might be affected by this too.
+
+	QDialog::reject();
+}
+
 // TODO: Move this into Utils
 void ImageOverlayDialog::scaleImage(int max_width, int max_height)
 {
