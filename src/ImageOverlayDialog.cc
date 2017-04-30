@@ -34,8 +34,6 @@ ImageOverlayDialog::ImageOverlayDialog(QPixmap image, QWidget *parent)
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	setWindowState(Qt::WindowFullScreen);
-
-	raise();
 }
 
 void ImageOverlayDialog::reject()
