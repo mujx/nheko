@@ -35,6 +35,7 @@ protected:
 private:
 	void scaleImage(int width, int height);
 
+	QPixmap originalImage_;
 	QPixmap image_;
 
 	QRect content_;
