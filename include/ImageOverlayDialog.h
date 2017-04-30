@@ -28,6 +28,8 @@ class ImageOverlayDialog : public QDialog
 public:
 	ImageOverlayDialog(QPixmap image, QWidget *parent = nullptr);
 
+	void reject() override;
+
 protected:
 	void mousePressEvent(QMouseEvent *event) override;
 	void paintEvent(QPaintEvent *event) override;
