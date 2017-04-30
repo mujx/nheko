@@ -36,8 +36,6 @@ ImageOverlayDialog::ImageOverlayDialog(QPixmap image, QWidget *parent)
 
 	setWindowState(Qt::WindowFullScreen);
 
-	raise();
-
 	connect(this, SIGNAL(closing()), this, SLOT(closeDialog()));
 }
 
