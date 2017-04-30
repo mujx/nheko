@@ -17,6 +17,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QTimer>
 
 #include "ImageOverlayDialog.h"
 
@@ -34,6 +35,8 @@ ImageOverlayDialog::ImageOverlayDialog(QPixmap image, QWidget *parent)
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	setWindowState(Qt::WindowFullScreen);
+
+	connect(this, SIGNAL(closing()), this, SLOT(closeDialog()));
 }
 
 void ImageOverlayDialog::reject()
@@ -51,6 +54,11 @@ void ImageOverlayDialog::reject()
 	// ...but there's a chance other platforms might be affected by this too.
 
 	QDialog::reject();
+}
+
+void ImageOverlayDialog::closeDialog()
+{
+	QTimer::singleShot(100, this, &ImageOverlayDialog::reject);
 }
 
 // TODO: Move this into Utils
@@ -125,9 +133,8 @@ void ImageOverlayDialog::mousePressEvent(QMouseEvent *event)
 	if (event->button() != Qt::LeftButton)
 		return;
 
-	// FIXME: The main window needs double click to regain focus.
 	if (close_button_.contains(event->pos()))
-		close();
+		emit closing();
 	else if (!content_.contains(event->pos()))
-		close();
+		emit closing();
 }
