@@ -77,12 +77,12 @@ RoomInfoListItem::RoomInfoListItem(RoomInfo info, QWidget *parent)
 	avatarLayout_->addWidget(roomAvatar_);
 
 	roomName_ = new QLabel(info_.name(), textWidget_);
-	roomName_->setMaximumSize(parent->width() - max_height_, 20);
+	roomName_->setMaximumSize(parent->width() - 10, 20);
 	roomName_->setStyleSheet("font-weight: 400; font-size: 14px;");
 	roomName_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 	roomTopic_ = new QLabel(info_.topic(), textWidget_);
-	roomTopic_->setMaximumSize(parent->width() - max_height_, 20);
+	roomTopic_->setMaximumSize(parent->width() - 10, 20);
 	roomTopic_->setStyleSheet("color: #171919; font-size: 12px");
 	roomTopic_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
@@ -92,8 +92,8 @@ RoomInfoListItem::RoomInfoListItem(RoomInfo info, QWidget *parent)
 	topLayout_->addWidget(avatarWidget_);
 	topLayout_->addWidget(textWidget_);
 
-	setElidedText(roomName_, info_.name(), parent->width() - max_height_);
-	setElidedText(roomTopic_, info_.topic(), parent->width() - max_height_);
+	setElidedText(roomName_, info_.name(), parent->width() - 10);
+	setElidedText(roomTopic_, info_.topic(), parent->width() - 10);
 
 	QPainterPath path;
 	path.addRoundedRect(rect(), 0, 0);
