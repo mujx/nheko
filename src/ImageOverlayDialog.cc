@@ -42,16 +42,9 @@ ImageOverlayDialog::ImageOverlayDialog(QPixmap image, QWidget *parent)
 void ImageOverlayDialog::reject()
 {
 	// needed on macOS to recover the main menu after the dialog is closed(!)
+	// also affects KDE/Plasma.  XXX: There may be a better way of resetting the
+	// window state than this...
 	setWindowState(Qt::WindowNoState);
-
-	// It might be slightly cleaner to do:
-	//
-	// #ifdef Q_WS_MACX
-	// #include <Carbon/Carbon.h>
-	// ShowMenuBar();
-	// #endif
-	//
-	// ...but rather than being platform-specific, let's try to fix it at the Qt layer.
 
 	QDialog::reject();
 }
