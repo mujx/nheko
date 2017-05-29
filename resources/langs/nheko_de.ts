@@ -87,7 +87,7 @@
     <message>
         <location filename="../../src/MatrixClient.cc" line="80"/>
         <source>Login endpoint was not found on the server</source>
-        <translation>Login-Endpunkte wurde auf dem Server nicht gefunden</translation>
+        <translation>Login-Endpunkt wurde auf dem Server nicht gefunden</translation>
     </message>
     <message>
         <location filename="../../src/MatrixClient.cc" line="86"/>
