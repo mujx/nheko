@@ -8,6 +8,13 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 
+if (Qt5Widgets_FOUND)
+    if (Qt5Widgets_VERSION VERSION_LESS 5.7.0)
+        message(STATUS "Qt version ${Qt5Widgets_VERSION}")
+        message(WARNING "Minimum supported Qt5 version is 5.7!")
+    endif()
+endif(Qt5Widgets_FOUND)
+
 set(CMAKE_C_COMPILER gcc)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -51,7 +58,6 @@ message(STATUS "Version: ${PROJECT_VERSION}")
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-        -std=c++11 \
         -Wall \
         -Wextra \
         -Werror \
@@ -72,6 +78,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 endif()
 
 set(SRC_FILES
+    src/AvatarProvider.cc
     src/ChatPage.cc
     src/Deserializable.cc
     src/EmojiCategory.cc
@@ -88,6 +95,7 @@ set(SRC_FILES
     src/Login.cc
     src/LoginPage.cc
     src/LoginSettings.cc
+    src/LogoutDialog.cc
     src/MainWindow.cc
     src/MatrixClient.cc
     src/Profile.cc
@@ -153,6 +161,7 @@ include_directories(include/events)
 include_directories(include/events/messages)
 
 qt5_wrap_cpp(MOC_HEADERS
+    include/AvatarProvider.h
     include/ChatPage.h
     include/EmojiCategory.h
     include/EmojiItemDelegate.h
@@ -165,6 +174,7 @@ qt5_wrap_cpp(MOC_HEADERS
     include/TimelineViewManager.h
     include/LoginPage.h
     include/LoginSettings.h
+    include/LogoutDialog.h
     include/MainWindow.h
     include/MatrixClient.h
     include/RegisterPage.h

@@ -17,48 +17,20 @@
 
 #pragma once
 
-#include <QGraphicsOpacityEffect>
-#include <QPropertyAnimation>
-#include <QScrollArea>
-#include <QWidget>
+#include <QFrame>
 
-#include "EmojiCategory.h"
-#include "EmojiProvider.h"
+#include "FlatButton.h"
 
-class EmojiPanel : public QWidget
+class LogoutDialog : public QFrame
 {
 	Q_OBJECT
-
 public:
-	EmojiPanel(QWidget *parent = nullptr);
-
-	void fadeOut();
-	void fadeIn();
+	explicit LogoutDialog(QWidget *parent = nullptr);
 
 signals:
-	void mouseLeft();
-	void emojiSelected(const QString &emoji);
-
-protected:
-	void leaveEvent(QEvent *event);
-	void paintEvent(QPaintEvent *event);
+	void closing(bool isLoggingOut);
 
 private:
-	void showEmojiCategory(const EmojiCategory *category);
-
-	QPropertyAnimation *animation_;
-	QGraphicsOpacityEffect *opacity_;
-
-	EmojiProvider emoji_provider_;
-
-	QScrollArea *scrollArea_;
-
-	int shadowMargin_;
-
-	// Panel dimensions.
-	int width_;
-	int height_;
-
-	int animationDuration_;
-	int categoryIconSize_;
+	FlatButton *confirmBtn_;
+	FlatButton *cancelBtn_;
 };

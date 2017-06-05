@@ -17,48 +17,39 @@
 
 #pragma once
 
-#include <QGraphicsOpacityEffect>
-#include <QPropertyAnimation>
-#include <QScrollArea>
-#include <QWidget>
+#include <QSettings>
 
-#include "EmojiCategory.h"
-#include "EmojiProvider.h"
-
-class EmojiPanel : public QWidget
+class RoomSettings
 {
-	Q_OBJECT
-
 public:
-	EmojiPanel(QWidget *parent = nullptr);
+	RoomSettings(QString room_id)
+	{
+		path_ = QString("notifications/%1").arg(room_id);
+		isNotificationsEnabled_ = true;
 
-	void fadeOut();
-	void fadeIn();
+		QSettings settings;
 
-signals:
-	void mouseLeft();
-	void emojiSelected(const QString &emoji);
+		if (settings.contains(path_))
+			isNotificationsEnabled_ = settings.value(path_).toBool();
+		else
+			settings.setValue(path_, isNotificationsEnabled_);
+	};
 
-protected:
-	void leaveEvent(QEvent *event);
-	void paintEvent(QPaintEvent *event);
+	bool isNotificationsEnabled()
+	{
+		return isNotificationsEnabled_;
+	};
+
+	void toggleNotifications()
+	{
+		isNotificationsEnabled_ = !isNotificationsEnabled_;
+
+		QSettings settings;
+		settings.setValue(path_, isNotificationsEnabled_);
+	}
 
 private:
-	void showEmojiCategory(const EmojiCategory *category);
+	QString path_;
 
-	QPropertyAnimation *animation_;
-	QGraphicsOpacityEffect *opacity_;
-
-	EmojiProvider emoji_provider_;
-
-	QScrollArea *scrollArea_;
-
-	int shadowMargin_;
-
-	// Panel dimensions.
-	int width_;
-	int height_;
-
-	int animationDuration_;
-	int categoryIconSize_;
+	bool isNotificationsEnabled_;
 };

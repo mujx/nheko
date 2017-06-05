@@ -17,48 +17,31 @@
 
 #pragma once
 
-#include <QGraphicsOpacityEffect>
-#include <QPropertyAnimation>
-#include <QScrollArea>
-#include <QWidget>
+#include <QImage>
+#include <QObject>
+#include <QSharedPointer>
+#include <QUrl>
 
-#include "EmojiCategory.h"
-#include "EmojiProvider.h"
+#include "MatrixClient.h"
+#include "TimelineItem.h"
 
-class EmojiPanel : public QWidget
+class AvatarProvider : public QObject
 {
 	Q_OBJECT
 
 public:
-	EmojiPanel(QWidget *parent = nullptr);
+	static void init(QSharedPointer<MatrixClient> client);
+	static void resolve(const QString &userId, TimelineItem *item);
+	static void setAvatarUrl(const QString &userId, const QUrl &url);
 
-	void fadeOut();
-	void fadeIn();
-
-signals:
-	void mouseLeft();
-	void emojiSelected(const QString &emoji);
-
-protected:
-	void leaveEvent(QEvent *event);
-	void paintEvent(QPaintEvent *event);
+	static void clear();
 
 private:
-	void showEmojiCategory(const EmojiCategory *category);
+	static void updateAvatar(const QString &uid, const QImage &img);
 
-	QPropertyAnimation *animation_;
-	QGraphicsOpacityEffect *opacity_;
+	static QSharedPointer<MatrixClient> client_;
+	static QMap<QString, QList<TimelineItem *>> toBeResolved_;
 
-	EmojiProvider emoji_provider_;
-
-	QScrollArea *scrollArea_;
-
-	int shadowMargin_;
-
-	// Panel dimensions.
-	int width_;
-	int height_;
-
-	int animationDuration_;
-	int categoryIconSize_;
+	static QMap<QString, QImage> userAvatars_;
+	static QMap<QString, QUrl> avatarUrls_;
 };
