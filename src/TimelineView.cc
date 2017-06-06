@@ -58,6 +58,15 @@ void TimelineView::sliderRangeChanged(int min, int max)
 
 	if (max - scroll_area_->verticalScrollBar()->value() < SCROLL_BAR_GAP)
 		scroll_area_->verticalScrollBar()->setValue(max);
+
+	if (isPaginationScrollPending_) {
+		isPaginationScrollPending_ = false;
+
+		int currentHeight = scroll_widget_->size().height();
+		int diff = currentHeight - oldHeight_;
+
+		scroll_area_->verticalScrollBar()->setValue(oldPosition_ + diff);
+	}
 }
 
 void TimelineView::scrollDown()
@@ -67,7 +76,7 @@ void TimelineView::scrollDown()
 
 	// The first time we enter the room move the scroll bar to the bottom.
 	if (!isInitialized) {
-		scroll_area_->ensureVisible(0, scroll_widget_->size().height(), 0, 0);
+		scroll_area_->verticalScrollBar()->setValue(max);
 		isInitialized = true;
 		return;
 	}
@@ -88,17 +97,14 @@ void TimelineView::sliderMoved(int position)
 			return;
 
 		// Prevent user from moving up when there is pagination in progress.
-		if (isPaginationInProgress_) {
-			scroll_area_->verticalScrollBar()->setValue(SCROLL_BAR_GAP);
+		// TODO: Keep a map of the event ids to filter out duplicates.
+		if (isPaginationInProgress_)
 			return;
-		}
 
 		isPaginationInProgress_ = true;
-		scroll_height_ = scroll_area_->verticalScrollBar()->value();
-		previous_max_height_ = scroll_area_->verticalScrollBar()->maximum();
 
 		// FIXME: Maybe move this to TimelineViewManager to remove the extra calls?
-		client_.data()->messages(room_id_, prev_batch_token_);
+		client_->messages(room_id_, prev_batch_token_);
 	}
 }
 
@@ -130,11 +136,15 @@ void TimelineView::addBackwardsEvents(const QString &room_id, const RoomMessages
 	// Reverse again to render them.
 	std::reverse(items.begin(), items.end());
 
+	oldPosition_ = scroll_area_->verticalScrollBar()->value();
+	oldHeight_ = scroll_widget_->size().height();
+
 	for (const auto &item : items)
 		addTimelineItem(item, TimelineDirection::Top);
 
 	prev_batch_token_ = msgs.end();
 	isPaginationInProgress_ = false;
+	isPaginationScrollPending_ = true;
 }
 
 TimelineItem *TimelineView::parseMessageEvent(const QJsonObject &event, TimelineDirection direction)
@@ -216,11 +226,6 @@ int TimelineView::addEvents(const Timeline &timeline)
 	QSettings settings;
 	QString localUser = settings.value("auth/user_id").toString();
 
-	if (isInitialSync) {
-		prev_batch_token_ = timeline.previousBatch();
-		isInitialSync = false;
-	}
-
 	for (const auto &event : timeline.events()) {
 		TimelineItem *item = parseMessageEvent(event.toObject(), TimelineDirection::Bottom);
 		auto sender = event.toObject().value("sender").toString();
@@ -231,6 +236,13 @@ int TimelineView::addEvents(const Timeline &timeline)
 			if (sender != localUser)
 				message_count += 1;
 		}
+	}
+
+	if (isInitialSync) {
+		prev_batch_token_ = timeline.previousBatch();
+		isInitialSync = false;
+
+		client_->messages(room_id_, prev_batch_token_);
 	}
 
 	return message_count;
