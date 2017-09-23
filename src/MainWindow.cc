@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
                 this,
                 SLOT(showChatPage(QString, QString, QString)));
 
-        QShortcut *quitShortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this);
+        QShortcut *quitShortcut = new QShortcut(QKeySequence::Quit, this);
         connect(quitShortcut, &QShortcut::activated, this, [=]() { QApplication::quit(); });
 
         QSettings settings;
