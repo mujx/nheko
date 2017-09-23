@@ -46,21 +46,21 @@ SyncResponse::deserialize(const QJsonDocument &data)
                 if (!object.value("presence").isObject()) {
                         throw DeserializationException("Sync: presence is not a JSON object");
                 }
-                //TODO: implement presence handling
+                // TODO: implement presence handling
         }
 
         if (object.contains("account_data")) {
                 if (!object.value("account_data").isObject()) {
                         throw DeserializationException("Sync: account_data is not a JSON object");
                 }
-                //TODO: implement account_data handling
+                // TODO: implement account_data handling
         }
 
         if (object.contains("to_device")) {
                 if (!object.value("to_device").isObject()) {
                         throw DeserializationException("Sync: to_device is not a JSON object");
                 }
-                //TODO: implement to_device handling
+                // TODO: implement to_device handling
         }
 
         // for device_lists updates (for e2e)
@@ -68,7 +68,7 @@ SyncResponse::deserialize(const QJsonDocument &data)
                 if (!object.value("device_lists").isObject()) {
                         throw DeserializationException("Sync: device_lists is not a JSON object");
                 }
-                //TODO: implement device_lists handling
+                // TODO: implement device_lists handling
         }
 
         next_batch_ = object.value("next_batch").toString();
@@ -105,14 +105,14 @@ Rooms::deserialize(const QJsonValue &data)
                 if (!object.value("invite").isObject()) {
                         throw DeserializationException("rooms/invite must be a JSON object");
                 }
-                //TODO: Implement invite handling
+                // TODO: Implement invite handling
         }
 
         if (object.contains("leave")) {
                 if (!object.value("leave").isObject()) {
                         throw DeserializationException("rooms/leave must be a JSON object");
                 }
-                //TODO: Implement leave handling
+                // TODO: Implement leave handling
         }
 }
 
@@ -133,7 +133,8 @@ JoinedRoom::deserialize(const QJsonValue &data)
 
                 if (state.contains("events")) {
                         if (!state.value("events").isArray()) {
-                                throw DeserializationException("join/state/events should be an array");
+                                throw DeserializationException(
+                                  "join/state/events should be an array");
                         }
 
                         state_.deserialize(state.value("events"));
@@ -156,28 +157,29 @@ JoinedRoom::deserialize(const QJsonValue &data)
                         if (!ephemeral.value("events").isArray())
                                 qWarning() << "join/ephemeral/events should be an array";
 
-                        //TODO: Implement ephemeral handling
+                        // TODO: Implement ephemeral handling
                 }
         }
 
         if (object.contains("account_data")) {
                 if (!object.value("account_data").isObject())
                         throw DeserializationException("join/account_data is not a JSON object");
-                //TODO: Implement account_data handling
+                // TODO: Implement account_data handling
         }
 
         if (object.contains("unread_notifications")) {
                 if (!object.value("unread_notifications").isObject()) {
-                        throw DeserializationException("join/unread_notifications is not a JSON object");
+                        throw DeserializationException(
+                          "join/unread_notifications is not a JSON object");
                 }
 
                 QJsonObject unreadNotifications = object.value("unread_notifications").toObject();
 
                 if (unreadNotifications.contains("highlight_count")) {
-                        //TODO: Implement unread_notifications handling
+                        // TODO: Implement unread_notifications handling
                 }
                 if (unreadNotifications.contains("notification_count")) {
-                        //TODO: Implement unread_notifications handling
+                        // TODO: Implement unread_notifications handling
                 }
         }
 }
