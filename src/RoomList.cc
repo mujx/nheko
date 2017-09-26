@@ -22,6 +22,7 @@
 #include "RoomInfoListItem.h"
 #include "RoomList.h"
 #include "Sync.h"
+#include "MainWindow.h"
 
 RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QWidget(parent)
@@ -54,6 +55,27 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
 
         scrollArea_->setWidget(scrollAreaContents_);
         topLayout_->addWidget(scrollArea_);
+
+        joinRoomButton_ = new QPushButton("Join room", this);
+        topLayout_->addWidget(joinRoomButton_);
+
+        connect(joinRoomButton_, &QPushButton::clicked, this, [=]() {
+                if (joinRoomDialog_ == nullptr) {
+                        joinRoomDialog_ = new JoinRoomDialog(this);
+                        connect(joinRoomDialog_,
+                                SIGNAL(closing(bool, QString)),
+                                this,
+                                SLOT(closeJoinRoomDialog(bool, QString)));
+                }
+
+                if (joinRoomModal_ == nullptr) {
+                        joinRoomModal_ = new OverlayModal(MainWindow::instance(), joinRoomDialog_);
+                        joinRoomModal_->setDuration(100);
+                        joinRoomModal_->setColor(QColor(55, 55, 55, 170));
+                }
+
+                joinRoomModal_->fadeIn();
+        });
 
         connect(client_.data(),
                 SIGNAL(roomAvatarRetrieved(const QString &, const QPixmap &)),
@@ -202,4 +224,14 @@ RoomList::updateRoomDescription(const QString &roomid, const DescInfo &info)
         }
 
         rooms_.value(roomid)->setDescriptionMessage(info);
+}
+
+void
+RoomList::closeJoinRoomDialog(bool isJoining, QString roomAlias)
+{
+        joinRoomModal_->fadeOut();
+
+        if (isJoining) {
+           client_->joinRoom(roomAlias);
+        }
 }

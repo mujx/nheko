@@ -21,11 +21,14 @@
 #include <QSharedPointer>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QPushButton>
 
 #include "MatrixClient.h"
 #include "RoomInfoListItem.h"
 #include "RoomState.h"
 #include "Sync.h"
+#include "OverlayModal.h"
+#include "JoinRoomDialog.h"
 
 class RoomList : public QWidget
 {
@@ -51,6 +54,9 @@ public slots:
         void updateUnreadMessageCount(const QString &roomid, int count);
         void updateRoomDescription(const QString &roomid, const DescInfo &info);
 
+private slots:
+        void closeJoinRoomDialog(bool isJoining, QString roomAlias);
+
 private:
         void calculateUnreadMessageCount();
 
@@ -58,6 +64,11 @@ private:
         QVBoxLayout *contentsLayout_;
         QScrollArea *scrollArea_;
         QWidget *scrollAreaContents_;
+
+        QPushButton *joinRoomButton_;
+
+        OverlayModal *joinRoomModal_;
+        JoinRoomDialog *joinRoomDialog_;
 
         QMap<QString, QSharedPointer<RoomInfoListItem>> rooms_;
 

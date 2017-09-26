@@ -463,6 +463,24 @@ MatrixClient::onMessagesResponse(QNetworkReply *reply)
 }
 
 void
+MatrixClient::onJoinRoomResponse(QNetworkReply *reply)
+{
+        reply->deleteLater();
+
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        if (status == 0 || status >= 400) {
+                qWarning() << reply->errorString();
+                return;
+        }
+
+        auto data    = reply->readAll();
+        QJsonDocument response = QJsonDocument::fromJson(data);
+        QString room_id = response.object()["room_id"].toString();
+        emit joinedRoom(room_id);
+}
+
+void
 MatrixClient::onResponse(QNetworkReply *reply)
 {
         switch (static_cast<Endpoint>(reply->property("endpoint").toInt())) {
@@ -507,6 +525,9 @@ MatrixClient::onResponse(QNetworkReply *reply)
                 break;
         case Endpoint::Messages:
                 onMessagesResponse(reply);
+                break;
+        case Endpoint::JoinRoom:
+                onJoinRoomResponse(reply);
                 break;
         default:
                 break;
@@ -827,6 +848,13 @@ MatrixClient::uploadImage(const QString &roomid, const QString &filename)
 
         QFile file(filename);
         if (!file.open(QIODevice::ReadWrite)) {
+                QUrl endpoint(server_);
+                endpoint.setPath("/_matrix/client/versions");
+
+                QNetworkRequest request(endpoint);
+
+                QNetworkReply *reply = get(request);
+                reply->setProperty("endpoint", static_cast<int>(Endpoint::Versions));
                 qDebug() << "Error while reading" << filename;
                 return;
         }
@@ -841,4 +869,21 @@ MatrixClient::uploadImage(const QString &roomid, const QString &filename)
         reply->setProperty("endpoint", static_cast<int>(Endpoint::ImageUpload));
         reply->setProperty("room_id", roomid);
         reply->setProperty("filename", filename);
+}
+
+void
+MatrixClient::joinRoom(const QString &roomIdOrAlias)
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + QString("/join/%1").arg(roomIdOrAlias));
+        endpoint.setQuery(query);
+
+        QNetworkRequest request(endpoint);
+        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader,"application/json");
+
+        QNetworkReply *reply = post(request, "{}");
+        reply->setProperty("endpoint", static_cast<int>(Endpoint::JoinRoom));
 }
