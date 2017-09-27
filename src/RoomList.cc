@@ -59,28 +59,24 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
         joinRoomButton_ = new QPushButton("Join room", this);
         topLayout_->addWidget(joinRoomButton_);
 
-        connect(joinRoomButton_, &QPushButton::clicked, this, [=]() {
-                if (joinRoomDialog_ == nullptr) {
-                        joinRoomDialog_ = new JoinRoomDialog(this);
-                        connect(joinRoomDialog_,
-                                SIGNAL(closing(bool, QString)),
-                                this,
-                                SLOT(closeJoinRoomDialog(bool, QString)));
-                }
-
-                if (joinRoomModal_ == nullptr) {
-                        joinRoomModal_ = new OverlayModal(MainWindow::instance(), joinRoomDialog_);
-                        joinRoomModal_->setDuration(100);
-                        joinRoomModal_->setColor(QColor(55, 55, 55, 170));
-                }
-
-                joinRoomModal_->fadeIn();
-        });
-
         connect(client_.data(),
                 SIGNAL(roomAvatarRetrieved(const QString &, const QPixmap &)),
                 this,
                 SLOT(updateRoomAvatar(const QString &, const QPixmap &)));
+
+        connect(joinRoomButton_, &QPushButton::clicked, this, [=]() {
+                joinRoomDialog_ = new JoinRoomDialog(this);
+                connect(joinRoomDialog_,
+                    SIGNAL(closing(bool, QString)),
+                    this,
+                    SLOT(closeJoinRoomDialog(bool, QString)));
+
+                joinRoomModal_ = new OverlayModal(MainWindow::instance(), joinRoomDialog_);
+                joinRoomModal_->setDuration(100);
+                joinRoomModal_->setColor(QColor(55, 55, 55, 170));
+
+                joinRoomModal_->fadeIn();
+        });
 }
 
 RoomList::~RoomList() {}
@@ -89,6 +85,26 @@ void
 RoomList::clear()
 {
         rooms_.clear();
+}
+
+void
+RoomList::addRoom(const QSharedPointer<RoomSettings> &settings,
+                  const RoomState &state,
+                  const QString &room_id)
+{
+        RoomInfoListItem *room_item =
+          new RoomInfoListItem(settings, state, room_id, scrollArea_);
+        connect(
+            room_item, &RoomInfoListItem::clicked,
+            this, &RoomList::highlightSelectedRoom);
+        connect(
+            room_item, &RoomInfoListItem::leaveRoom,
+            client_.data(), &MatrixClient::leaveRoom);
+
+        rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
+
+        int pos = contentsLayout_->count() - 1;
+        contentsLayout_->insertWidget(pos, room_item);
 }
 
 void

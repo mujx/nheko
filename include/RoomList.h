@@ -44,6 +44,9 @@ public:
 
         void clear();
 
+        void addRoom(const QSharedPointer<RoomSettings> &settings,
+                     const RoomState &state,
+                     const QString &room_id);
         void removeRoom(const QString &room_id, bool reset);
 
 signals:

@@ -567,6 +567,8 @@ ChatPage::joinedRoom(const QString &room_id)
     settingsManager_.insert(room_id,
                             QSharedPointer<RoomSettings>(new RoomSettings(room_id)));
 
+    room_list_->addRoom(settingsManager_[room_id], state_manager_[room_id], room_id);
+
     this->changeTopRoomInfo(room_id);
 }
 
