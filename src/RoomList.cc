@@ -92,6 +92,20 @@ RoomList::clear()
 }
 
 void
+RoomList::removeRoom(const QString &room_id, bool reset)
+{
+        rooms_.remove(room_id);
+
+        if (rooms_.isEmpty() || !reset)
+                return;
+
+        auto first_room = rooms_.first();
+        first_room->setPressedState(true);
+
+        emit roomChanged(rooms_.firstKey());
+}
+
+void
 RoomList::updateUnreadMessageCount(const QString &roomid, int count)
 {
         if (!rooms_.contains(roomid)) {
@@ -137,7 +151,11 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
                 RoomInfoListItem *room_item =
                   new RoomInfoListItem(settings[room_id], state, room_id, scrollArea_);
                 connect(
-                  room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
+                            room_item, &RoomInfoListItem::clicked,
+                            this, &RoomList::highlightSelectedRoom);
+                connect(
+                            room_item, &RoomInfoListItem::leaveRoom,
+                            client_.data(), &MatrixClient::leaveRoom);
 
                 rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
 

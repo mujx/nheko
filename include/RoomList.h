@@ -44,6 +44,8 @@ public:
 
         void clear();
 
+        void removeRoom(const QString &room_id, bool reset);
+
 signals:
         void roomChanged(const QString &room_id);
         void totalUnreadMessageCountUpdated(int count);
@@ -53,8 +55,6 @@ public slots:
         void highlightSelectedRoom(const QString &room_id);
         void updateUnreadMessageCount(const QString &roomid, int count);
         void updateRoomDescription(const QString &roomid, const DescInfo &info);
-
-private slots:
         void closeJoinRoomDialog(bool isJoining, QString roomAlias);
 
 private:

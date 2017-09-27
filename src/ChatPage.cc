@@ -114,6 +114,10 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         connect(user_info_widget_, SIGNAL(logout()), client_.data(), SLOT(logout()));
         connect(client_.data(), SIGNAL(loggedOut()), this, SLOT(logout()));
 
+        connect(top_bar_, &TopRoomBar::leaveRoom, this, [=](){
+            client_->leaveRoom(current_room_);
+        });
+
         connect(room_list_, &RoomList::roomChanged, this, &ChatPage::changeTopRoomInfo);
         connect(room_list_, &RoomList::roomChanged, text_input_, &TextInputWidget::focusLineEdit);
         connect(
@@ -190,6 +194,14 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 SIGNAL(ownAvatarRetrieved(const QPixmap &)),
                 this,
                 SLOT(setOwnAvatar(const QPixmap &)));
+        connect(client_.data(),
+                SIGNAL(joinedRoom(const QString &)),
+                this,
+                SLOT(joinedRoom(const QString &)));
+        connect(client_.data(),
+                SIGNAL(leftRoom(const QString &)),
+                this,
+                SLOT(leftRoom(const QString &)));
 
         AvatarProvider::init(client);
 }
@@ -307,11 +319,20 @@ ChatPage::syncCompleted(const SyncResponse &response)
                         oldState.update(room_state);
                         state_manager_.insert(it.key(), oldState);
                 } else {
+                        // TODO: Add newly joined room
                         qWarning() << "New rooms cannot be added after initial sync, yet.";
                 }
 
                 if (it.key() == current_room_)
                         changeTopRoomInfo(it.key());
+        }
+
+        auto leave = response.rooms().leave();
+
+        for (auto it = leave.constBegin(); it != leave.constEnd(); it++) {
+            if (state_manager_.contains(it.key())) {
+                leftRoom(it.key());
+            }
         }
 
         try {
@@ -535,6 +556,33 @@ ChatPage::showQuickSwitcher()
 
         quickSwitcher_->setRoomList(rooms);
         quickSwitcherModal_->fadeIn();
+}
+
+void
+ChatPage::joinedRoom(const QString &room_id)
+{
+    RoomState room_state;
+
+    state_manager_.insert(room_id, room_state);
+    settingsManager_.insert(room_id,
+                            QSharedPointer<RoomSettings>(new RoomSettings(room_id)));
+
+    this->changeTopRoomInfo(room_id);
+}
+
+void
+ChatPage::leftRoom(const QString &room_id)
+{
+    state_manager_.remove(room_id);
+    settingsManager_.remove(room_id);
+    try {
+        cache_->removeRoom(room_id);
+    } catch (const lmdb::error &e) {
+        qCritical() << "The cache couldn't be updated: " << e.what();
+        // TODO: Notify the user.
+        cache_->unmount();
+    }
+    room_list_->removeRoom(room_id, room_id == current_room_);
 }
 
 ChatPage::~ChatPage()

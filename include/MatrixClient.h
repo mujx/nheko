@@ -53,6 +53,7 @@ public:
         void messages(const QString &room_id, const QString &from_token, int limit = 20) noexcept;
         void uploadImage(const QString &roomid, const QString &filename);
         void joinRoom(const QString &roomIdOrAlias);
+        void leaveRoom(const QString &roomId);
 
         inline QUrl getHomeServer();
         inline int transactionId();
@@ -96,6 +97,7 @@ signals:
         void emoteSent(const QString &event_id, const QString &roomid, const int txn_id);
         void messagesRetrieved(const QString &room_id, const RoomMessages &msgs);
         void joinedRoom(const QString &room_id);
+        void leftRoom(const QString &room_id);
 
 private slots:
         void onResponse(QNetworkReply *reply);
@@ -118,6 +120,7 @@ private:
                 UserAvatar,
                 Versions,
                 JoinRoom,
+                LeaveRoom,
         };
 
         // Response handlers.
@@ -136,6 +139,7 @@ private:
         void onUserAvatarResponse(QNetworkReply *reply);
         void onVersionsResponse(QNetworkReply *reply);
         void onJoinRoomResponse(QNetworkReply *reply);
+        void onLeaveRoomResponse(QNetworkReply *reply);
 
         // Client API prefix.
         QString clientApiUrl_;

@@ -51,6 +51,9 @@ public:
 
         void reset();
 
+signals:
+        void leaveRoom();
+
 protected:
         void paintEvent(QPaintEvent *event) override;
 
@@ -65,6 +68,7 @@ private:
 
         QMenu *menu_;
         QAction *toggleNotifications_;
+        QAction *leaveRoom_;
 
         FlatButton *settingsBtn_;
 

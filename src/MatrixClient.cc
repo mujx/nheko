@@ -481,6 +481,22 @@ MatrixClient::onJoinRoomResponse(QNetworkReply *reply)
 }
 
 void
+MatrixClient::onLeaveRoomResponse(QNetworkReply *reply)
+{
+        reply->deleteLater();
+
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        if (status == 0 || status >= 400) {
+                qWarning() << reply->errorString();
+                return;
+        }
+
+        QString room_id = reply->property("room_id").toString();
+        emit leftRoom(room_id);
+}
+
+void
 MatrixClient::onResponse(QNetworkReply *reply)
 {
         switch (static_cast<Endpoint>(reply->property("endpoint").toInt())) {
@@ -528,6 +544,9 @@ MatrixClient::onResponse(QNetworkReply *reply)
                 break;
         case Endpoint::JoinRoom:
                 onJoinRoomResponse(reply);
+                break;
+        case Endpoint::LeaveRoom:
+                onLeaveRoomResponse(reply);
                 break;
         default:
                 break;
@@ -592,7 +611,11 @@ void
 MatrixClient::sync() noexcept
 {
         QJsonObject filter{ { "room",
-                              QJsonObject{ { "ephemeral", QJsonObject{ { "limit", 0 } } } } },
+                              QJsonObject{
+                                  { "include_leave", true },
+                                  { "ephemeral", QJsonObject{ { "limit", 0 } } }
+                              }
+                            },
                             { "presence", QJsonObject{ { "limit", 0 } } } };
 
         QUrlQuery query;
@@ -886,4 +909,22 @@ MatrixClient::joinRoom(const QString &roomIdOrAlias)
 
         QNetworkReply *reply = post(request, "{}");
         reply->setProperty("endpoint", static_cast<int>(Endpoint::JoinRoom));
+}
+
+void
+MatrixClient::leaveRoom(const QString &roomId)
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + QString("/rooms/%1/leave").arg(roomId));
+        endpoint.setQuery(query);
+
+        QNetworkRequest request(endpoint);
+        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader,"application/json");
+
+        QNetworkReply *reply = post(request, "{}");
+        reply->setProperty("room_id", roomId);
+        reply->setProperty("endpoint", static_cast<int>(Endpoint::LeaveRoom));
 }
