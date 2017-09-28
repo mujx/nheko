@@ -871,13 +871,6 @@ MatrixClient::uploadImage(const QString &roomid, const QString &filename)
 
         QFile file(filename);
         if (!file.open(QIODevice::ReadWrite)) {
-                QUrl endpoint(server_);
-                endpoint.setPath("/_matrix/client/versions");
-
-                QNetworkRequest request(endpoint);
-
-                QNetworkReply *reply = get(request);
-                reply->setProperty("endpoint", static_cast<int>(Endpoint::Versions));
                 qDebug() << "Error while reading" << filename;
                 return;
         }
