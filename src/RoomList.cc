@@ -103,9 +103,7 @@ RoomList::addRoom(const QSharedPointer<RoomSettings> &settings,
 
         rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
 
-        int pos = contentsLayout_->count() - 1;
-        contentsLayout_->insertWidget(pos, room_item);
-}
+        contentsLayout_->insertWidget(0, room_item);}
 
 void
 RoomList::removeRoom(const QString &room_id, bool reset)
@@ -196,8 +194,9 @@ RoomList::sync(const QMap<QString, RoomState> &states)
                 auto state   = it.value();
 
                 // TODO: Add the new room to the list.
-                if (!rooms_.contains(room_id))
-                        continue;
+                if (!rooms_.contains(room_id)) {
+                        addRoom(QSharedPointer<RoomSettings>(new RoomSettings(room_id)), state, room_id);
+                }
 
                 auto room = rooms_[room_id];
 
