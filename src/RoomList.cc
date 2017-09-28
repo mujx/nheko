@@ -56,15 +56,16 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
         scrollArea_->setWidget(scrollAreaContents_);
         topLayout_->addWidget(scrollArea_);
 
-        joinRoomButton_ = new QPushButton("Join room", this);
-        topLayout_->addWidget(joinRoomButton_);
+        //joinRoomButton_ = new QPushButton("Join room", this);
+        //topLayout_->addWidget(joinRoomButton_);
 
         connect(client_.data(),
                 SIGNAL(roomAvatarRetrieved(const QString &, const QPixmap &)),
                 this,
                 SLOT(updateRoomAvatar(const QString &, const QPixmap &)));
 
-        connect(joinRoomButton_, &QPushButton::clicked, this, [=]() {
+        /* Nonfunctional and disabled
+         * connect(joinRoomButton_, &QPushButton::clicked, this, [=]() {
                 joinRoomDialog_ = new JoinRoomDialog(this);
                 connect(joinRoomDialog_,
                     SIGNAL(closing(bool, QString)),
@@ -77,6 +78,7 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
 
                 joinRoomModal_->fadeIn();
         });
+        */
 }
 
 RoomList::~RoomList() {}
