@@ -42,6 +42,8 @@ JoinRoomDialog::JoinRoomDialog(QWidget *parent)
         layout->addWidget(roomAliasEdit_);
         layout->addLayout(buttonLayout);
 
-        connect(confirmBtn_, &QPushButton::clicked, [=]() { emit closing(true, roomAliasEdit_->text()); });
+        connect(confirmBtn_, &QPushButton::clicked, [=]() {
+                emit closing(true, roomAliasEdit_->text());
+        });
         connect(cancelBtn_, &QPushButton::clicked, [=]() { emit closing(false, nullptr); });
 }

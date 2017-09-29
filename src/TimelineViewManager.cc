@@ -121,9 +121,9 @@ TimelineViewManager::addRoom(const JoinedRoom &room, const QString &room_id)
         views_.insert(room_id, QSharedPointer<TimelineView>(view));
 
         connect(view,
-            &TimelineView::updateLastTimelineMessage,
-            this,
-            &TimelineViewManager::updateRoomsLastMessage);
+                &TimelineView::updateLastTimelineMessage,
+                this,
+                &TimelineViewManager::updateRoomsLastMessage);
 
         // Add the view in the widget stack.
         addWidget(view);
@@ -137,9 +137,9 @@ TimelineViewManager::addRoom(const QString &room_id)
         views_.insert(room_id, QSharedPointer<TimelineView>(view));
 
         connect(view,
-            &TimelineView::updateLastTimelineMessage,
-            this,
-            &TimelineViewManager::updateRoomsLastMessage);
+                &TimelineView::updateLastTimelineMessage,
+                this,
+                &TimelineViewManager::updateRoomsLastMessage);
 
         // Add the view in the widget stack.
         addWidget(view);

@@ -84,9 +84,7 @@ TopRoomBar::TopRoomBar(QWidget *parent)
         });
 
         leaveRoom_ = new QAction(tr("Leave room"), this);
-        connect(leaveRoom_, &QAction::triggered, this, [=](){
-            emit leaveRoom();
-        });
+        connect(leaveRoom_, &QAction::triggered, this, [=]() { emit leaveRoom(); });
 
         menu_->addAction(toggleNotifications_);
         menu_->addAction(leaveRoom_);

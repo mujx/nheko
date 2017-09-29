@@ -82,6 +82,7 @@ Rooms::deserialize(const QJsonValue &data)
 
         QJsonObject object = data.toObject();
 
+<<<<<<< HEAD
         if (object.contains("join")) {
                 if (!object.value("join").isObject())
                         throw DeserializationException("rooms/join must be a JSON object");
@@ -97,6 +98,38 @@ Rooms::deserialize(const QJsonValue &data)
                                 qWarning() << e.what();
                                 qWarning() << "Skipping malformed object for room" << it.key();
                         }
+=======
+        if (!object.contains("join"))
+                throw DeserializationException("rooms/join is missing");
+
+        if (!object.contains("invite"))
+                throw DeserializationException("rooms/invite is missing");
+
+        if (!object.contains("leave"))
+                throw DeserializationException("rooms/leave is missing");
+
+        if (!object.value("join").isObject())
+                throw DeserializationException("rooms/join must be a JSON object");
+
+        if (!object.value("invite").isObject())
+                throw DeserializationException("rooms/invite must be a JSON object");
+
+        if (!object.value("leave").isObject())
+                throw DeserializationException("rooms/leave must be a JSON object");
+
+        auto join  = object.value("join").toObject();
+        auto leave = object.value("leave").toObject();
+
+        for (auto it = join.constBegin(); it != join.constEnd(); it++) {
+                JoinedRoom tmp_room;
+
+                try {
+                        tmp_room.deserialize(it.value());
+                        join_.insert(it.key(), tmp_room);
+                } catch (DeserializationException &e) {
+                        qWarning() << e.what();
+                        qWarning() << "Skipping malformed object for room" << it.key();
+>>>>>>> `make lint`
                 }
         }
 

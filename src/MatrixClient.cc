@@ -474,9 +474,9 @@ MatrixClient::onJoinRoomResponse(QNetworkReply *reply)
                 return;
         }
 
-        auto data    = reply->readAll();
+        auto data              = reply->readAll();
         QJsonDocument response = QJsonDocument::fromJson(data);
-        QString room_id = response.object()["room_id"].toString();
+        QString room_id        = response.object()["room_id"].toString();
         emit joinedRoom(room_id);
 }
 
@@ -611,11 +611,8 @@ void
 MatrixClient::sync() noexcept
 {
         QJsonObject filter{ { "room",
-                              QJsonObject{
-                                  { "include_leave", true },
-                                  { "ephemeral", QJsonObject{ { "limit", 0 } } }
-                              }
-                            },
+                              QJsonObject{ { "include_leave", true },
+                                           { "ephemeral", QJsonObject{ { "limit", 0 } } } } },
                             { "presence", QJsonObject{ { "limit", 0 } } } };
 
         QUrlQuery query;
@@ -898,7 +895,7 @@ MatrixClient::joinRoom(const QString &roomIdOrAlias)
         endpoint.setQuery(query);
 
         QNetworkRequest request(endpoint);
-        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader, "application/json");
 
         QNetworkReply *reply = post(request, "{}");
         reply->setProperty("endpoint", static_cast<int>(Endpoint::JoinRoom));
@@ -915,7 +912,7 @@ MatrixClient::leaveRoom(const QString &roomId)
         endpoint.setQuery(query);
 
         QNetworkRequest request(endpoint);
-        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader, "application/json");
 
         QNetworkReply *reply = post(request, "{}");
         reply->setProperty("room_id", roomId);

@@ -19,10 +19,10 @@
 #include <QJsonArray>
 #include <QRegularExpression>
 
+#include "MainWindow.h"
 #include "RoomInfoListItem.h"
 #include "RoomList.h"
 #include "Sync.h"
-#include "MainWindow.h"
 
 RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QWidget(parent)
@@ -56,8 +56,8 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
         scrollArea_->setWidget(scrollAreaContents_);
         topLayout_->addWidget(scrollArea_);
 
-        //joinRoomButton_ = new QPushButton("Join room", this);
-        //topLayout_->addWidget(joinRoomButton_);
+        // joinRoomButton_ = new QPushButton("Join room", this);
+        // topLayout_->addWidget(joinRoomButton_);
 
         connect(client_.data(),
                 SIGNAL(roomAvatarRetrieved(const QString &, const QPixmap &)),
@@ -94,18 +94,14 @@ RoomList::addRoom(const QSharedPointer<RoomSettings> &settings,
                   const RoomState &state,
                   const QString &room_id)
 {
-        RoomInfoListItem *room_item =
-          new RoomInfoListItem(settings, state, room_id, scrollArea_);
-        connect(
-            room_item, &RoomInfoListItem::clicked,
-            this, &RoomList::highlightSelectedRoom);
-        connect(
-            room_item, &RoomInfoListItem::leaveRoom,
-            client_.data(), &MatrixClient::leaveRoom);
+        RoomInfoListItem *room_item = new RoomInfoListItem(settings, state, room_id, scrollArea_);
+        connect(room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
+        connect(room_item, &RoomInfoListItem::leaveRoom, client_.data(), &MatrixClient::leaveRoom);
 
         rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
 
-        contentsLayout_->insertWidget(0, room_item);}
+        contentsLayout_->insertWidget(0, room_item);
+}
 
 void
 RoomList::removeRoom(const QString &room_id, bool reset)
@@ -167,11 +163,11 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
                 RoomInfoListItem *room_item =
                   new RoomInfoListItem(settings[room_id], state, room_id, scrollArea_);
                 connect(
-                            room_item, &RoomInfoListItem::clicked,
-                            this, &RoomList::highlightSelectedRoom);
-                connect(
-                            room_item, &RoomInfoListItem::leaveRoom,
-                            client_.data(), &MatrixClient::leaveRoom);
+                  room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
+                connect(room_item,
+                        &RoomInfoListItem::leaveRoom,
+                        client_.data(),
+                        &MatrixClient::leaveRoom);
 
                 rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
 
@@ -197,7 +193,8 @@ RoomList::sync(const QMap<QString, RoomState> &states)
 
                 // TODO: Add the new room to the list.
                 if (!rooms_.contains(room_id)) {
-                        addRoom(QSharedPointer<RoomSettings>(new RoomSettings(room_id)), state, room_id);
+                        addRoom(
+                          QSharedPointer<RoomSettings>(new RoomSettings(room_id)), state, room_id);
                 }
 
                 auto room = rooms_[room_id];
@@ -267,6 +264,6 @@ RoomList::closeJoinRoomDialog(bool isJoining, QString roomAlias)
         joinRoomModal_->fadeOut();
 
         if (isJoining) {
-           client_->joinRoom(roomAlias);
+                client_->joinRoom(roomAlias);
         }
 }

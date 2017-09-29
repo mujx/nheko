@@ -114,14 +114,13 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         connect(user_info_widget_, SIGNAL(logout()), client_.data(), SLOT(logout()));
         connect(client_.data(), SIGNAL(loggedOut()), this, SLOT(logout()));
 
-        connect(top_bar_, &TopRoomBar::leaveRoom, this, [=](){
-            client_->leaveRoom(current_room_);
-        });
+        connect(
+          top_bar_, &TopRoomBar::leaveRoom, this, [=]() { client_->leaveRoom(current_room_); });
 
         connect(room_list_, &RoomList::roomChanged, this, &ChatPage::changeTopRoomInfo);
         connect(room_list_, &RoomList::roomChanged, text_input_, &TextInputWidget::focusLineEdit);
         connect(
-            room_list_, &RoomList::roomChanged, view_manager_, &TimelineViewManager::setHistoryView);
+          room_list_, &RoomList::roomChanged, view_manager_, &TimelineViewManager::setHistoryView);
 
         connect(view_manager_,
                 &TimelineViewManager::unreadMessages,
@@ -198,10 +197,8 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 SIGNAL(joinedRoom(const QString &)),
                 this,
                 SLOT(joinedRoom(const QString &)));
-        connect(client_.data(),
-                SIGNAL(leftRoom(const QString &)),
-                this,
-                SLOT(leftRoom(const QString &)));
+        connect(
+          client_.data(), SIGNAL(leftRoom(const QString &)), this, SLOT(leftRoom(const QString &)));
 
         AvatarProvider::init(client);
 }
@@ -336,19 +333,18 @@ ChatPage::syncCompleted(const SyncResponse &response)
                         updateDisplayNames(room_state);
 
                         state_manager_.insert(it.key(), room_state);
-                        settingsManager_.insert(it.key(),
-                                    QSharedPointer<RoomSettings>(new RoomSettings(it.key())));
+                        settingsManager_.insert(
+                          it.key(), QSharedPointer<RoomSettings>(new RoomSettings(it.key())));
 
                         for (const auto membership : room_state.memberships) {
-                            auto uid = membership.sender();
-                            auto url = membership.content().avatarUrl();
+                                auto uid = membership.sender();
+                                auto url = membership.content().avatarUrl();
 
-                            if (!url.toString().isEmpty())
-                                AvatarProvider::setAvatarUrl(uid, url);
+                                if (!url.toString().isEmpty())
+                                        AvatarProvider::setAvatarUrl(uid, url);
                         }
 
                         view_manager_->addRoom(it.value(), it.key());
-
                 }
 
                 if (it.key() == current_room_)
@@ -358,9 +354,9 @@ ChatPage::syncCompleted(const SyncResponse &response)
         auto leave = response.rooms().leave();
 
         for (auto it = leave.constBegin(); it != leave.constEnd(); it++) {
-            if (state_manager_.contains(it.key())) {
-                leftRoom(it.key());
-            }
+                if (state_manager_.contains(it.key())) {
+                        leftRoom(it.key());
+                }
         }
 
         try {
@@ -589,34 +585,33 @@ ChatPage::showQuickSwitcher()
 void
 ChatPage::joinedRoom(const QString &room_id)
 {
-    if (!state_manager_.contains(room_id)) {
-        RoomState room_state;
+        if (!state_manager_.contains(room_id)) {
+                RoomState room_state;
 
-        state_manager_.insert(room_id, room_state);
-        settingsManager_.insert(room_id,
-                                QSharedPointer<RoomSettings>(new RoomSettings(room_id)));
+                state_manager_.insert(room_id, room_state);
+                settingsManager_.insert(room_id,
+                                        QSharedPointer<RoomSettings>(new RoomSettings(room_id)));
 
-        room_list_->addRoom(settingsManager_[room_id], state_manager_[room_id], room_id);
+                room_list_->addRoom(settingsManager_[room_id], state_manager_[room_id], room_id);
 
-        this->changeTopRoomInfo(room_id);
-        room_list_->highlightSelectedRoom(room_id);
-    }
-
+                this->changeTopRoomInfo(room_id);
+                room_list_->highlightSelectedRoom(room_id);
+        }
 }
 
 void
 ChatPage::leftRoom(const QString &room_id)
 {
-    state_manager_.remove(room_id);
-    settingsManager_.remove(room_id);
-    try {
-        cache_->removeRoom(room_id);
-    } catch (const lmdb::error &e) {
-        qCritical() << "The cache couldn't be updated: " << e.what();
-        // TODO: Notify the user.
-        cache_->unmount();
-    }
-    room_list_->removeRoom(room_id, room_id == current_room_);
+        state_manager_.remove(room_id);
+        settingsManager_.remove(room_id);
+        try {
+                cache_->removeRoom(room_id);
+        } catch (const lmdb::error &e) {
+                qCritical() << "The cache couldn't be updated: " << e.what();
+                // TODO: Notify the user.
+                cache_->unmount();
+        }
+        room_list_->removeRoom(room_id, room_id == current_room_);
 }
 
 ChatPage::~ChatPage()

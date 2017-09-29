@@ -156,14 +156,11 @@ Cache::insertRoomState(lmdb::txn &txn, const QString &roomid, const RoomState &s
 void
 Cache::removeRoom(const QString &roomid)
 {
-    auto txn = lmdb::txn::begin(env_, nullptr, 0);
+        auto txn = lmdb::txn::begin(env_, nullptr, 0);
 
-    lmdb::dbi_del(txn,
-                  roomDb_,
-                  lmdb::val(roomid.toUtf8(), roomid.toUtf8().size()),
-                  nullptr);
+        lmdb::dbi_del(txn, roomDb_, lmdb::val(roomid.toUtf8(), roomid.toUtf8().size()), nullptr);
 
-    txn.commit();
+        txn.commit();
 }
 
 QMap<QString, RoomState>
