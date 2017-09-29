@@ -303,12 +303,12 @@ TimelineItem::TimelineItem(const events::MessageEvent<msgs::Text> &event,
 void
 TimelineItem::generateBody(const QString &body)
 {
-        QString content("<span style=\"color: black;\"> %1 </span>");
+        QString content("<span style=\"color: black; font-family: EmojiOne Color, Open Sans;\"> %1 </span>");
 
         body_ = new QLabel(this);
         body_->setFont(font_);
         body_->setWordWrap(true);
-        body_->setText(content.arg(replaceEmoji(body)));
+        body_->setText(content.arg(body));
         body_->setMargin(0);
 
         body_->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextBrowserInteraction);
@@ -343,7 +343,7 @@ TimelineItem::generateBody(const QString &userid, const QString &body)
         body_ = new QLabel(this);
         body_->setFont(font_);
         body_->setWordWrap(true);
-        body_->setText(bodyContent.arg(replaceEmoji(body)));
+        body_->setText(bodyContent.arg(body));
         body_->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextBrowserInteraction);
         body_->setOpenExternalLinks(true);
         body_->setMargin(0);
@@ -364,27 +364,6 @@ TimelineItem::generateTimestamp(const QDateTime &time)
         timestamp_->setFont(timestampFont);
         timestamp_->setText(msg.arg(time.toString("HH:mm")));
         timestamp_->setContentsMargins(0, topMargin, 0, 0);
-}
-
-QString
-TimelineItem::replaceEmoji(const QString &body)
-{
-        QString fmtBody = "";
-
-        for (auto &c : body) {
-                int code = c.unicode();
-
-                // TODO: Be more precise here.
-                if (code > 9000)
-                        fmtBody += QString("<span style=\"font-family: Emoji "
-                                           "One; font-size: %1px\">")
-                                     .arg(conf::emojiSize) +
-                                   QString(c) + "</span>";
-                else
-                        fmtBody += c;
-        }
-
-        return fmtBody;
 }
 
 void

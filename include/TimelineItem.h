@@ -80,8 +80,6 @@ private:
         void setupAvatarLayout(const QString &userName);
         void setupSimpleLayout();
 
-        QString replaceEmoji(const QString &body);
-
         DescInfo descriptionMsg_;
 
         QHBoxLayout *topLayout_;
