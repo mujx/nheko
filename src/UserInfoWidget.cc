@@ -45,15 +45,15 @@ UserInfoWidget::UserInfoWidget(QWidget *parent)
         userAvatar_ = new Avatar(this);
         userAvatar_->setLetter(QChar('?'));
         userAvatar_->setSize(55);
-        userAvatar_->setBackgroundColor("#fff");
-        userAvatar_->setTextColor("#333333");
+//        userAvatar_->setBackgroundColor("#fff");
+//        userAvatar_->setTextColor("#333333");
 
         QFont nameFont("Open Sans SemiBold");
         nameFont.setPixelSize(conf::userInfoWidget::fonts::displayName);
 
         displayNameLabel_ = new QLabel(this);
         displayNameLabel_->setFont(nameFont);
-        displayNameLabel_->setStyleSheet("padding: 0 9px; color: #171919; margin-bottom: -10px;");
+        displayNameLabel_->setStyleSheet("padding: 0 9px; margin-bottom: -10px;");
         displayNameLabel_->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignTop);
 
         QFont useridFont("Open Sans");
@@ -61,7 +61,7 @@ UserInfoWidget::UserInfoWidget(QWidget *parent)
 
         userIdLabel_ = new QLabel(this);
         userIdLabel_->setFont(useridFont);
-        userIdLabel_->setStyleSheet("padding: 0 8px 8px 8px; color: #555459;");
+        userIdLabel_->setStyleSheet("padding: 0 8px 8px 8px;");
         userIdLabel_->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
 
         avatarLayout_->addWidget(userAvatar_);

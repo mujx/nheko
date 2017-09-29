@@ -173,7 +173,6 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         setFixedHeight(conf::textInput::height);
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         setCursor(Qt::ArrowCursor);
-        setStyleSheet("background-color: #fff;");
 
         topLayout_ = new QHBoxLayout();
         topLayout_->setSpacing(0);
@@ -199,9 +198,13 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         input_->setFont(font);
         input_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         input_->setPlaceholderText(tr("Write a message..."));
-        input_->setStyleSheet("color: #333333; border: none; padding-top: 5px; margin: 0 5px");
+        input_->setStyleSheet("border: none; padding-top: 5px; margin: 0 5px");
 
         sendMessageBtn_ = new FlatButton(this);
+<<<<<<< HEAD
+=======
+//        sendMessageBtn_->setForegroundColor(QColor("#acc7dc"));
+>>>>>>> Remove a bunch of hardcoded colors
 
         QIcon send_message_icon;
         send_message_icon.addFile(":/icons/icons/ui/cursor.png");
