@@ -56,29 +56,10 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
         scrollArea_->setWidget(scrollAreaContents_);
         topLayout_->addWidget(scrollArea_);
 
-        // joinRoomButton_ = new QPushButton("Join room", this);
-        // topLayout_->addWidget(joinRoomButton_);
-
         connect(client_.data(),
                 SIGNAL(roomAvatarRetrieved(const QString &, const QPixmap &)),
                 this,
                 SLOT(updateRoomAvatar(const QString &, const QPixmap &)));
-
-        /* Nonfunctional and disabled
-         * connect(joinRoomButton_, &QPushButton::clicked, this, [=]() {
-                joinRoomDialog_ = new JoinRoomDialog(this);
-                connect(joinRoomDialog_,
-                    SIGNAL(closing(bool, QString)),
-                    this,
-                    SLOT(closeJoinRoomDialog(bool, QString)));
-
-                joinRoomModal_ = new OverlayModal(MainWindow::instance(), joinRoomDialog_);
-                joinRoomModal_->setDuration(100);
-                joinRoomModal_->setColor(QColor(55, 55, 55, 170));
-
-                joinRoomModal_->fadeIn();
-        });
-        */
 }
 
 RoomList::~RoomList() {}
@@ -96,9 +77,22 @@ RoomList::addRoom(const QSharedPointer<RoomSettings> &settings,
 {
         RoomInfoListItem *room_item = new RoomInfoListItem(settings, state, room_id, scrollArea_);
         connect(room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
-        connect(room_item, &RoomInfoListItem::leaveRoom, client_.data(), &MatrixClient::leaveRoom);
+        connect(room_item, &RoomInfoListItem::leaveRoom, client_.data(), [=]() {
+                leaveRoomDialog_ = new LeaveRoomDialog(this);
+                connect(leaveRoomDialog_, &LeaveRoomDialog::closing, this, [=](bool leaving) {
+                        closeLeaveRoomDialog(leaving, room_id);
+                });
+
+                leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
+                leaveRoomModal->setDuration(100);
+                leaveRoomModal->setColor(QColor(55, 55, 55, 170));
+
+                leaveRoomModal->fadeIn();
+        });
 
         rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
+
+        client_->fetchRoomAvatar(room_id, state.getAvatar());
 
         contentsLayout_->insertWidget(0, room_item);
 }
@@ -164,10 +158,19 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
                   new RoomInfoListItem(settings[room_id], state, room_id, scrollArea_);
                 connect(
                   room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
-                connect(room_item,
-                        &RoomInfoListItem::leaveRoom,
-                        client_.data(),
-                        &MatrixClient::leaveRoom);
+                connect(room_item, &RoomInfoListItem::leaveRoom, client_.data(), [=]() {
+                        leaveRoomDialog_ = new LeaveRoomDialog(this);
+                        connect(leaveRoomDialog_,
+                                &LeaveRoomDialog::closing,
+                                this,
+                                [=](bool leaving) { closeLeaveRoomDialog(leaving, room_id); });
+
+                        leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
+                        leaveRoomModal->setDuration(100);
+                        leaveRoomModal->setColor(QColor(55, 55, 55, 170));
+
+                        leaveRoomModal->fadeIn();
+                });
 
                 rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
 
@@ -191,7 +194,6 @@ RoomList::sync(const QMap<QString, RoomState> &states)
                 auto room_id = it.key();
                 auto state   = it.value();
 
-                // TODO: Add the new room to the list.
                 if (!rooms_.contains(room_id)) {
                         addRoom(
                           QSharedPointer<RoomSettings>(new RoomSettings(room_id)), state, room_id);
@@ -265,5 +267,15 @@ RoomList::closeJoinRoomDialog(bool isJoining, QString roomAlias)
 
         if (isJoining) {
                 client_->joinRoom(roomAlias);
+        }
+}
+
+void
+RoomList::closeLeaveRoomDialog(bool leaving, const QString &room_id)
+{
+        leaveRoomModal->fadeOut();
+
+        if (leaving) {
+                client_->leaveRoom(room_id);
         }
 }

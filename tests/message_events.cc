@@ -99,7 +99,10 @@ TEST(MessageEvent, File)
 TEST(MessageEvent, Image)
 {
         auto thumbinfo = QJsonObject{
-                { "h", 11 }, { "w", 22 }, { "size", 212 }, { "mimetype", "img/jpeg" },
+                { "h", 11 },
+                { "w", 22 },
+                { "size", 212 },
+                { "mimetype", "img/jpeg" },
         };
 
         auto imginfo = QJsonObject{
@@ -239,49 +242,49 @@ TEST(MessageEvent, Video)
 
 TEST(MessageEvent, Types)
 {
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.audio" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::Audio);
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.emote" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::Emote);
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.file" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::File);
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.image" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::Image);
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.location" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::Location);
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.notice" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::Notice);
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.text" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::Text);
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.video" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::Video);
-        EXPECT_EQ(
-          extractMessageEventType(QJsonObject{
-            { "content", QJsonObject{ { "msgtype", "m.random" } } }, { "type", "m.room.message" },
-          }),
-          MessageEventType::Unknown);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.audio" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::Audio);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.emote" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::Emote);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.file" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::File);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.image" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::Image);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.location" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::Location);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.notice" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::Notice);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.text" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::Text);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.video" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::Video);
+        EXPECT_EQ(extractMessageEventType(QJsonObject{
+                    { "content", QJsonObject{ { "msgtype", "m.random" } } },
+                    { "type", "m.room.message" },
+                  }),
+                  MessageEventType::Unknown);
 }

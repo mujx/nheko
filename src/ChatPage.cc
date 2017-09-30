@@ -193,12 +193,12 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 SIGNAL(ownAvatarRetrieved(const QPixmap &)),
                 this,
                 SLOT(setOwnAvatar(const QPixmap &)));
-        connect(client_.data(),
-                SIGNAL(joinedRoom(const QString &)),
-                this,
-                SLOT(joinedRoom(const QString &)));
         connect(
-          client_.data(), SIGNAL(leftRoom(const QString &)), this, SLOT(leftRoom(const QString &)));
+          client_.data(), SIGNAL(addRoom(const QString &)), this, SLOT(addRoom(const QString &)));
+        connect(client_.data(),
+                SIGNAL(removeRoom(const QString &)),
+                this,
+                SLOT(removeRoom(const QString &)));
 
         AvatarProvider::init(client);
 }
@@ -355,7 +355,7 @@ ChatPage::syncCompleted(const SyncResponse &response)
 
         for (auto it = leave.constBegin(); it != leave.constEnd(); it++) {
                 if (state_manager_.contains(it.key())) {
-                        leftRoom(it.key());
+                        removeRoom(it.key());
                 }
         }
 
@@ -583,7 +583,7 @@ ChatPage::showQuickSwitcher()
 }
 
 void
-ChatPage::joinedRoom(const QString &room_id)
+ChatPage::addRoom(const QString &room_id)
 {
         if (!state_manager_.contains(room_id)) {
                 RoomState room_state;
@@ -600,7 +600,7 @@ ChatPage::joinedRoom(const QString &room_id)
 }
 
 void
-ChatPage::leftRoom(const QString &room_id)
+ChatPage::removeRoom(const QString &room_id)
 {
         state_manager_.remove(room_id);
         settingsManager_.remove(room_id);

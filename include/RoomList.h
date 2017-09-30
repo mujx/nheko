@@ -24,6 +24,7 @@
 #include <QWidget>
 
 #include "JoinRoomDialog.h"
+#include "LeaveRoomDialog.h"
 #include "MatrixClient.h"
 #include "OverlayModal.h"
 #include "RoomInfoListItem.h"
@@ -59,6 +60,7 @@ public slots:
         void updateUnreadMessageCount(const QString &roomid, int count);
         void updateRoomDescription(const QString &roomid, const DescInfo &info);
         void closeJoinRoomDialog(bool isJoining, QString roomAlias);
+        void closeLeaveRoomDialog(bool leaving, const QString &room_id);
 
 private:
         void calculateUnreadMessageCount();
@@ -72,6 +74,9 @@ private:
 
         OverlayModal *joinRoomModal_;
         JoinRoomDialog *joinRoomDialog_;
+
+        OverlayModal *leaveRoomModal;
+        LeaveRoomDialog *leaveRoomDialog_;
 
         QMap<QString, QSharedPointer<RoomInfoListItem>> rooms_;
 

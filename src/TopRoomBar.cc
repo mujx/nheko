@@ -18,6 +18,7 @@
 #include <QStyleOption>
 
 #include "Config.h"
+#include "MainWindow.h"
 #include "TopRoomBar.h"
 
 TopRoomBar::TopRoomBar(QWidget *parent)
@@ -84,7 +85,17 @@ TopRoomBar::TopRoomBar(QWidget *parent)
         });
 
         leaveRoom_ = new QAction(tr("Leave room"), this);
-        connect(leaveRoom_, &QAction::triggered, this, [=]() { emit leaveRoom(); });
+        connect(leaveRoom_, &QAction::triggered, this, [=]() {
+                leaveRoomDialog_ = new LeaveRoomDialog(this);
+                connect(
+                  leaveRoomDialog_, SIGNAL(closing(bool)), this, SLOT(closeLeaveRoomDialog(bool)));
+
+                leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
+                leaveRoomModal->setDuration(100);
+                leaveRoomModal->setColor(QColor(55, 55, 55, 170));
+
+                leaveRoomModal->fadeIn();
+        });
 
         menu_->addAction(toggleNotifications_);
         menu_->addAction(leaveRoom_);
@@ -101,6 +112,16 @@ TopRoomBar::TopRoomBar(QWidget *parent)
         });
 
         setLayout(topLayout_);
+}
+
+void
+TopRoomBar::closeLeaveRoomDialog(bool leaving)
+{
+        leaveRoomModal->fadeOut();
+
+        if (leaving) {
+                emit leaveRoom();
+        }
 }
 
 void

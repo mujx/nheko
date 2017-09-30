@@ -29,7 +29,9 @@
 
 #include "Avatar.h"
 #include "FlatButton.h"
+#include "LeaveRoomDialog.h"
 #include "Menu.h"
+#include "OverlayModal.h"
 #include "RoomSettings.h"
 
 static const QString URL_HTML = "<a href=\"\\1\" style=\"color: #333333\">\\1</a>";
@@ -57,6 +59,9 @@ signals:
 protected:
         void paintEvent(QPaintEvent *event) override;
 
+private slots:
+        void closeLeaveRoomDialog(bool leaving);
+
 private:
         QHBoxLayout *topLayout_;
         QVBoxLayout *textLayout_;
@@ -71,6 +76,9 @@ private:
         QAction *leaveRoom_;
 
         FlatButton *settingsBtn_;
+
+        OverlayModal *leaveRoomModal;
+        LeaveRoomDialog *leaveRoomDialog_;
 
         Avatar *avatar_;
 
