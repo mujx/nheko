@@ -193,10 +193,12 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 SIGNAL(ownAvatarRetrieved(const QPixmap &)),
                 this,
                 SLOT(setOwnAvatar(const QPixmap &)));
-        connect(
-          client_.data(), SIGNAL(addRoom(const QString &)), this, SLOT(addRoom(const QString &)));
         connect(client_.data(),
-                SIGNAL(removeRoom(const QString &)),
+                SIGNAL(joinedRoom(const QString &)),
+                this,
+                SLOT(addRoom(const QString &)));
+        connect(client_.data(),
+                SIGNAL(leftRoom(const QString &)),
                 this,
                 SLOT(removeRoom(const QString &)));
 

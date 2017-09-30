@@ -96,7 +96,8 @@ Rooms::deserialize(const QJsonValue &data)
                         } catch (DeserializationException &e) {
                                 qWarning() << e.what();
                                 qWarning() << "Skipping malformed object for room" << it.key();
-                        }                }
+                        }
+                }
         }
 
         if (object.contains("invite")) {
@@ -124,7 +125,6 @@ Rooms::deserialize(const QJsonValue &data)
                         }
                 }
         }
-
 }
 
 void
