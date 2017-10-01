@@ -1,9 +1,24 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(nheko C CXX)
-
 option(BUILD_TESTS "Build all tests" OFF)
 option(APPVEYOR_BUILD "Build on appveyor" OFF)
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+# Include Qt basic functions
+include(QtCommon)
+
+project(nheko LANGUAGES C CXX VERSION 1.0)
+
+# Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
+fix_project_version()
+
+# Set additional project information
+set(COMPANY "Mujx")
+set(COPYRIGHT "Copyright (c) 2017 mujx")
+set(IDENTIFIER "com.mujx.nheko")
+
+add_project_meta(META_FILES_TO_INCLUDE)
 
 #
 # LMDB
@@ -320,16 +335,18 @@ else()
     set (NHEKO_LIBS matrix_events Qt5::Widgets Qt5::Network ${LMDB_LIBRARY})
 endif()
 
-    set (NHEKO_DEPS ${OS_BUNDLE} ${SRC_FILES} ${UI_HEADERS} ${MOC_HEADERS} ${QRC} ${LANG_QRC} ${QM_SRC})
+    set (NHEKO_DEPS ${SRC_FILES} ${UI_HEADERS} ${MOC_HEADERS} ${QRC} ${LANG_QRC} ${QM_SRC} ${META_FILES_TO_INCLUDE})
 
     if(APPLE)
-        add_executable (nheko ${NHEKO_DEPS})
+        add_executable (nheko ${OS_BUNDLE} ${NHEKO_DEPS})
         target_link_libraries (nheko ${NHEKO_LIBS} Qt5::MacExtras)
     elseif(WIN32)
-        add_executable (nheko ${ICON_FILE} ${NHEKO_DEPS})
+        add_executable (nheko ${OS_BUNDLE} ${ICON_FILE} ${NHEKO_DEPS})
         target_link_libraries (nheko ${NTDLIB} ${NHEKO_LIBS} Qt5::WinMain)
     else()
-        add_executable (nheko ${NHEKO_DEPS})
+        add_executable (nheko ${OS_BUNDLE} ${NHEKO_DEPS})
         target_link_libraries (nheko ${NHEKO_LIBS})
     endif()
 endif()
+
+qt5_use_modules(${PROJECT_NAME} Widgets)
