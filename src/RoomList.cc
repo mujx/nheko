@@ -173,7 +173,7 @@ RoomList::openLeaveRoomDialog(const QString &room_id)
                 [=](bool leaving) { closeLeaveRoomDialog(leaving, room_id); });
 
         leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
-        leaveRoomModal->setDuration(100);
+        leaveRoomModal->setDuration(0);
         leaveRoomModal->setColor(QColor(55, 55, 55, 170));
 
         leaveRoomModal->fadeIn();
