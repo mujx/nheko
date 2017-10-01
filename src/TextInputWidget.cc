@@ -182,12 +182,14 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         send_file_icon.addFile(":/icons/icons/ui/paper-clip-outline.png");
 
         sendFileBtn_ = new FlatButton(this);
+        sendFileBtn_->setForegroundColor(palette().color(QPalette::Text));
         sendFileBtn_->setIcon(send_file_icon);
         sendFileBtn_->setIconSize(QSize(24, 24));
 
         spinner_ = new LoadingIndicator(this);
         spinner_->setFixedHeight(32);
         spinner_->setFixedWidth(32);
+        spinner_->setColor(palette().color(QPalette::Text));
         spinner_->hide();
 
         QFont font;
@@ -201,10 +203,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         input_->setStyleSheet("border: none; padding-top: 5px; background-color: rgba(0,0,0,0);");
 
         sendMessageBtn_ = new FlatButton(this);
-<<<<<<< HEAD
-=======
-//        sendMessageBtn_->setForegroundColor(QColor("#acc7dc"));
->>>>>>> Remove a bunch of hardcoded colors
+        sendMessageBtn_->setForegroundColor(palette().color(QPalette::Text));
 
         QIcon send_message_icon;
         send_message_icon.addFile(":/icons/icons/ui/cursor.png");
@@ -212,6 +211,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         sendMessageBtn_->setIconSize(QSize(24, 24));
 
         emojiBtn_ = new EmojiPickButton(this);
+        emojiBtn_->setForegroundColor(palette().color(QPalette::Text));
 
         QIcon emoji_icon;
         emoji_icon.addFile(":/icons/icons/ui/smile.png");
