@@ -348,5 +348,3 @@ endif()
         target_link_libraries (nheko ${NHEKO_LIBS})
     endif()
 endif()
-
-qt5_use_modules(${PROJECT_NAME} Widgets)
