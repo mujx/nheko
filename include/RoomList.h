@@ -60,6 +60,7 @@ public slots:
         void updateUnreadMessageCount(const QString &roomid, int count);
         void updateRoomDescription(const QString &roomid, const DescInfo &info);
         void closeJoinRoomDialog(bool isJoining, QString roomAlias);
+        void openLeaveRoomDialog(const QString &room_id);
         void closeLeaveRoomDialog(bool leaving, const QString &room_id);
 
 private:

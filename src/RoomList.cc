@@ -77,18 +77,7 @@ RoomList::addRoom(const QSharedPointer<RoomSettings> &settings,
 {
         RoomInfoListItem *room_item = new RoomInfoListItem(settings, state, room_id, scrollArea_);
         connect(room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
-        connect(room_item, &RoomInfoListItem::leaveRoom, client_.data(), [=]() {
-                leaveRoomDialog_ = new LeaveRoomDialog(this);
-                connect(leaveRoomDialog_, &LeaveRoomDialog::closing, this, [=](bool leaving) {
-                        closeLeaveRoomDialog(leaving, room_id);
-                });
-
-                leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
-                leaveRoomModal->setDuration(100);
-                leaveRoomModal->setColor(QColor(55, 55, 55, 170));
-
-                leaveRoomModal->fadeIn();
-        });
+        connect(room_item, &RoomInfoListItem::leaveRoom, this, &RoomList::openLeaveRoomDialog);
 
         rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
 
@@ -158,19 +147,7 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
                   new RoomInfoListItem(settings[room_id], state, room_id, scrollArea_);
                 connect(
                   room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
-                connect(room_item, &RoomInfoListItem::leaveRoom, client_.data(), [=]() {
-                        leaveRoomDialog_ = new LeaveRoomDialog(this);
-                        connect(leaveRoomDialog_,
-                                &LeaveRoomDialog::closing,
-                                this,
-                                [=](bool leaving) { closeLeaveRoomDialog(leaving, room_id); });
-
-                        leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
-                        leaveRoomModal->setDuration(100);
-                        leaveRoomModal->setColor(QColor(55, 55, 55, 170));
-
-                        leaveRoomModal->fadeIn();
-                });
+                connect(room_item, &RoomInfoListItem::leaveRoom, this, &RoomList::openLeaveRoomDialog);
 
                 rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
 
@@ -185,6 +162,21 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
         first_room->setPressedState(true);
 
         emit roomChanged(rooms_.firstKey());
+}
+
+void
+RoomList::openLeaveRoomDialog(const QString &room_id)
+{
+        leaveRoomDialog_ = new LeaveRoomDialog(this);
+        connect(leaveRoomDialog_,
+                &LeaveRoomDialog::closing, this,
+                [=](bool leaving) { closeLeaveRoomDialog(leaving, room_id); });
+
+        leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
+        leaveRoomModal->setDuration(100);
+        leaveRoomModal->setColor(QColor(55, 55, 55, 170));
+
+        leaveRoomModal->fadeIn();
 }
 
 void
