@@ -198,7 +198,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         input_->setFont(font);
         input_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         input_->setPlaceholderText(tr("Write a message..."));
-        input_->setStyleSheet("border: none; padding-top: 5px; margin: 0 5px");
+        input_->setStyleSheet("border: none; padding-top: 5px; background-color: rgba(0,0,0,0);");
 
         sendMessageBtn_ = new FlatButton(this);
 <<<<<<< HEAD

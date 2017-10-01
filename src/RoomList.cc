@@ -34,7 +34,7 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
   , client_(client)
 {
         setStyleSheet(
-          "border: 1px solid #ccc; border-right: 0px solid #000; border-left: 0px solid #000;");
+          "border-top: 1px solid; border-bottom: 1px solid;");
 
         topLayout_ = new QVBoxLayout(this);
         topLayout_->setSpacing(0);

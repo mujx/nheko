@@ -400,6 +400,8 @@ TimelineView::init()
                 scroll_area_->verticalScrollBar()->setValue(max);
         });
 
+        setBackgroundRole(QPalette::Base);
+
         top_layout_ = new QVBoxLayout(this);
         top_layout_->setSpacing(0);
         top_layout_->setMargin(0);
