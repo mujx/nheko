@@ -296,14 +296,6 @@ qt5_add_resources(QRC resources/res.qrc)
 add_library(matrix_events ${MATRIX_EVENTS} src/Deserializable.cc)
 target_link_libraries(matrix_events Qt5::Core)
 
-#
-# Bundle icons.
-#
-if (APPLE)
-    set(ICON_FILE resources/nheko.icns)
-    set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-endif()
-
 if (BUILD_TESTS)
     #
     # Build tests.
