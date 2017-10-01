@@ -49,14 +49,13 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QWidget(parent)
   , client_(client)
 {
-//        setStyleSheet("background-color: #fff;");
-
         topLayout_ = new QHBoxLayout(this);
         topLayout_->setSpacing(0);
         topLayout_->setMargin(0);
 
         auto splitter = new Splitter(this);
-        splitter->setHandleWidth(0);
+        splitter->setHandleWidth(1);
+        splitter->setStyleSheet("QSplitter::handle { background-color: palette(base); }");
 
         topLayout_->addWidget(splitter);
 
