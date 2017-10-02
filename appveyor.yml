@@ -36,7 +36,7 @@ build_script:
     - echo %INSTVERSION%
     - echo %DIST%
     - echo %DATE%
-    - cmake -G "Visual Studio 14 2015 Win64" -H. -Bbuild -DAPPVEYOR_BUILD=ON
+    - cmake -G "Visual Studio 14 2015 Win64" -H. -Bbuild -DAPPVEYOR_BUILD=ON -DCMAKE_BUILD_TYPE=Release
     - cmake --build build --config Release
 
 after_build:
