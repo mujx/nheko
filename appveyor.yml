@@ -64,6 +64,7 @@ after_build:
     - mkdir installer\packages\com.mujx.nheko
     - mkdir installer\packages\com.mujx.nheko\data
     - mkdir installer\packages\com.mujx.nheko\meta
+    - mkdir installer\packages\com.mujx.nheko.cleanup\meta
     # Copy installer data
     - copy %BUILD%\resources\nheko.ico installer\config
     - copy %BUILD%\resources\nheko.png installer\config
