@@ -13,7 +13,7 @@ Component.prototype.createOperations = function()
             /**
              * Cleanup AppData and registry
              */
-            component.addElevatedOperation("Execute","UNDOEXECUTE","cmd /C reg delete HKEY_CURRENT_USER\\Software\\nheko\\nheko /f");
+            component.addElevatedOperation("Execute","UNDOEXECUTE","cmd /C reg delete HKEY_CURRENT_USER\Software\nheko\nheko /f");
             var localappdata = installer.environmentVariable("LOCALAPPDATA");
             if( localappdata != "" )
             {
