@@ -35,8 +35,8 @@ Component.prototype.createOperations = function()
                 var localappdata = installer.environmentVariable("LOCALAPPDATA");
                 if( localappdata != "" )
                 {
-                    var command = "cmd /C rmdir " localappdata+"\nheko /f";
-                    component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE",command);
+
+                    component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C rmdir "+localappdata+"\nheko /f");
                 }
             }
         }
