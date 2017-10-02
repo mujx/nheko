@@ -29,9 +29,9 @@ Component.prototype.createOperations = function()
              */
             if( installer.isUninstaller() )
             {
-                component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C reg delete "HKEY_CURRENT_USER\Software\nheko\nheko\font" /f");
-                component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C reg delete "HKEY_CURRENT_USER\Software\nheko\nheko\notifications" /f");
-                component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C reg delete "HKEY_CURRENT_USER\Software\nheko\nheko\window" /f");
+                component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C reg delete HKEY_CURRENT_USER\Software\nheko\nheko\font /f");
+                component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C reg delete HKEY_CURRENT_USER\Software\nheko\nheko\notifications /f");
+                component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C reg delete HKEY_CURRENT_USER\Software\nheko\nheko\window /f");
                 if( installer.environmentVariable("LOCALAPPDATA") != "" )
                 {
                     component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C rmdir "%LOCALAPPDATA%\nheko" /f");
