@@ -2,13 +2,14 @@ cmake_minimum_required(VERSION 3.1)
 
 option(BUILD_TESTS "Build all tests" OFF)
 option(APPVEYOR_BUILD "Build on appveyor" OFF)
+option(WINDOWS_DEBUG "Build with debug window" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Include Qt basic functions
 include(QtCommon)
 
-project(nheko LANGUAGES C CXX VERSION 1.0)
+project(nheko LANGUAGES C CXX VERSION 0.0.1)
 
 # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
 fix_project_version()
