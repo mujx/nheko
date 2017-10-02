@@ -5,7 +5,7 @@
     <Version>__VERSION__</Version>
     <ReleaseDate>__DATE__</ReleaseDate>
     <Licenses>
-        <License name="GPLv3" file="license.txt" />
+        <License name="Nheko License - GPLv3" file="license.txt" />
     </Licenses>
     <Default>true</Default>
     <ForcedInstallation>true</ForcedInstallation>

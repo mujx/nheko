@@ -13,11 +13,11 @@ Component.prototype.createOperations = function()
             /**
              * Cleanup AppData and registry
              */
-            component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C reg delete HKEY_CURRENT_USER\Software\nheko\nheko /f");
+            component.addElevatedOperation("Execute","UNDOEXECUTE","cmd /C reg delete HKEY_CURRENT_USER\Software\nheko\nheko /f");
             var localappdata = installer.environmentVariable("LOCALAPPDATA");
             if( localappdata != "" )
             {
-                component.addElevatedOperation("Execute","echo do nothing","UNDOEXECUTE","cmd /C rmdir "+localappdata+"\nheko /f");
+                component.addElevatedOperation("Execute","UNDOEXECUTE","cmd /C rmdir "+localappdata+"\nheko /f");
             }
         }
     }

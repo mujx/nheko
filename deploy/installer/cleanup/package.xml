@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package>
     <DisplayName>Cleanup AppData and Registry</DisplayName>
-    <Description>Cleansup AppData and Registry when selected (logs you out)</Description>
+    <Description>Cleans up AppData and Registry when selected (logs you out)</Description>
     <Version>__VERSION__</Version>
     <ReleaseDate>__DATE__</ReleaseDate>
-    <Licenses>
-        <License name="GPLv3" file="license.txt" />
-    </Licenses>
     <Default>false</Default>
     <ForcedInstallation>false</ForcedInstallation>
     <SortingPriority>80</SortingPriority>
