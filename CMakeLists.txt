@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 option(BUILD_TESTS "Build all tests" OFF)
 option(APPVEYOR_BUILD "Build on appveyor" OFF)
-option(WINDOWS_DEBUG "Build with debug window" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
