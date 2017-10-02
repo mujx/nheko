@@ -8,14 +8,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # Include Qt basic functions
 include(QtCommon)
 
-project(nheko LANGUAGES C CXX VERSION 0.0.1)
+project(nheko LANGUAGES C CXX VERSION 0.1.0)
 
 # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
 fix_project_version()
 
 # Set additional project information
-set(COMPANY "Mujx")
-set(COPYRIGHT "Copyright (c) 2017 mujx")
+set(COMPANY "Nheko")
+set(COPYRIGHT "Copyright (c) 2017 Mujx")
 set(IDENTIFIER "com.mujx.nheko")
 
 add_project_meta(META_FILES_TO_INCLUDE)
