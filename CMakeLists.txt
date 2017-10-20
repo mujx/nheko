@@ -173,6 +173,7 @@ set(SRC_FILES
     src/ui/Badge.cc
     src/ui/LoadingIndicator.cc
     src/ui/FlatButton.cc
+    src/ui/Label.cc
     src/ui/OverlayModal.cc
     src/ui/ScrollBar.cc
     src/ui/SnackBar.cc
@@ -256,6 +257,7 @@ qt5_wrap_cpp(MOC_HEADERS
     include/ui/Badge.h
     include/ui/LoadingIndicator.h
     include/ui/FlatButton.h
+    include/ui/Label.h
     include/ui/OverlayWidget.h
     include/ui/ScrollBar.h
     include/ui/SnackBar.h
