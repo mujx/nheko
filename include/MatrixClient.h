@@ -99,6 +99,7 @@ signals:
         void getOwnProfileResponse(const QUrl &avatar_url, const QString &display_name);
         void getOwnCommunitiesResponse(const QList<QString> &own_communities);
         void initialSyncCompleted(const SyncResponse &response);
+        void initialSyncFailed(const QString &msg);
         void syncCompleted(const SyncResponse &response);
         void syncFailed(const QString &msg);
         void joinFailed(const QString &msg);
