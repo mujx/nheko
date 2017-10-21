@@ -326,6 +326,8 @@ ChatPage::resetUI()
         user_info_widget_->reset();
         view_manager_->clearAll();
         AvatarProvider::clear();
+
+        showUnreadMessageNotification(0);
 }
 
 void
