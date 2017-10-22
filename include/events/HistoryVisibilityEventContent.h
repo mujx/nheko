@@ -34,7 +34,7 @@ enum class HistoryVisibility
 class HistoryVisibilityEventContent : public Deserializable, public Serializable
 {
 public:
-        inline HistoryVisibility historyVisibility() const;
+        HistoryVisibility historyVisibility() const { return history_visibility_; };
 
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;
@@ -43,10 +43,5 @@ private:
         HistoryVisibility history_visibility_;
 };
 
-inline HistoryVisibility
-HistoryVisibilityEventContent::historyVisibility() const
-{
-        return history_visibility_;
-}
 } // namespace events
 } // namespace matrix

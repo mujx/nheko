@@ -50,12 +50,13 @@ public:
         void clearUnreadMessageCount();
         void setState(const RoomState &state);
 
-        inline bool isPressed() const;
-        inline RoomState state() const;
-        inline void setAvatar(const QImage &avatar_image);
-        inline int unreadMessageCount() const;
-        inline void setDescriptionMessage(const DescInfo &info);
-        inline QString roomId();
+        QString roomId();
+        bool isPressed() const { return isPressed_; };
+        RoomState state() const { return state_; };
+        int unreadMessageCount() const { return unreadMsgCount_; };
+
+        void setAvatar(const QImage &avatar_image);
+        void setDescriptionMessage(const DescInfo &info);
 
 signals:
         void clicked(const QString &room_id);
