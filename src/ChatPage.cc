@@ -55,7 +55,6 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
 
         auto splitter = new Splitter(this);
         splitter->setHandleWidth(1);
-        splitter->setStyleSheet("QSplitter::handle { background-color: palette(base); }");
 
         topLayout_->addWidget(splitter);
 

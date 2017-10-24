@@ -67,7 +67,6 @@ TimelineItem::init()
         headerLayout_->setMargin(0);
         headerLayout_->setSpacing(conf::timeline::headerSpacing);
 
-        setStyleSheet("background-color: rgba(0,0,0,0);");
 }
 
 /*

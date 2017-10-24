@@ -77,7 +77,6 @@ UserInfoWidget::UserInfoWidget(QWidget *parent)
         buttonLayout_->setMargin(0);
 
         logoutButton_ = new FlatButton(this);
-        logoutButton_->setForegroundColor(palette().color(QPalette::Text));
         logoutButton_->setCornerRadius(logoutButtonSize_ / 2);
 
         QIcon icon;

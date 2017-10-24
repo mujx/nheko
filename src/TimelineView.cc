@@ -399,9 +399,6 @@ TimelineView::init()
                 const int max = scroll_area_->verticalScrollBar()->maximum();
                 scroll_area_->verticalScrollBar()->setValue(max);
         });
-
-        setBackgroundRole(QPalette::Base);
-
         top_layout_ = new QVBoxLayout(this);
         top_layout_->setSpacing(0);
         top_layout_->setMargin(0);
@@ -418,6 +415,7 @@ TimelineView::init()
         scroll_layout_ = new QVBoxLayout(scroll_widget_);
         scroll_layout_->addStretch(1);
         scroll_layout_->setSpacing(0);
+        scroll_layout_->setObjectName("timelinescrollarea");
 
         scroll_area_->setWidget(scroll_widget_);
 

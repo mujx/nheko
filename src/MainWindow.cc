@@ -43,7 +43,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
         setWindowTitle("nheko");
         setObjectName("MainWindow");
-//        setStyleSheet("QWidget#MainWindow {background-color: #fff}");
 
         restoreWindowSize();
 

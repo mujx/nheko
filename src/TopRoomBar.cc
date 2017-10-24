@@ -70,7 +70,6 @@ TopRoomBar::TopRoomBar(QWidget *parent)
         textLayout_->addWidget(topicLabel_);
 
         settingsBtn_ = new FlatButton(this);
-        settingsBtn_->setForegroundColor(palette().color(QPalette::ToolTipText));
         settingsBtn_->setFixedSize(buttonSize_, buttonSize_);
         settingsBtn_->setCornerRadius(buttonSize_ / 2);
 

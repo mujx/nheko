@@ -70,6 +70,12 @@ main(int argc, char *argv[])
         app.setWindowIcon(QIcon(":/logos/nheko.png"));
         qSetMessagePattern("%{time process}: [%{type}] - %{message}");
 
+        QFile stylefile(":/styles/styles/system.qss");
+        stylefile.open(QFile::ReadOnly);
+        QString stylesheet = QString(stylefile.readAll());
+
+        app.setStyleSheet(stylesheet);
+
         QSettings settings;
 
         // Set the default if a value has not been set.

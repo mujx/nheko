@@ -1,0 +1,2 @@
+TimelineView { background-color: red; }
+TimelineItem { background-color: rgba(255,0,0,255); }
