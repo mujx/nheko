@@ -23,6 +23,8 @@
         <file>icons/ui/angle-pointing-to-left.png</file>
         <file>icons/ui/angle-pointing-to-left@2x.png</file>
         <file>icons/ui/world.png</file>
+        <file>icons/ui/angle-arrow-down.png</file>
+        <file>icons/ui/angle-arrow-down@2x.png</file>
 
         <file>icons/emoji-categories/people.png</file>
         <file>icons/emoji-categories/people@2x.png</file>
@@ -65,13 +67,6 @@
         <file>fonts/OpenSans/OpenSans-Italic.ttf</file>
         <file>fonts/OpenSans/OpenSans-Bold.ttf</file>
         <file>fonts/OpenSans/OpenSans-Semibold.ttf</file>
-<<<<<<< HEAD
-        <file>fonts/OpenSans/OpenSans-SemiboldItalic.ttf</file>
-        <file>fonts/OpenSans/OpenSans-ExtraBold.ttf</file>
-        <file>fonts/OpenSans/OpenSans-ExtraBoldItalic.ttf</file>
-=======
-
->>>>>>> Fix icons for retina displays
         <file>fonts/EmojiOne/emojione-android.ttf</file>
     </qresource>
     <qresource prefix="/"/>
