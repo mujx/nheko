@@ -855,6 +855,6 @@ ChatPage::getMemberships(const QJsonArray &events) const
         }
 
         return memberships;
-};
+}
 
 ChatPage::~ChatPage() {}
