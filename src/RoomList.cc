@@ -144,7 +144,7 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
                 return;
         }
 
-        for (auto it = states.constBegin(); it != states.constEnd(); it++) {
+        for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
                 auto room_id = it.key();
                 auto state   = it.value();
 
@@ -200,7 +200,7 @@ RoomList::openLeaveRoomDialog(const QString &room_id)
 void
 RoomList::sync(const QMap<QString, RoomState> &states)
 {
-        for (auto it = states.constBegin(); it != states.constEnd(); it++) {
+        for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
                 auto room_id = it.key();
                 auto state   = it.value();
 
@@ -237,7 +237,7 @@ RoomList::highlightSelectedRoom(const QString &room_id)
 
         calculateUnreadMessageCount();
 
-        for (auto it = rooms_.constBegin(); it != rooms_.constEnd(); it++) {
+        for (auto it = rooms_.constBegin(); it != rooms_.constEnd(); ++it) {
                 if (it.key() != room_id) {
                         it.value()->setPressedState(false);
                 } else {
