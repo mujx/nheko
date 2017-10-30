@@ -72,6 +72,7 @@ private slots:
         void showUnreadMessageNotification(int count);
         void updateTopBarAvatar(const QString &roomid, const QPixmap &img);
         void updateOwnProfileInfo(const QUrl &avatar_url, const QString &display_name);
+        void updateOwnCommunitiesInfo(const QList<QString> &own_communities);
         void setOwnAvatar(const QPixmap &img);
         void initialSyncCompleted(const SyncResponse &response);
         void syncCompleted(const SyncResponse &response);
@@ -108,6 +109,8 @@ private:
         Splitter *splitter;
 
         QWidget *sideBar_;
+        QWidget *communitiesSideBar_;
+        QVBoxLayout *communitiesSideBarLayout_;
         QVBoxLayout *sideBarLayout_;
         QVBoxLayout *sideBarTopLayout_;
         QVBoxLayout *sideBarMainLayout_;
@@ -119,7 +122,9 @@ private:
         QHBoxLayout *topBarLayout_;
         QVBoxLayout *mainContentLayout_;
 
+        CommunitiesList *communitiesList_;
         RoomList *room_list_;
+
         TimelineViewManager *view_manager_;
         SideBarActions *sidebarActions_;
 
@@ -132,12 +137,17 @@ private:
         QTimer *consensusTimer_;
 
         QString current_room_;
+        QString current_community_;
+
         QMap<QString, QPixmap> room_avatars_;
+        QMap<QString, QPixmap> community_avatars_;
 
         UserInfoWidget *user_info_widget_;
 
         QMap<QString, RoomState> state_manager_;
         QMap<QString, QSharedPointer<RoomSettings>> settingsManager_;
+
+        QMap<QString, QSharedPointer<Community>> communityManager_;
 
         // Keeps track of the users currently typing on each room.
         QMap<QString, QList<QString>> typingUsers_;

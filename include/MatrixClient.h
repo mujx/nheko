@@ -50,6 +50,9 @@ public:
         void versions() noexcept;
         void fetchRoomAvatar(const QString &roomid, const QUrl &avatar_url);
         void fetchUserAvatar(const QString &userId, const QUrl &avatarUrl);
+        void fetchCommunityAvatar(const QString &communityId, const QUrl &avatarUrl);
+        void fetchCommunityProfile(const QString &communityId);
+        void fetchCommunityRooms(const QString &communityId);
         void fetchOwnAvatar(const QUrl &avatar_url);
         void downloadImage(const QString &event_id, const QUrl &url);
         void messages(const QString &room_id, const QString &from_token, int limit = 30) noexcept;
@@ -65,6 +68,7 @@ public:
 
 public slots:
         void getOwnProfile() noexcept;
+        void getOwnCommunities() noexcept;
         void logout() noexcept;
 
         void setServer(const QString &server)
@@ -90,11 +94,15 @@ signals:
 
         void roomAvatarRetrieved(const QString &roomid, const QPixmap &img);
         void userAvatarRetrieved(const QString &userId, const QImage &img);
+        void communityAvatarRetrieved(const QString &communityId, const QPixmap &img);
+        void communityProfileRetrieved(const QString &communityId, const QJsonObject &profile);
+        void communityRoomsRetrieved(const QString &communityId, const QJsonObject &rooms);
         void ownAvatarRetrieved(const QPixmap &img);
         void imageDownloaded(const QString &event_id, const QPixmap &img);
 
         // Returned profile data for the user's account.
         void getOwnProfileResponse(const QUrl &avatar_url, const QString &display_name);
+        void getOwnCommunitiesResponse(const QList<QString> &own_communities);
         void initialSyncCompleted(const SyncResponse &response);
         void initialSyncFailed(const QString &msg);
         void syncCompleted(const SyncResponse &response);

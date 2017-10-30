@@ -55,6 +55,17 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         topLayout_->setSpacing(0);
         topLayout_->setMargin(0);
 
+        communitiesSideBar_ = new QWidget(this);
+        communitiesSideBar_->setFixedWidth(ui::sidebar::CommunitiesSidebarSize);
+        communitiesSideBarLayout_ = new QVBoxLayout(communitiesSideBar_);
+        communitiesSideBarLayout_->setSpacing(0);
+        communitiesSideBarLayout_->setMargin(0);
+
+        communitiesList_ = new CommunitiesList(client, this);
+        communitiesSideBarLayout_->addWidget(communitiesList_);
+        //communitiesSideBarLayout_->addStretch(1);
+        topLayout_->addWidget(communitiesSideBar_);
+
         auto splitter = new Splitter(this);
         splitter->setHandleWidth(0);
 
@@ -242,6 +253,26 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 this,
                 SLOT(updateOwnProfileInfo(const QUrl &, const QString &)));
         connect(client_.data(),
+                SIGNAL(getOwnCommunitiesResponse(QList<QString>)),
+                this,
+                SLOT(updateOwnCommunitiesInfo(QList<QString>)));
+        connect(client_.data(), &MatrixClient::communityProfileRetrieved, this,
+                [=](QString communityId, QJsonObject profile) {
+            communityManager_[communityId]->parseProfile(profile);
+        });
+        connect(client_.data(), &MatrixClient::communityRoomsRetrieved, this,
+                [=](QString communityId, QJsonObject rooms) {
+            communityManager_[communityId]->parseRooms(rooms);
+
+            if (communityId == current_community_) {
+                if (communityId == "world") {
+                    room_list_->setFilterRooms(false);
+                } else {
+                    room_list_->setRoomFilter(communityManager_[communityId]->getRoomList());
+                }
+            }
+        });
+        connect(client_.data(),
                 SIGNAL(ownAvatarRetrieved(const QPixmap &)),
                 this,
                 SLOT(setOwnAvatar(const QPixmap &)));
@@ -268,6 +299,15 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                         showContentTimer_->stop();
                         consensusTimer_->stop();
                 }
+        });
+
+        connect(communitiesList_, &CommunitiesList::communityChanged, this, [=](const QString &communityId) {
+            current_community_ = communityId;
+            if (communityId == "world") {
+                room_list_->setFilterRooms(false);
+            } else {
+                room_list_->setRoomFilter(communityManager_[communityId]->getRoomList());
+            }
         });
 
         AvatarProvider::init(client);
@@ -323,6 +363,7 @@ ChatPage::bootstrap(QString userid, QString homeserver, QString token)
         client_->setServer(homeserver);
         client_->setAccessToken(token);
         client_->getOwnProfile();
+        client_->getOwnCommunities();
 
         cache_ = QSharedPointer<Cache>(new Cache(userid));
 
@@ -443,6 +484,18 @@ ChatPage::updateOwnProfileInfo(const QUrl &avatar_url, const QString &display_na
 
         if (avatar_url.isValid())
                 client_->fetchOwnAvatar(avatar_url);
+}
+
+void
+ChatPage::updateOwnCommunitiesInfo(const QList<QString> &own_communities)
+{
+    for (int i = 0; i < own_communities.size(); i++) {
+        QSharedPointer<Community> community = QSharedPointer<Community>(new Community());
+
+        communityManager_[own_communities[i]] = community;
+    }
+
+    communitiesList_->setCommunities(communityManager_);
 }
 
 void

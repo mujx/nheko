@@ -57,6 +57,7 @@ public:
 
         void setAvatar(const QImage &avatar_image);
         void setDescriptionMessage(const DescInfo &info);
+        inline QString roomId();
 
 signals:
         void clicked(const QString &room_id);
