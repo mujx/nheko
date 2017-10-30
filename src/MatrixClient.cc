@@ -214,6 +214,32 @@ MatrixClient::onGetOwnProfileResponse(QNetworkReply *reply)
 }
 
 void
+MatrixClient::onGetOwnCommunitiesResponse(QNetworkReply *reply)
+{
+        reply->deleteLater();
+
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        if (status >= 400) {
+                qWarning() << reply->errorString();
+                return;
+        }
+
+        auto data = reply->readAll();
+        auto json = QJsonDocument::fromJson(data).object();
+
+        try {
+                QList<QString> response;
+                for (auto it = json["groups"].toArray().constBegin(); it != json["groups"].toArray().constEnd(); it++) {
+                    response.append(it->toString());
+                }
+                emit getOwnCommunitiesResponse(response);
+        } catch (DeserializationException &e) {
+                qWarning() << "Own communities:" << e.what();
+        }
+}
+
+void
 MatrixClient::onInitialSyncResponse(QNetworkReply *reply)
 {
         reply->deleteLater();
@@ -353,7 +379,7 @@ MatrixClient::onRoomAvatarResponse(QNetworkReply *reply)
         int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
         if (status == 0 || status >= 400) {
-                qWarning() << reply->errorString();
+                qWarning() << "Fetch room avatar error:" << reply->errorString();
                 return;
         }
 
@@ -371,6 +397,70 @@ MatrixClient::onRoomAvatarResponse(QNetworkReply *reply)
 }
 
 void
+MatrixClient::onCommunityAvatarResponse(QNetworkReply *reply)
+{
+        reply->deleteLater();
+
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        auto error_string = reply->errorString();
+        if (status == 0 || status >= 400) {
+                qWarning() << "Fetch community avatar error:" << error_string;
+                return;
+        }
+
+        auto img = reply->readAll();
+
+        if (img.size() == 0)
+                return;
+
+        auto communityid = reply->property("communityid").toString();
+
+        QPixmap pixmap;
+        pixmap.loadFromData(img);
+
+        emit communityAvatarRetrieved(communityid, pixmap);
+}
+
+void
+MatrixClient::onCommunityProfileResponse(QNetworkReply *reply)
+{
+        reply->deleteLater();
+
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        if (status >= 400) {
+                qWarning() << reply->errorString();
+                return;
+        }
+
+        auto data = reply->readAll();
+        const auto json = QJsonDocument::fromJson(data).object();
+        const auto communityId = reply->property("communityId").toString();
+
+        emit communityProfileRetrieved(communityId, json);
+}
+
+void
+MatrixClient::onCommunityRoomsResponse(QNetworkReply *reply)
+{
+        reply->deleteLater();
+
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        if (status >= 400) {
+                qWarning() << reply->errorString();
+                return;
+        }
+
+        auto data = reply->readAll();
+        const auto json = QJsonDocument::fromJson(data).object();
+        const auto communityId = reply->property("communityId").toString();
+
+        emit communityRoomsRetrieved(communityId, json);
+}
+
+void
 MatrixClient::onUserAvatarResponse(QNetworkReply *reply)
 {
         reply->deleteLater();
@@ -378,7 +468,7 @@ MatrixClient::onUserAvatarResponse(QNetworkReply *reply)
         int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
         if (status == 0 || status >= 400) {
-                qWarning() << reply->errorString();
+                qWarning() << "Fetch user avatar error:" << reply->errorString();
                 return;
         }
 
@@ -402,7 +492,7 @@ MatrixClient::onGetOwnAvatarResponse(QNetworkReply *reply)
         int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
         if (status == 0 || status >= 400) {
-                qWarning() << reply->errorString();
+                qWarning() << "Fetch own avatar error:" << reply->errorString();
                 return;
         }
 
@@ -531,6 +621,9 @@ MatrixClient::onResponse(QNetworkReply *reply)
         case Endpoint::GetOwnProfile:
                 onGetOwnProfileResponse(reply);
                 break;
+        case Endpoint::GetOwnCommunities:
+                onGetOwnCommunitiesResponse(reply);
+                break;
         case Endpoint::Image:
                 onImageResponse(reply);
                 break;
@@ -548,6 +641,15 @@ MatrixClient::onResponse(QNetworkReply *reply)
                 break;
         case Endpoint::RoomAvatar:
                 onRoomAvatarResponse(reply);
+                break;
+        case Endpoint::CommunityAvatar:
+                onCommunityAvatarResponse(reply);
+                break;
+        case Endpoint::CommunityProfile:
+                onCommunityProfileResponse(reply);
+                break;
+        case Endpoint::CommunityRooms:
+                onCommunityRoomsResponse(reply);
                 break;
         case Endpoint::UserAvatar:
                 onUserAvatarResponse(reply);
@@ -753,6 +855,22 @@ MatrixClient::getOwnProfile() noexcept
 }
 
 void
+MatrixClient::getOwnCommunities() noexcept
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + "/joined_groups");
+        endpoint.setQuery(query);
+
+        QNetworkRequest request(QString(endpoint.toEncoded()));
+
+        QNetworkReply *reply = get(request);
+        reply->setProperty("endpoint", static_cast<int>(Endpoint::GetOwnCommunities));
+}
+
+void
 MatrixClient::fetchRoomAvatar(const QString &roomid, const QUrl &avatar_url)
 {
         QList<QString> url_parts = avatar_url.toString().split("mxc://");
@@ -778,6 +896,68 @@ MatrixClient::fetchRoomAvatar(const QString &roomid, const QUrl &avatar_url)
         QNetworkReply *reply = get(avatar_request);
         reply->setProperty("roomid", roomid);
         reply->setProperty("endpoint", static_cast<int>(Endpoint::RoomAvatar));
+}
+
+void
+MatrixClient::fetchCommunityAvatar(const QString &communityid, const QUrl &avatar_url)
+{
+        QList<QString> url_parts = avatar_url.toString().split("mxc://");
+
+        if (url_parts.size() != 2) {
+                qDebug() << "Invalid format for community avatar " << avatar_url.toString();
+                return;
+        }
+
+        QUrlQuery query;
+        query.addQueryItem("width", "512");
+        query.addQueryItem("height", "512");
+        query.addQueryItem("method", "crop");
+
+        QString media_url =
+          QString("%1/_matrix/media/r0/thumbnail/%2").arg(getHomeServer().toString(), url_parts[1]);
+
+        QUrl endpoint(media_url);
+        endpoint.setQuery(query);
+
+        QNetworkRequest avatar_request(endpoint);
+
+        QNetworkReply *reply = get(avatar_request);
+        reply->setProperty("communityid", communityid);
+        reply->setProperty("endpoint", static_cast<int>(Endpoint::CommunityAvatar));
+}
+
+void
+MatrixClient::fetchCommunityProfile(const QString &communityId)
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + "/groups/" + communityId + "/profile");
+        endpoint.setQuery(query);
+
+        QNetworkRequest request(QString(endpoint.toEncoded()));
+
+        QNetworkReply *reply = get(request);
+        reply->setProperty("communityId", communityId);
+        reply->setProperty("endpoint", static_cast<int>(Endpoint::CommunityProfile));
+}
+
+void
+MatrixClient::fetchCommunityRooms(const QString &communityId)
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + "/groups/" + communityId + "/rooms");
+        endpoint.setQuery(query);
+
+        QNetworkRequest request(QString(endpoint.toEncoded()));
+
+        QNetworkReply *reply = get(request);
+        reply->setProperty("communityId", communityId);
+        reply->setProperty("endpoint", static_cast<int>(Endpoint::CommunityRooms));
 }
 
 void

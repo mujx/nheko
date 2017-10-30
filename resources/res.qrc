@@ -13,7 +13,6 @@
         <file>icons/power-button-off.png</file>
         <file>icons/smile.png</file>
         <file>icons/error.png</file>
-
         <file>icons/emoji-categories/people.png</file>
         <file>icons/emoji-categories/nature.png</file>
         <file>icons/emoji-categories/foods.png</file>
@@ -22,10 +21,9 @@
         <file>icons/emoji-categories/objects.png</file>
         <file>icons/emoji-categories/symbols.png</file>
         <file>icons/emoji-categories/flags.png</file>
-
         <file>icons/vertical-ellipsis.png</file>
+        <file>icons/world.png</file>
     </qresource>
-
     <qresource prefix="/logos">
         <file>nheko.png</file>
         <file>nheko-512.png</file>
@@ -35,7 +33,6 @@
         <file>nheko-32.png</file>
         <file>nheko-16.png</file>
     </qresource>
-
     <qresource prefix="/fonts">
         <file>fonts/OpenSans/OpenSans-Light.ttf</file>
         <file>fonts/OpenSans/OpenSans-LightItalic.ttf</file>
@@ -47,7 +44,7 @@
         <file>fonts/OpenSans/OpenSans-SemiboldItalic.ttf</file>
         <file>fonts/OpenSans/OpenSans-ExtraBold.ttf</file>
         <file>fonts/OpenSans/OpenSans-ExtraBoldItalic.ttf</file>
-
         <file>fonts/EmojiOne/emojione-android.ttf</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

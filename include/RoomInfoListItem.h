@@ -54,6 +54,7 @@ public:
         inline void setAvatar(const QImage &avatar_image);
         inline int unreadMessageCount() const;
         inline void setDescriptionMessage(const DescInfo &info);
+        inline QString roomId();
 
 signals:
         void clicked(const QString &room_id);
@@ -128,4 +129,10 @@ RoomInfoListItem::setDescriptionMessage(const DescInfo &info)
 {
         lastMsgInfo_ = info;
         update();
+}
+
+inline QString
+RoomInfoListItem::roomId()
+{
+    return roomId_;
 }

@@ -49,6 +49,8 @@ public:
                      const RoomState &state,
                      const QString &room_id);
         void removeRoom(const QString &room_id, bool reset);
+        void setFilterRooms(bool filterRooms);
+        void setRoomFilter(QList<QString> room_ids);
 
 signals:
         void roomChanged(const QString &room_id);
@@ -80,6 +82,10 @@ private:
         QSharedPointer<LeaveRoomDialog> leaveRoomDialog_;
 
         QMap<QString, QSharedPointer<RoomInfoListItem>> rooms_;
+        QString selectedRoom_;
+
+        bool filterRooms_ = false;
+        QList<QString> roomFilter_ = QList<QString>(); //which rooms to include in the room list
 
         QSharedPointer<MatrixClient> client_;
 };
