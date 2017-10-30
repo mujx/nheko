@@ -313,18 +313,21 @@ RoomList::setFilterRooms(bool filterRooms)
             }
         }
 
-        if (!roomFilter_.contains(selectedRoom_)) {
-            RoomInfoListItem *firstVisibleRoom = nullptr;
-            for (int i=0; i<contentsLayout_->count(); i++) {
-                QWidget *item = contentsLayout_->itemAt(i)->widget();
-                if (item != nullptr && item->isVisible()) {
-                    firstVisibleRoom = (RoomInfoListItem *) item;
-                    break;
+        if (filterRooms_ && !roomFilter_.contains(selectedRoom_)) {
+                RoomInfoListItem *firstVisibleRoom = nullptr;
+                for (int i = 0; i < contentsLayout_->count(); i++) {
+                        QWidget *item = contentsLayout_->itemAt(i)->widget();
+                        if (item != nullptr && item->isVisible()) {
+                                firstVisibleRoom = (RoomInfoListItem *)item;
+                                break;
+                        }
                 }
-            }
-            if (firstVisibleRoom != nullptr) {
-                highlightSelectedRoom(firstVisibleRoom->roomId());
-            }
+                if (firstVisibleRoom != nullptr) {
+                        highlightSelectedRoom(firstVisibleRoom->roomId());
+                }
+        } else {
+                scrollArea_->ensureWidgetVisible(
+                  qobject_cast<QWidget *>(rooms_.value(selectedRoom_).data()));
         }
 }
 
