@@ -1,2 +1,13 @@
-TimelineView { background-color: red; }
-TimelineItem { background-color: rgba(255,0,0,255); }
+TimelineView, TimelineView > * {
+        background-color: palette(base);
+}
+
+FlatButton {
+        qproperty-foregroundColor: palette(text);
+}
+
+RoomInfoListItem {
+        qproperty-highlightedBackgroundColor: palette(highlight);
+        qproperty-hoverBackgroundColor: palette(dark);
+        qproperty-backgroundColor: palette(window);
+}

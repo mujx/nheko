@@ -96,11 +96,11 @@ RoomInfoListItem::paintEvent(QPaintEvent *event)
         p.setRenderHint(QPainter::Antialiasing);
 
         if (isPressed_)
-                p.fillRect(rect(), palette().color(QPalette::Highlight));
+                p.fillRect(rect(), highlightedBackgroundColor_);
         else if (underMouse())
-                p.fillRect(rect(), palette().color(QPalette::Dark));
+                p.fillRect(rect(), hoverBackgroundColor_);
         else
-                p.fillRect(rect(), palette().color(QPalette::Window));
+                p.fillRect(rect(), backgroundColor_);
 
         QFont font;
         font.setPixelSize(conf::fontSize);

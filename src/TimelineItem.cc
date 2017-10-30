@@ -468,3 +468,12 @@ TimelineItem::descriptiveTime(const QDateTime &then)
 }
 
 TimelineItem::~TimelineItem() {}
+
+void
+TimelineItem::paintEvent(QPaintEvent *)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}

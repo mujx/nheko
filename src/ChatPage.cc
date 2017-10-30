@@ -54,7 +54,7 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         topLayout_->setMargin(0);
 
         auto splitter = new Splitter(this);
-        splitter->setHandleWidth(1);
+        splitter->setHandleWidth(0);
 
         topLayout_->addWidget(splitter);
 

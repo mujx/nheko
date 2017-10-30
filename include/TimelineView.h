@@ -21,6 +21,8 @@
 #include <QList>
 #include <QQueue>
 #include <QScrollArea>
+#include <QStyle>
+#include <QStyleOption>
 
 #include "Emote.h"
 #include "Image.h"
@@ -119,6 +121,9 @@ private slots:
 
 signals:
         void updateLastTimelineMessage(const QString &user, const DescInfo &info);
+
+protected:
+        void paintEvent(QPaintEvent *event) override;
 
 private:
         void init();

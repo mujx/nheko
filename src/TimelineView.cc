@@ -639,3 +639,12 @@ TimelineView::handleFailedMessage(int txnid)
         // Note: We do this even if the message has already been echoed.
         QTimer::singleShot(500, this, SLOT(sendNextPendingMessage()));
 }
+
+void
+TimelineView::paintEvent(QPaintEvent *)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}

@@ -22,6 +22,7 @@
 #include <QNetworkProxy>
 #include <QSettings>
 #include <QTranslator>
+#include <QFile>
 
 #include "MainWindow.h"
 

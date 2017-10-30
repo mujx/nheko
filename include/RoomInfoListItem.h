@@ -38,6 +38,15 @@ struct DescInfo
 class RoomInfoListItem : public QWidget
 {
         Q_OBJECT
+        Q_PROPERTY(QColor highlightedBackgroundColor
+                   READ   highlightedBackgroundColor
+                   WRITE  setHighlightedBackgroundColor)
+        Q_PROPERTY(QColor hoverBackgroundColor
+                   READ   hoverBackgroundColor
+                   WRITE  setHoverBackgroundColor)
+        Q_PROPERTY(QColor backgroundColor
+                   READ   backgroundColor
+                   WRITE  setBackgroundColor)
 
 public:
         RoomInfoListItem(QSharedPointer<RoomSettings> settings,
@@ -51,12 +60,20 @@ public:
         void clearUnreadMessageCount();
         void setState(const RoomState &state);
 
-        bool isPressed() const { return isPressed_; };
-        RoomState state() const { return state_; };
-        int unreadMessageCount() const { return unreadMsgCount_; };
+        bool isPressed() const { return isPressed_; }
+        RoomState state() const { return state_; }
+        int unreadMessageCount() const { return unreadMsgCount_; }
 
         void setAvatar(const QImage &avatar_image);
         void setDescriptionMessage(const DescInfo &info);
+
+        inline QColor highlightedBackgroundColor() const { return highlightedBackgroundColor_; }
+        inline QColor hoverBackgroundColor() const { return hoverBackgroundColor_; }
+        inline QColor backgroundColor() const { return backgroundColor_; }
+
+        inline void setHighlightedBackgroundColor(QColor &color) { highlightedBackgroundColor_ = color; }
+        inline void setHoverBackgroundColor(QColor &color) { hoverBackgroundColor_ = color; }
+        inline void setBackgroundColor(QColor &color) { backgroundColor_ = color; }
 
 signals:
         void clicked(const QString &room_id);
@@ -98,4 +115,8 @@ private:
 
         int maxHeight_;
         int unreadMsgCount_ = 0;
+
+        QColor highlightedBackgroundColor_;
+        QColor hoverBackgroundColor_;
+        QColor backgroundColor_;
 };
