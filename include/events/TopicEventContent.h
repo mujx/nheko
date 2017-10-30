@@ -30,9 +30,7 @@ namespace events
  * room.
  */
 
-class TopicEventContent
-  : public Deserializable
-  , public Serializable
+class TopicEventContent : public Deserializable, public Serializable
 {
 public:
         void deserialize(const QJsonValue &data) override;

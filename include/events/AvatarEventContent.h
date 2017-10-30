@@ -30,9 +30,7 @@ namespace events
  * A picture that is associated with the room.
  */
 
-class AvatarEventContent
-  : public Deserializable
-  , public Serializable
+class AvatarEventContent : public Deserializable, public Serializable
 {
 public:
         void deserialize(const QJsonValue &data) override;

@@ -84,8 +84,8 @@ private:
         QMap<QString, QSharedPointer<RoomInfoListItem>> rooms_;
         QString selectedRoom_;
 
-        bool filterRooms_ = false;
-        QList<QString> roomFilter_ = QList<QString>(); //which rooms to include in the room list
+        bool filterRooms_          = false;
+        QList<QString> roomFilter_ = QList<QString>(); // which rooms to include in the room list
 
         QSharedPointer<MatrixClient> client_;
 };

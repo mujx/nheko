@@ -10,8 +10,8 @@ enum class AvatarType { Icon, Image, Letter };
 
 namespace sidebar
 {
-static const int SmallSize  = 60;
-static const int NormalSize = 300;
+static const int SmallSize              = 60;
+static const int NormalSize             = 300;
 static const int CommunitiesSidebarSize = 64;
 }
 // Default font size.

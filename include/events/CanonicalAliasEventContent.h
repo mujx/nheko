@@ -32,9 +32,7 @@ namespace events
  * users which alias to use to advertise the room.
  */
 
-class CanonicalAliasEventContent
-  : public Deserializable
-  , public Serializable
+class CanonicalAliasEventContent : public Deserializable, public Serializable
 {
 public:
         void deserialize(const QJsonValue &data) override;

@@ -32,9 +32,7 @@ enum class HistoryVisibility {
         WorldReadable,
 };
 
-class HistoryVisibilityEventContent
-  : public Deserializable
-  , public Serializable
+class HistoryVisibilityEventContent : public Deserializable, public Serializable
 {
 public:
         inline HistoryVisibility historyVisibility() const;

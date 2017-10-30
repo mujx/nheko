@@ -181,4 +181,6 @@ RegisterPage::onRegisterButtonClicked()
         }
 }
 
-RegisterPage::~RegisterPage() {}
+RegisterPage::~RegisterPage()
+{
+}

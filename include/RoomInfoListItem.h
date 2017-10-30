@@ -134,5 +134,5 @@ RoomInfoListItem::setDescriptionMessage(const DescInfo &info)
 inline QString
 RoomInfoListItem::roomId()
 {
-    return roomId_;
+        return roomId_;
 }

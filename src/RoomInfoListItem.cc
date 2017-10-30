@@ -310,4 +310,6 @@ RoomInfoListItem::mousePressEvent(QMouseEvent *event)
         ripple_overlay_->addRipple(ripple);
 }
 
-RoomInfoListItem::~RoomInfoListItem() {}
+RoomInfoListItem::~RoomInfoListItem()
+{
+}

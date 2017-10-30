@@ -3,35 +3,38 @@
 CommunitiesListItem::CommunitiesListItem(QSharedPointer<Community> community,
                                          QString community_id,
                                          QWidget *parent)
-    : QWidget(parent)
-    , community_(community)
-    , communityId_(community_id)
+  : QWidget(parent)
+  , community_(community)
+  , communityId_(community_id)
 {
-    //menu_ = new Menu(this);
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setFixedHeight(ui::sidebar::CommunitiesSidebarSize);
-    setFixedWidth(ui::sidebar::CommunitiesSidebarSize);
+        // menu_ = new Menu(this);
+        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        setFixedHeight(ui::sidebar::CommunitiesSidebarSize);
+        setFixedWidth(ui::sidebar::CommunitiesSidebarSize);
 }
 
-CommunitiesListItem::~CommunitiesListItem() {}
+CommunitiesListItem::~CommunitiesListItem()
+{
+}
 
 void
 CommunitiesListItem::setCommunity(QSharedPointer<Community> community)
 {
-    community_ = community;
+        community_ = community;
 }
 
 void
 CommunitiesListItem::setPressedState(bool state)
 {
-    if (isPressed_ != state) {
-        isPressed_ = state;
-        update();
-    }
+        if (isPressed_ != state) {
+                isPressed_ = state;
+                update();
+        }
 }
 
 void
-CommunitiesListItem::mousePressEvent(QMouseEvent *event) {
+CommunitiesListItem::mousePressEvent(QMouseEvent *event)
+{
         if (event->buttons() == Qt::RightButton) {
                 QWidget::mousePressEvent(event);
                 return;
@@ -46,7 +49,6 @@ void
 CommunitiesListItem::paintEvent(QPaintEvent *event)
 {
         Q_UNUSED(event);
-
 
         QPainter p(this);
         p.setRenderHint(QPainter::TextAntialiasing);
@@ -65,7 +67,7 @@ CommunitiesListItem::paintEvent(QPaintEvent *event)
 
         p.setPen(QColor("#333"));
 
-        QRect avatarRegion((width()-IconSize)/2, (height()-IconSize)/2, IconSize, IconSize);
+        QRect avatarRegion((width() - IconSize) / 2, (height() - IconSize) / 2, IconSize, IconSize);
 
         font.setBold(false);
         p.setPen(Qt::NoPen);
@@ -91,14 +93,15 @@ CommunitiesListItem::paintEvent(QPaintEvent *event)
                 p.save();
 
                 QPainterPath path;
-                path.addEllipse((width()-IconSize)/2, (height()-IconSize)/2, IconSize, IconSize);
+                path.addEllipse(
+                  (width() - IconSize) / 2, (height() - IconSize) / 2, IconSize, IconSize);
                 p.setClipPath(path);
 
                 p.drawPixmap(avatarRegion, communityAvatar_);
                 p.restore();
         }
 
-        //TODO: Discord-style community ping counts?
+        // TODO: Discord-style community ping counts?
         /*if (unreadMsgCount_ > 0) {
                 QColor textColor("white");
                 QColor backgroundColor("#38A3D8");
@@ -142,15 +145,17 @@ CommunitiesListItem::contextMenuEvent(QContextMenuEvent *event)
 {
         Q_UNUSED(event);
 
-        //menu_->popup(event->globalPos());
+        // menu_->popup(event->globalPos());
 }
 
 WorldCommunityListItem::WorldCommunityListItem(QWidget *parent)
-    : CommunitiesListItem(QSharedPointer<Community>(), "", parent)
+  : CommunitiesListItem(QSharedPointer<Community>(), "", parent)
 {
 }
 
-WorldCommunityListItem::~WorldCommunityListItem() {}
+WorldCommunityListItem::~WorldCommunityListItem()
+{
+}
 
 void
 WorldCommunityListItem::mousePressEvent(QMouseEvent *event)
@@ -190,10 +195,10 @@ WorldCommunityListItem::paintEvent(QPaintEvent *event)
         p.setPen(Qt::NoPen);
         p.setBrush(brush);
 
-        QRect avatarRegion((width()-IconSize)/2, (height()-IconSize)/2, IconSize, IconSize);
+        QRect avatarRegion((width() - IconSize) / 2, (height() - IconSize) / 2, IconSize, IconSize);
         p.drawEllipse(avatarRegion.center(), IconSize / 2, IconSize / 2);
         QPainterPath path;
-        path.addEllipse((width()-IconSize)/2, (height()-IconSize)/2, IconSize, IconSize);
+        path.addEllipse((width() - IconSize) / 2, (height() - IconSize) / 2, IconSize, IconSize);
         p.setClipPath(path);
 
         p.drawPixmap(avatarRegion, worldIcon);

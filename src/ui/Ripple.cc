@@ -25,7 +25,9 @@ Ripple::Ripple(const QPoint &center, RippleOverlay *overlay, QObject *parent)
         init();
 }
 
-Ripple::~Ripple() {}
+Ripple::~Ripple()
+{
+}
 
 void
 Ripple::setRadius(qreal radius)

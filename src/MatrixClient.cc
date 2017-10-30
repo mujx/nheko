@@ -230,8 +230,10 @@ MatrixClient::onGetOwnCommunitiesResponse(QNetworkReply *reply)
 
         try {
                 QList<QString> response;
-                for (auto it = json["groups"].toArray().constBegin(); it != json["groups"].toArray().constEnd(); it++) {
-                    response.append(it->toString());
+                for (auto it = json["groups"].toArray().constBegin();
+                     it != json["groups"].toArray().constEnd();
+                     it++) {
+                        response.append(it->toString());
                 }
                 emit getOwnCommunitiesResponse(response);
         } catch (DeserializationException &e) {
@@ -434,8 +436,8 @@ MatrixClient::onCommunityProfileResponse(QNetworkReply *reply)
                 return;
         }
 
-        auto data = reply->readAll();
-        const auto json = QJsonDocument::fromJson(data).object();
+        auto data              = reply->readAll();
+        const auto json        = QJsonDocument::fromJson(data).object();
         const auto communityId = reply->property("communityId").toString();
 
         emit communityProfileRetrieved(communityId, json);
@@ -453,8 +455,8 @@ MatrixClient::onCommunityRoomsResponse(QNetworkReply *reply)
                 return;
         }
 
-        auto data = reply->readAll();
-        const auto json = QJsonDocument::fromJson(data).object();
+        auto data              = reply->readAll();
+        const auto json        = QJsonDocument::fromJson(data).object();
         const auto communityId = reply->property("communityId").toString();
 
         emit communityRoomsRetrieved(communityId, json);

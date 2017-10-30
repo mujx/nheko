@@ -62,9 +62,7 @@ bool
 isStateEvent(EventType type);
 
 template<class Content>
-class Event
-  : public Deserializable
-  , public Serializable
+class Event : public Deserializable, public Serializable
 {
 public:
         inline Content content() const;

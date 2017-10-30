@@ -297,4 +297,6 @@ LoginPage::onBackButtonClicked()
         emit backButtonClicked();
 }
 
-LoginPage::~LoginPage() {}
+LoginPage::~LoginPage()
+{
+}

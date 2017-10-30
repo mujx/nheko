@@ -62,7 +62,9 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
                 SLOT(updateRoomAvatar(const QString &, const QPixmap &)));
 }
 
-RoomList::~RoomList() {}
+RoomList::~RoomList()
+{
+}
 
 void
 RoomList::clear()
@@ -291,35 +293,35 @@ RoomList::setFilterRooms(bool filterRooms)
 {
         filterRooms_ = filterRooms;
 
-        for (int i=0; i<contentsLayout_->count(); i++) {
+        for (int i = 0; i < contentsLayout_->count(); i++) {
+                // If roomFilter_ contains the room for the current RoomInfoListItem,
+                // show the list item, otherwise hide it
+                RoomInfoListItem *listitem =
+                  (RoomInfoListItem *)contentsLayout_->itemAt(i)->widget();
 
-            //If roomFilter_ contains the room for the current RoomInfoListItem,
-            //show the list item, otherwise hide it
-            RoomInfoListItem *listitem = (RoomInfoListItem *) contentsLayout_->itemAt(i)->widget();
-
-            if (listitem != nullptr) {
-                if (!filterRooms) {
-                    contentsLayout_->itemAt(i)->widget()->show();
-                } else if (roomFilter_.contains(listitem->roomId())) {
-                    contentsLayout_->itemAt(i)->widget()->show();
-                } else {
-                    contentsLayout_->itemAt(i)->widget()->hide();
+                if (listitem != nullptr) {
+                        if (!filterRooms) {
+                                contentsLayout_->itemAt(i)->widget()->show();
+                        } else if (roomFilter_.contains(listitem->roomId())) {
+                                contentsLayout_->itemAt(i)->widget()->show();
+                        } else {
+                                contentsLayout_->itemAt(i)->widget()->hide();
+                        }
                 }
-            }
         }
 
         if (!roomFilter_.contains(selectedRoom_)) {
-            RoomInfoListItem *firstVisibleRoom = nullptr;
-            for (int i=0; i<contentsLayout_->count(); i++) {
-                QWidget *item = contentsLayout_->itemAt(i)->widget();
-                if (item != nullptr && item->isVisible()) {
-                    firstVisibleRoom = (RoomInfoListItem *) item;
-                    break;
+                RoomInfoListItem *firstVisibleRoom = nullptr;
+                for (int i = 0; i < contentsLayout_->count(); i++) {
+                        QWidget *item = contentsLayout_->itemAt(i)->widget();
+                        if (item != nullptr && item->isVisible()) {
+                                firstVisibleRoom = (RoomInfoListItem *)item;
+                                break;
+                        }
                 }
-            }
-            if (firstVisibleRoom != nullptr) {
-                highlightSelectedRoom(firstVisibleRoom->roomId());
-            }
+                if (firstVisibleRoom != nullptr) {
+                        highlightSelectedRoom(firstVisibleRoom->roomId());
+                }
         }
 }
 

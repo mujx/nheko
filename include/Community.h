@@ -1,13 +1,13 @@
 #pragma once
 
-#include <QObject>
 #include <QJsonObject>
-#include <QUrl>
+#include <QObject>
 #include <QString>
+#include <QUrl>
 
 class Community : public QObject
 {
-    Q_OBJECT
+        Q_OBJECT
 
 public:
         void parseProfile(const QJsonObject &profile);
@@ -54,7 +54,6 @@ Community::getLongDescription() const
 {
         return long_description_;
 }
-
 
 inline const QList<QString>
 Community::getRoomList() const

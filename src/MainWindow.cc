@@ -253,4 +253,6 @@ MainWindow::instance()
         return instance_;
 }
 
-MainWindow::~MainWindow() {}
+MainWindow::~MainWindow()
+{
+}

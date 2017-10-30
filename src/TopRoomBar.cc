@@ -171,4 +171,6 @@ TopRoomBar::setRoomSettings(QSharedPointer<RoomSettings> settings)
         roomSettings_ = settings;
 }
 
-TopRoomBar::~TopRoomBar() {}
+TopRoomBar::~TopRoomBar()
+{
+}

@@ -30,9 +30,7 @@ namespace events
  * of all other events.
  */
 
-class CreateEventContent
-  : public Deserializable
-  , public Serializable
+class CreateEventContent : public Deserializable, public Serializable
 {
 public:
         void deserialize(const QJsonValue &data) override;

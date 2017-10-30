@@ -22,6 +22,7 @@
 #include <QWidget>
 
 #include "Cache.h"
+#include "CommunitiesList.h"
 #include "MatrixClient.h"
 #include "QuickSwitcher.h"
 #include "RoomList.h"
@@ -33,7 +34,6 @@
 #include "TopRoomBar.h"
 #include "TypingDisplay.h"
 #include "UserInfoWidget.h"
-#include "CommunitiesList.h"
 
 constexpr int CONSENSUS_TIMEOUT    = 1000;
 constexpr int SHOW_CONTENT_TIMEOUT = 3000;

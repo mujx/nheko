@@ -47,9 +47,7 @@ enum class Membership {
  * The current membership state of a user in the room.
  */
 
-class MemberEventContent
-  : public Deserializable
-  , public Serializable
+class MemberEventContent : public Deserializable, public Serializable
 {
 public:
         void deserialize(const QJsonValue &data) override;
