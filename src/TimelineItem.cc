@@ -66,7 +66,6 @@ TimelineItem::init()
 
         headerLayout_->setMargin(0);
         headerLayout_->setSpacing(conf::timeline::headerSpacing);
-
 }
 
 /*
@@ -400,8 +399,8 @@ TimelineItem::setupAvatarLayout(const QString &userName)
 
         userAvatar_ = new Avatar(this);
         userAvatar_->setLetter(QChar(userName[0]).toUpper());
-//        userAvatar_->setBackgroundColor(QColor("#eee"));
-//        userAvatar_->setTextColor(QColor("black"));
+        //        userAvatar_->setBackgroundColor(QColor("#eee"));
+        //        userAvatar_->setTextColor(QColor("black"));
         userAvatar_->setSize(conf::timeline::avatarSize);
 
         // TODO: The provided user name should be a UserId class
@@ -472,8 +471,8 @@ TimelineItem::~TimelineItem() {}
 void
 TimelineItem::paintEvent(QPaintEvent *)
 {
-    QStyleOption opt;
-    opt.init(this);
-    QPainter p(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+        QStyleOption opt;
+        opt.init(this);
+        QPainter p(this);
+        style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

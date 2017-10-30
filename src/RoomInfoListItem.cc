@@ -106,7 +106,7 @@ RoomInfoListItem::paintEvent(QPaintEvent *event)
         font.setPixelSize(conf::fontSize);
         QFontMetrics metrics(font);
 
-        //p.setPen(QColor("#333"));
+        // p.setPen(QColor("#333"));
 
         QRect avatarRegion(Padding, Padding, IconSize, IconSize);
 

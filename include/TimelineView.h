@@ -64,7 +64,8 @@ struct PendingMessage
           , filename(filename)
           , event_id(event_id)
           , widget(widget)
-        {}
+        {
+        }
 };
 
 // In which place new TimelineItems should be inserted.

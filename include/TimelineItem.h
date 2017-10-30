@@ -19,9 +19,9 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPainter>
 #include <QStyle>
 #include <QStyleOption>
-#include <QPainter>
 
 #include "Emote.h"
 #include "Image.h"
