@@ -476,7 +476,29 @@ MatrixClient::getOwnCommunities() noexcept
         QNetworkRequest request(QString(endpoint.toEncoded()));
 
         QNetworkReply *reply = get(request);
-        reply->setProperty("endpoint", static_cast<int>(Endpoint::GetOwnCommunities));
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            reply->deleteLater();
+
+            int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+            if (status >= 400) {
+                qWarning() << reply->errorString();
+                return;
+            }
+
+            auto data = reply->readAll();
+            auto json = QJsonDocument::fromJson(data).object();
+
+            try {
+                QList<QString> response;
+                for (auto it = json["groups"].toArray().constBegin(); it != json["groups"].toArray().constEnd(); it++) {
+                    response.append(it->toString());
+                }
+                emit getOwnCommunitiesResponse(response);
+            } catch (DeserializationException &e) {
+                qWarning() << "Own communities:" << e.what();
+            }
+        });
 }
 
 void
@@ -526,7 +548,7 @@ MatrixClient::fetchRoomAvatar(const QString &roomid, const QUrl &avatar_url)
 }
 
 void
-MatrixClient::fetchCommunityAvatar(const QString &communityid, const QUrl &avatar_url)
+MatrixClient::fetchCommunityAvatar(const QString &communityId, const QUrl &avatar_url)
 {
         QList<QString> url_parts = avatar_url.toString().split("mxc://");
 
@@ -585,7 +607,7 @@ MatrixClient::fetchCommunityProfile(const QString &communityId)
 
         QNetworkReply *reply = get(request);
 
-        connect(reply, &QNetworkRequest::finished, this, [this, reply, communityId]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, communityId]() {
                         reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -615,7 +637,7 @@ MatrixClient::fetchCommunityRooms(const QString &communityId)
         QNetworkRequest request(QString(endpoint.toEncoded()));
 
         QNetworkReply *reply = get(request);
-        connect(reply, &QNetworkRequest::finished, this, [this, reply, communityId]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, communityId]() {
                         reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
