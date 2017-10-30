@@ -315,7 +315,7 @@ RoomList::setFilterRooms(bool filterRooms)
                 }
         }
 
-        if (!roomFilter_.contains(selectedRoom_)) {
+        if (filterRooms_ && !roomFilter_.contains(selectedRoom_)) {
                 RoomInfoListItem *firstVisibleRoom = nullptr;
                 for (int i = 0; i < contentsLayout_->count(); i++) {
                         QWidget *item = contentsLayout_->itemAt(i)->widget();
@@ -327,6 +327,9 @@ RoomList::setFilterRooms(bool filterRooms)
                 if (firstVisibleRoom != nullptr) {
                         highlightSelectedRoom(firstVisibleRoom->roomId());
                 }
+        } else {
+                scrollArea_->ensureWidgetVisible(
+                  qobject_cast<QWidget *>(rooms_.value(selectedRoom_).data()));
         }
 }
 
