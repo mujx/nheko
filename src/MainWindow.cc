@@ -203,7 +203,6 @@ MainWindow::showChatPage(QString userid, QString homeserver, QString token)
                 spinner_ = QSharedPointer<LoadingIndicator>(
                   new LoadingIndicator(this),
                   [=](LoadingIndicator *indicator) { indicator->deleteLater(); });
-//                spinner_->setColor("#acc7dc");
                 spinner_->setFixedHeight(100);
                 spinner_->setFixedWidth(100);
                 spinner_->start();
