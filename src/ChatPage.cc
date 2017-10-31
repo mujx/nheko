@@ -63,7 +63,7 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
 
         communitiesList_ = new CommunitiesList(client, this);
         communitiesSideBarLayout_->addWidget(communitiesList_);
-        //communitiesSideBarLayout_->addStretch(1);
+        // communitiesSideBarLayout_->addStretch(1);
         topLayout_->addWidget(communitiesSideBar_);
 
         auto splitter = new Splitter(this);
@@ -256,22 +256,27 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 SIGNAL(getOwnCommunitiesResponse(QList<QString>)),
                 this,
                 SLOT(updateOwnCommunitiesInfo(QList<QString>)));
-        connect(client_.data(), &MatrixClient::communityProfileRetrieved, this,
+        connect(client_.data(),
+                &MatrixClient::communityProfileRetrieved,
+                this,
                 [=](QString communityId, QJsonObject profile) {
-            communityManager_[communityId]->parseProfile(profile);
-        });
-        connect(client_.data(), &MatrixClient::communityRoomsRetrieved, this,
+                        communityManager_[communityId]->parseProfile(profile);
+                });
+        connect(client_.data(),
+                &MatrixClient::communityRoomsRetrieved,
+                this,
                 [=](QString communityId, QJsonObject rooms) {
-            communityManager_[communityId]->parseRooms(rooms);
+                        communityManager_[communityId]->parseRooms(rooms);
 
-            if (communityId == current_community_) {
-                if (communityId == "world") {
-                    room_list_->setFilterRooms(false);
-                } else {
-                    room_list_->setRoomFilter(communityManager_[communityId]->getRoomList());
-                }
-            }
-        });
+                        if (communityId == current_community_) {
+                                if (communityId == "world") {
+                                        room_list_->setFilterRooms(false);
+                                } else {
+                                        room_list_->setRoomFilter(
+                                          communityManager_[communityId]->getRoomList());
+                                }
+                        }
+                });
         connect(client_.data(),
                 SIGNAL(ownAvatarRetrieved(const QPixmap &)),
                 this,
@@ -301,14 +306,18 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 }
         });
 
-        connect(communitiesList_, &CommunitiesList::communityChanged, this, [=](const QString &communityId) {
-            current_community_ = communityId;
-            if (communityId == "world") {
-                room_list_->setFilterRooms(false);
-            } else {
-                room_list_->setRoomFilter(communityManager_[communityId]->getRoomList());
-            }
-        });
+        connect(communitiesList_,
+                &CommunitiesList::communityChanged,
+                this,
+                [=](const QString &communityId) {
+                        current_community_ = communityId;
+                        if (communityId == "world") {
+                                room_list_->setFilterRooms(false);
+                        } else {
+                                room_list_->setRoomFilter(
+                                  communityManager_[communityId]->getRoomList());
+                        }
+                });
 
         AvatarProvider::init(client);
 }
@@ -489,13 +498,13 @@ ChatPage::updateOwnProfileInfo(const QUrl &avatar_url, const QString &display_na
 void
 ChatPage::updateOwnCommunitiesInfo(const QList<QString> &own_communities)
 {
-    for (int i = 0; i < own_communities.size(); i++) {
-        QSharedPointer<Community> community = QSharedPointer<Community>(new Community());
+        for (int i = 0; i < own_communities.size(); i++) {
+                QSharedPointer<Community> community = QSharedPointer<Community>(new Community());
 
-        communityManager_[own_communities[i]] = community;
-    }
+                communityManager_[own_communities[i]] = community;
+        }
 
-    communitiesList_->setCommunities(communityManager_);
+        communitiesList_->setCommunities(communityManager_);
 }
 
 void

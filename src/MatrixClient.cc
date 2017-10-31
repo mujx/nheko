@@ -489,13 +489,15 @@ MatrixClient::getOwnCommunities() noexcept
                 auto data = reply->readAll();
                 auto json = QJsonDocument::fromJson(data);
                 try {
-                    QList<QString> response;
-                    for (auto it = json["groups"].toArray().constBegin(); it != json["groups"].toArray().constEnd(); it++) {
-                        response.append(it->toString());
-                    }
-                    emit getOwnCommunitiesResponse(response);
+                        QList<QString> response;
+                        for (auto it = json["groups"].toArray().constBegin();
+                             it != json["groups"].toArray().constEnd();
+                             it++) {
+                                response.append(it->toString());
+                        }
+                        emit getOwnCommunitiesResponse(response);
                 } catch (DeserializationException &e) {
-                    qWarning() << "Own communities:" << e.what();
+                        qWarning() << "Own communities:" << e.what();
                 }
         });
 }
@@ -606,7 +608,7 @@ MatrixClient::fetchCommunityProfile(const QString &communityId)
 
         QNetworkReply *reply = get(request);
         connect(reply, &QNetworkReply::finished, this, [this, reply, communityId]() {
-                        reply->deleteLater();
+                reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
@@ -615,7 +617,7 @@ MatrixClient::fetchCommunityProfile(const QString &communityId)
                         return;
                 }
 
-                auto data = reply->readAll();
+                auto data       = reply->readAll();
                 const auto json = QJsonDocument::fromJson(data).object();
 
                 emit communityProfileRetrieved(communityId, json);
@@ -636,7 +638,7 @@ MatrixClient::fetchCommunityRooms(const QString &communityId)
 
         QNetworkReply *reply = get(request);
         connect(reply, &QNetworkReply::finished, this, [this, reply, communityId]() {
-                        reply->deleteLater();
+                reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
@@ -645,7 +647,7 @@ MatrixClient::fetchCommunityRooms(const QString &communityId)
                         return;
                 }
 
-                auto data = reply->readAll();
+                auto data       = reply->readAll();
                 const auto json = QJsonDocument::fromJson(data).object();
 
                 emit communityRoomsRetrieved(communityId, json);

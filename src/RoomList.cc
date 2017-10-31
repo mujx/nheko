@@ -296,21 +296,21 @@ RoomList::setFilterRooms(bool filterRooms)
 {
         filterRooms_ = filterRooms;
 
-        for (int i=0; i<contentsLayout_->count(); i++) {
+        for (int i = 0; i < contentsLayout_->count(); i++) {
+                // If roomFilter_ contains the room for the current RoomInfoListItem,
+                // show the list item, otherwise hide it
+                RoomInfoListItem *listitem =
+                  (RoomInfoListItem *)contentsLayout_->itemAt(i)->widget();
 
-            //If roomFilter_ contains the room for the current RoomInfoListItem,
-            //show the list item, otherwise hide it
-            RoomInfoListItem *listitem = (RoomInfoListItem *) contentsLayout_->itemAt(i)->widget();
-
-            if (listitem != nullptr) {
-                if (!filterRooms) {
-                    contentsLayout_->itemAt(i)->widget()->show();
-                } else if (roomFilter_.contains(listitem->roomId())) {
-                    contentsLayout_->itemAt(i)->widget()->show();
-                } else {
-                    contentsLayout_->itemAt(i)->widget()->hide();
+                if (listitem != nullptr) {
+                        if (!filterRooms) {
+                                contentsLayout_->itemAt(i)->widget()->show();
+                        } else if (roomFilter_.contains(listitem->roomId())) {
+                                contentsLayout_->itemAt(i)->widget()->show();
+                        } else {
+                                contentsLayout_->itemAt(i)->widget()->hide();
+                        }
                 }
-            }
         }
 
         if (filterRooms_ && !roomFilter_.contains(selectedRoom_)) {
