@@ -148,8 +148,7 @@ CommunitiesListItem::contextMenuEvent(QContextMenuEvent *event)
 
 WorldCommunityListItem::WorldCommunityListItem(QWidget *parent)
   : CommunitiesListItem(QSharedPointer<Community>(), "", parent)
-{
-}
+{}
 
 WorldCommunityListItem::~WorldCommunityListItem() {}
 
