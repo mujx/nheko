@@ -26,6 +26,8 @@
 #include "MemberEventContent.h"
 #include "MessageEvent.h"
 #include "StateEvent.h"
+#include "CommunitiesList.h"
+#include "Community.h"
 
 class Cache;
 class MatrixClient;

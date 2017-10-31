@@ -487,7 +487,7 @@ MatrixClient::getOwnCommunities() noexcept
                 }
 
                 auto data = reply->readAll();
-                auto json = QJsonDocument::fromJson(data);
+                auto json = QJsonDocument::fromJson(data).object();
                 try {
                         QList<QString> response;
                         for (auto it = json["groups"].toArray().constBegin();
@@ -549,7 +549,7 @@ MatrixClient::fetchRoomAvatar(const QString &roomid, const QUrl &avatar_url)
 }
 
 void
-MatrixClient::fetchCommunityAvatar(const QString &communityid, const QUrl &avatar_url)
+MatrixClient::fetchCommunityAvatar(const QString &communityId, const QUrl &avatar_url)
 {
         QList<QString> url_parts = avatar_url.toString().split("mxc://");
 

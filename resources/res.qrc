@@ -66,13 +66,6 @@
         <file>fonts/OpenSans/OpenSans-Italic.ttf</file>
         <file>fonts/OpenSans/OpenSans-Bold.ttf</file>
         <file>fonts/OpenSans/OpenSans-Semibold.ttf</file>
-<<<<<<< HEAD
-
-=======
-        <file>fonts/OpenSans/OpenSans-SemiboldItalic.ttf</file>
-        <file>fonts/OpenSans/OpenSans-ExtraBold.ttf</file>
-        <file>fonts/OpenSans/OpenSans-ExtraBoldItalic.ttf</file>
->>>>>>> 4e60338... Initial implementation of Communities (groups) feature
         <file>fonts/EmojiOne/emojione-android.ttf</file>
     </qresource>
     <qresource prefix="/"/>

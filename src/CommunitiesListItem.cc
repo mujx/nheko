@@ -171,7 +171,7 @@ WorldCommunityListItem::paintEvent(QPaintEvent *event)
 {
         Q_UNUSED(event);
 
-        static QPixmap worldIcon(":/icons/icons/world.png");
+        static QPixmap worldIcon(":/icons/icons/ui/world.png");
 
         QPainter p(this);
         p.setRenderHint(QPainter::SmoothPixmapTransform);
