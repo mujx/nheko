@@ -2,6 +2,8 @@
 
 #include <QEvent>
 #include <QWidget>
+#include <QStyleOption>
+#include <QPainter>
 
 class OverlayWidget : public QWidget
 {
@@ -15,4 +17,5 @@ protected:
         bool eventFilter(QObject *obj, QEvent *event) override;
 
         QRect overlayGeometry() const;
+        void paintEvent(QPaintEvent *event) override;
 };

@@ -112,7 +112,7 @@ public slots:
         void addBackwardsEvents(const QString &room_id, const RoomMessages &msgs);
 
         // Whether or not the initial batch has been loaded.
-        bool hasLoaded() { return scroll_layout_->count() > 1 || isTimelineFinished; };
+        bool hasLoaded() { return scroll_layout_->count() > 1 || isTimelineFinished; }
 
         void handleFailedMessage(int txnid);
 
@@ -138,7 +138,7 @@ private:
         bool isPendingMessage(const QString &txnid, const QString &sender, const QString &userid);
         void removePendingMessage(const QString &txnid);
 
-        bool isDuplicate(const QString &event_id) { return eventIds_.contains(event_id); };
+        bool isDuplicate(const QString &event_id) { return eventIds_.contains(event_id); }
 
         void handleNewUserMessage(PendingMessage msg);
 

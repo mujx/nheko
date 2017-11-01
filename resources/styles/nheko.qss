@@ -1,0 +1,35 @@
+* {
+        background-color: white;
+}
+
+FlatButton {
+        /* qproperty-foregroundColor: black; */
+}
+
+RoomInfoListItem {
+        qproperty-highlightedBackgroundColor: #38A3D8;
+        qproperty-hoverBackgroundColor: rgba(200,200,200,128);
+        qproperty-backgroundColor: white;
+}
+
+LoadingIndicator {
+        /* qproperty-color: ; */
+}
+
+UserInfoWidget, UserInfoWidget > * {
+        background-color: #d6dde3;
+        color: #ebebeb;
+}
+
+#userAvatar {
+        background-color: white;
+        color: #333333;
+}
+
+#displayNameLabel {
+        color: #171919;
+}
+
+#userIdLabel {
+        color: #555459;
+}

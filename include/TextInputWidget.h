@@ -76,7 +76,7 @@ public:
 public slots:
         void openFileSelection();
         void hideUploadSpinner();
-        void focusLineEdit() { input_->setFocus(); };
+        void focusLineEdit() { input_->setFocus(); }
 
 private slots:
         void addSelectedEmoji(const QString &emoji);
@@ -89,10 +89,11 @@ signals:
 
         void startedTyping();
         void stoppedTyping();
-
-protected:
         void focusInEvent(QFocusEvent *event);
 
+protected:
+
+        void paintEvent(QPaintEvent *) override;
 private:
         void showUploadSpinner();
         void command(QString name, QString args);

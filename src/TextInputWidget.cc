@@ -332,3 +332,12 @@ TextInputWidget::focusInEvent(QFocusEvent *event)
 {
         input_->setFocus(event->reason());
 }
+
+void
+TextInputWidget::paintEvent(QPaintEvent *)
+{
+        QStyleOption opt;
+        opt.init(this);
+        QPainter p(this);
+        style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}

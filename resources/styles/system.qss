@@ -1,4 +1,12 @@
-TimelineView, TimelineView > * {
+OverlayWidget, OverlayWidget > * {
+        background-color: palette(window);
+}
+
+#mainContent, #mainContent > * {
+        background-color: palette(base);
+}
+
+TimelineView, TimelineView > *, TimelineItem, TimelineItem > * {
         background-color: palette(base);
 }
 
@@ -10,4 +18,12 @@ RoomInfoListItem {
         qproperty-highlightedBackgroundColor: palette(highlight);
         qproperty-hoverBackgroundColor: palette(dark);
         qproperty-backgroundColor: palette(window);
+}
+
+LoadingIndicator {
+        qproperty-color: palette(text);
+}
+
+UserInfoWidget, UserInfoWidget > * {
+        background-color: palette(window);
 }

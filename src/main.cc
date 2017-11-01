@@ -71,14 +71,27 @@ main(int argc, char *argv[])
         app.setWindowIcon(QIcon(":/logos/nheko.png"));
         qSetMessagePattern("%{time process}: [%{type}] - %{message}");
 
-        QFile stylefile(":/styles/styles/system.qss");
+
+        QSettings settings;
+
+        QFile stylefile;
+
+        if (!settings.contains("style/style")) {
+            settings.setValue("style/style", "nheko");
+        }
+
+        if (settings.value("style/style").toString() == "nheko") {
+            stylefile.setFileName(":/styles/styles/nheko.qss");
+        } else if (settings.value("style/style").toString() == "system") {
+            stylefile.setFileName(":/styles/styles/system.qss");
+        } else {
+            //qWarning() << "Unrecognized style config";
+            stylefile.setFileName(":/styles/styles/nheko.qss");
+        }
         stylefile.open(QFile::ReadOnly);
         QString stylesheet = QString(stylefile.readAll());
 
         app.setStyleSheet(stylesheet);
-
-        QSettings settings;
-
         // Set the default if a value has not been set.
         if (settings.value("font/size").toInt() == 0)
                 settings.setValue("font/size", 12);

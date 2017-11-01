@@ -70,5 +70,6 @@
     </qresource>
     <qresource prefix="/styles">
         <file>styles/system.qss</file>
+        <file>styles/nheko.qss</file>
     </qresource>
 </RCC>

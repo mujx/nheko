@@ -78,6 +78,7 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
 
         // Content
         content_       = new QFrame(this);
+        content_->setObjectName("mainContent");
         contentLayout_ = new QVBoxLayout(content_);
         contentLayout_->setSpacing(0);
         contentLayout_->setMargin(0);
