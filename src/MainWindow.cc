@@ -111,6 +111,11 @@ MainWindow::MainWindow(QWidget *parent)
         QShortcut *quitShortcut = new QShortcut(QKeySequence::Quit, this);
         connect(quitShortcut, &QShortcut::activated, this, QApplication::quit);
 
+        QShortcut *quickSwitchShortcut = new QShortcut(QKeySequence("Ctrl+K"), this);
+        connect(quickSwitchShortcut, &QShortcut::activated, this, [=]() {
+                chat_page_->showQuickSwitcher();
+        });
+
         QSettings settings;
 
         if (hasActiveUser()) {
@@ -125,10 +130,7 @@ MainWindow::MainWindow(QWidget *parent)
 void
 MainWindow::keyPressEvent(QKeyEvent *e)
 {
-        if ((e->key() == Qt::Key_K) && (e->modifiers().testFlag(Qt::ControlModifier)))
-                chat_page_->showQuickSwitcher();
-        else
-                QMainWindow::keyPressEvent(e);
+        QMainWindow::keyPressEvent(e);
 }
 
 void
