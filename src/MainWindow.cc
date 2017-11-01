@@ -113,6 +113,10 @@ MainWindow::MainWindow(QWidget *parent)
 
         QSettings settings;
 
+        if (!settings.value("user/window/tray", true).toBool()) {
+                trayIcon_->hide();
+        }
+
         if (hasActiveUser()) {
                 QString token       = settings.value("auth/access_token").toString();
                 QString home_server = settings.value("auth/home_server").toString();
@@ -253,7 +257,8 @@ MainWindow::showUserSettingsPage()
 void
 MainWindow::closeEvent(QCloseEvent *event)
 {
-        if (isVisible()) {
+        QSettings settings;
+        if (isVisible() && settings.value("user/window/tray", true).toBool()) {
                 event->ignore();
                 hide();
         }
