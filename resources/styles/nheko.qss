@@ -1,5 +1,10 @@
 * {
         background-color: white;
+        color: black;
+}
+
+QLabel {
+        color: black;
 }
 
 FlatButton {
