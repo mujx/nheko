@@ -76,17 +76,14 @@ main(int argc, char *argv[])
 
         QFile stylefile;
 
-        if (!settings.contains("style/style")) {
-            settings.setValue("style/style", "nheko");
+        if (!settings.contains("user/theme")) {
+            settings.setValue("user/theme", "default");
         }
 
-        if (settings.value("style/style").toString() == "nheko") {
+        if (settings.value("user/theme").toString() == "default") {
             stylefile.setFileName(":/styles/styles/nheko.qss");
-        } else if (settings.value("style/style").toString() == "system") {
-            stylefile.setFileName(":/styles/styles/system.qss");
         } else {
-            //qWarning() << "Unrecognized style config";
-            stylefile.setFileName(":/styles/styles/nheko.qss");
+            stylefile.setFileName(":/styles/styles/system.qss");
         }
         stylefile.open(QFile::ReadOnly);
         QString stylesheet = QString(stylefile.readAll());
