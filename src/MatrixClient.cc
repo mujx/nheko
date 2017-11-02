@@ -490,8 +490,9 @@ MatrixClient::getOwnCommunities() noexcept
                 auto json = QJsonDocument::fromJson(data).object();
                 try {
                         QList<QString> response;
-                        for (auto it = json["groups"].toArray().constBegin();
-                             it != json["groups"].toArray().constEnd();
+                        auto array = json["groups"].toArray();
+                        for (auto it = array.constBegin();
+                             it != array.constEnd();
                              it++) {
                                 response.append(it->toString());
                         }
