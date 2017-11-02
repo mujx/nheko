@@ -128,12 +128,6 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void
-MainWindow::keyPressEvent(QKeyEvent *e)
-{
-        QMainWindow::keyPressEvent(e);
-}
-
-void
 MainWindow::restoreWindowSize()
 {
         QSettings settings;
