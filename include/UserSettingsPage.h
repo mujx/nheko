@@ -66,7 +66,7 @@ protected:
 
 signals:
         void moveBack();
-        void trayOptionChanged(const bool value);
+        void trayOptionChanged(bool value);
 
 private:
         // Layouts
