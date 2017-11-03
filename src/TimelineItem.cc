@@ -369,6 +369,7 @@ TimelineItem::generateTimestamp(const QDateTime &time)
         timestamp_->setFont(timestampFont);
         timestamp_->setText(msg.arg(time.toString("HH:mm")));
         timestamp_->setContentsMargins(0, topMargin, 0, 0);
+        timestamp_->setStyleSheet(QString("font-size: %1px;").arg(conf::timeline::fonts::timestamp));
 }
 
 QString

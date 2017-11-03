@@ -95,6 +95,7 @@ main(int argc, char *argv[])
 
         QFont font("Open Sans", settings.value("font/size").toInt());
         app.setFont(font);
+        app.setStyleSheet(QString("* { font-size: %1px; }").arg(settings.value("font/size").toInt()));
 
         QString lang = QLocale::system().name();
 
