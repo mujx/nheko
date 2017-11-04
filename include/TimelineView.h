@@ -19,6 +19,7 @@
 
 #include <QLayout>
 #include <QList>
+#include <QQueue>
 #include <QScrollArea>
 
 #include "Emote.h"
@@ -42,14 +43,18 @@ namespace events = matrix::events;
 // but not yet confirmed by the homeserver through sync.
 struct PendingMessage
 {
+        matrix::events::MessageEventType ty;
         int txn_id;
         QString body;
+        QString filename;
         QString event_id;
         TimelineItem *widget;
 
-        PendingMessage(int txn_id, QString body, QString event_id, TimelineItem *widget)
-          : txn_id(txn_id)
+        PendingMessage(matrix::events::MessageEventType ty, int txn_id, QString body, QString filename, QString event_id, TimelineItem *widget)
+          : ty(ty)
+          , txn_id(txn_id)
           , body(body)
+          , filename(filename)
           , event_id(event_id)
           , widget(widget)
         {}
@@ -102,6 +107,11 @@ public slots:
         // Whether or not the initial batch has been loaded.
         bool hasLoaded() { return scroll_layout_->count() > 1 || isTimelineFinished; };
 
+        void handleFailedMessage(int txnid);
+
+private slots:
+        void sendNextPendingMessage();
+
 signals:
         void updateLastTimelineMessage(const QString &user, const DescInfo &info);
 
@@ -116,12 +126,13 @@ private:
         bool isSenderRendered(const QString &user_id, TimelineDirection direction);
 
         bool isPendingMessage(const QString &eventid,
-                              const QString &body,
                               const QString &sender,
                               const QString &userid);
-        void removePendingMessage(const QString &eventid, const QString &body);
+        void removePendingMessage(const QString &eventid);
 
         bool isDuplicate(const QString &event_id) { return eventIds_.contains(event_id); };
+
+        void handleNewUserMessage(PendingMessage msg);
 
         // Return nullptr if the event couldn't be parsed.
         TimelineItem *parseMessageEvent(const QJsonObject &event, TimelineDirection direction);
@@ -162,6 +173,7 @@ private:
 
         // The events currently rendered. Used for duplicate detection.
         QMap<QString, bool> eventIds_;
-        QList<PendingMessage> pending_msgs_;
+        QQueue<PendingMessage> pending_msgs_;
+        QList<PendingMessage> pending_sent_msgs_;
         QSharedPointer<MatrixClient> client_;
 };
