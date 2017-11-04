@@ -265,7 +265,7 @@ EmojiPanel::paintEvent(QPaintEvent *event)
                          height());
 
         style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
-        //QWidget::paintEvent(event);
+        // QWidget::paintEvent(event);
 }
 
 void

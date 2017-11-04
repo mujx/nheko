@@ -1,9 +1,9 @@
 #pragma once
 
 #include <QEvent>
-#include <QWidget>
-#include <QStyleOption>
 #include <QPainter>
+#include <QStyleOption>
+#include <QWidget>
 
 class OverlayWidget : public QWidget
 {

@@ -94,6 +94,7 @@ signals:
 protected:
 
         void paintEvent(QPaintEvent *) override;
+
 private:
         void showUploadSpinner();
         void command(QString name, QString args);

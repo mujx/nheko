@@ -71,19 +71,18 @@ main(int argc, char *argv[])
         app.setWindowIcon(QIcon(":/logos/nheko.png"));
         qSetMessagePattern("%{time process}: [%{type}] - %{message}");
 
-
         QSettings settings;
 
         QFile stylefile;
 
         if (!settings.contains("user/theme")) {
-            settings.setValue("user/theme", "default");
+                settings.setValue("user/theme", "default");
         }
 
         if (settings.value("user/theme").toString() == "default") {
-            stylefile.setFileName(":/styles/styles/nheko.qss");
+                stylefile.setFileName(":/styles/styles/nheko.qss");
         } else {
-            stylefile.setFileName(":/styles/styles/system.qss");
+                stylefile.setFileName(":/styles/styles/system.qss");
         }
         stylefile.open(QFile::ReadOnly);
         QString stylesheet = QString(stylefile.readAll());
@@ -95,7 +94,8 @@ main(int argc, char *argv[])
 
         QFont font("Open Sans", settings.value("font/size").toInt());
         app.setFont(font);
-        app.setStyleSheet(QString("* { font-size: %1px; }").arg(settings.value("font/size").toInt()));
+        app.setStyleSheet(
+          QString("* { font-size: %1px; }").arg(settings.value("font/size").toInt()));
 
         QString lang = QLocale::system().name();
 
