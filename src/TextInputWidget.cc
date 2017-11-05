@@ -30,9 +30,7 @@ static constexpr size_t INPUT_HISTORY_SIZE = 127;
 
 FilteredTextEdit::FilteredTextEdit(QWidget *parent)
   : QTextEdit{ parent }
-  , true_history_(INPUT_HISTORY_SIZE)
-  , working_history_(1)
-  , history_index_(0)
+  , history_index_{ 0 }
 {
         connect(document()->documentLayout(),
                 &QAbstractTextDocumentLayout::documentSizeChanged,
