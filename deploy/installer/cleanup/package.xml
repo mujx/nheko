@@ -8,4 +8,5 @@
     <ForcedInstallation>false</ForcedInstallation>
     <SortingPriority>80</SortingPriority>
     <Script>installscript.qs</Script>
+    <Checkable>false</Checkable>
 </Package>
