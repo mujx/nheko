@@ -16,12 +16,7 @@
  */
 
 #include <QDebug>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
 
-#include "Deserializable.h"
 #include "Sync.h"
 
 void
@@ -88,7 +83,7 @@ Rooms::deserialize(const QJsonValue &data)
 
                 auto join = object.value("join").toObject();
 
-                for (auto it = join.constBegin(); it != join.constEnd(); it++) {
+                for (auto it = join.constBegin(); it != join.constEnd(); ++it) {
                         JoinedRoom tmp_room;
                         try {
                                 tmp_room.deserialize(it.value());
@@ -113,7 +108,7 @@ Rooms::deserialize(const QJsonValue &data)
                 }
                 auto leave = object.value("leave").toObject();
 
-                for (auto it = leave.constBegin(); it != leave.constEnd(); it++) {
+                for (auto it = leave.constBegin(); it != leave.constEnd(); ++it) {
                         LeftRoom tmp_room;
 
                         try {
@@ -168,7 +163,21 @@ JoinedRoom::deserialize(const QJsonValue &data)
                         if (!ephemeral.value("events").isArray())
                                 qWarning() << "join/ephemeral/events should be an array";
 
-                        // TODO: Implement ephemeral handling
+                        auto ephemeralEvents = ephemeral.value("events").toArray();
+
+                        for (const auto e : ephemeralEvents) {
+                                auto obj = e.toObject();
+
+                                if (obj.contains("type") && obj.value("type") == "m.typing") {
+                                        auto ids = obj.value("content")
+                                                     .toObject()
+                                                     .value("user_ids")
+                                                     .toArray();
+
+                                        for (const auto uid : ids)
+                                                typingUserIDs_.push_back(uid.toString());
+                                }
+                        }
                 }
         }
 

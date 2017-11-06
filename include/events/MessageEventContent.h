@@ -21,11 +21,10 @@
 
 #include "Deserializable.h"
 
-namespace matrix
+namespace matrix {
+namespace events {
+enum class MessageEventType
 {
-namespace events
-{
-enum class MessageEventType {
         // m.audio
         Audio,
 
@@ -65,16 +64,11 @@ public:
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;
 
-        inline QString body() const;
+        QString body() const { return body_; };
 
 private:
         QString body_;
 };
 
-inline QString
-MessageEventContent::body() const
-{
-        return body_;
-}
 } // namespace events
 } // namespace matrix

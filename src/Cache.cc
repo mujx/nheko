@@ -18,12 +18,12 @@
 #include <stdexcept>
 
 #include <QDebug>
-#include <QDir>
 #include <QFile>
 #include <QStandardPaths>
 
 #include "Cache.h"
 #include "MemberEventContent.h"
+#include "RoomState.h"
 
 namespace events = matrix::events;
 
@@ -31,15 +31,25 @@ static const lmdb::val NEXT_BATCH_KEY("next_batch");
 static const lmdb::val transactionID("transaction_id");
 
 Cache::Cache(const QString &userId)
-  : env_{ nullptr }
-  , stateDb_{ 0 }
-  , roomDb_{ 0 }
-  , isMounted_{ false }
-  , userId_{ userId }
+  : env_{nullptr}
+  , stateDb_{0}
+  , roomDb_{0}
+  , isMounted_{false}
+  , userId_{userId}
+{}
+
+void
+Cache::setup()
 {
+        qDebug() << "Setting up cache";
+
         auto statePath = QString("%1/%2/state")
                            .arg(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
                            .arg(QString::fromUtf8(userId_.toUtf8().toHex()));
+
+        cacheDirectory_ = QString("%1/%2")
+                            .arg(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
+                            .arg(QString::fromUtf8(userId_.toUtf8().toHex()));
 
         bool isInitial = !QFile::exists(statePath);
 
@@ -48,7 +58,7 @@ Cache::Cache(const QString &userId)
         env_.set_max_dbs(1024UL);
 
         if (isInitial) {
-                qDebug() << "[cache] First time initializing LMDB";
+                qDebug() << "First time initializing LMDB";
 
                 if (!QDir().mkpath(statePath)) {
                         throw std::runtime_error(
@@ -83,10 +93,7 @@ Cache::Cache(const QString &userId)
 
         txn.commit();
 
-        isMounted_      = true;
-        cacheDirectory_ = QString("%1/%2")
-                            .arg(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
-                            .arg(QString::fromUtf8(userId_.toUtf8().toHex()));
+        isMounted_ = true;
 }
 
 void
@@ -95,14 +102,21 @@ Cache::setState(const QString &nextBatchToken, const QMap<QString, RoomState> &s
         if (!isMounted_)
                 return;
 
-        auto txn = lmdb::txn::begin(env_);
+        try {
+                auto txn = lmdb::txn::begin(env_);
 
-        setNextBatchToken(txn, nextBatchToken);
+                setNextBatchToken(txn, nextBatchToken);
 
-        for (auto it = states.constBegin(); it != states.constEnd(); it++)
-                insertRoomState(txn, it.key(), it.value());
+                for (auto it = states.constBegin(); it != states.constEnd(); ++it)
+                        insertRoomState(txn, it.key(), it.value());
 
-        txn.commit();
+                txn.commit();
+        } catch (const lmdb::error &e) {
+                qCritical() << "The cache couldn't be updated: " << e.what();
+
+                unmount();
+                deleteData();
+        }
 }
 
 void
@@ -156,6 +170,9 @@ Cache::insertRoomState(lmdb::txn &txn, const QString &roomid, const RoomState &s
 void
 Cache::removeRoom(const QString &roomid)
 {
+        if (!isMounted_)
+                return;
+
         auto txn = lmdb::txn::begin(env_, nullptr, 0);
 
         lmdb::dbi_del(txn, roomDb_, lmdb::val(roomid.toUtf8(), roomid.toUtf8().size()), nullptr);
@@ -254,4 +271,13 @@ Cache::nextBatchToken() const
         txn.commit();
 
         return QString::fromUtf8(token.data(), token.size());
+}
+
+void
+Cache::deleteData()
+{
+        qInfo() << "Deleting cache data";
+
+        if (!cacheDirectory_.isEmpty())
+                QDir(cacheDirectory_).removeRecursively();
 }

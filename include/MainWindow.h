@@ -19,15 +19,20 @@
 
 #include <QMainWindow>
 #include <QSharedPointer>
+#include <QStackedWidget>
+#include <QSystemTrayIcon>
 
-#include "ChatPage.h"
-#include "LoadingIndicator.h"
-#include "LoginPage.h"
-#include "MatrixClient.h"
-#include "OverlayModal.h"
-#include "RegisterPage.h"
-#include "TrayIcon.h"
-#include "WelcomePage.h"
+class ChatPage;
+class LoadingIndicator;
+class LoginPage;
+class MatrixClient;
+class OverlayModal;
+class RegisterPage;
+class SnackBar;
+class TrayIcon;
+class UserSettingsPage;
+class UserSettings;
+class WelcomePage;
 
 class MainWindow : public QMainWindow
 {
@@ -55,6 +60,7 @@ private slots:
 
         // Show the register page in the main window.
         void showRegisterPage();
+        void showUserSettingsPage();
 
         // Show the chat page and start communicating with the given access token.
         void showChatPage(QString user_id, QString home_server, QString token);
@@ -81,14 +87,19 @@ private:
 
         // The main chat area.
         ChatPage *chat_page_;
+        UserSettingsPage *userSettingsPage_;
+        QSharedPointer<UserSettings> userSettings_;
 
         // Used to hide undefined states between page transitions.
-        OverlayModal *progress_modal_;
-        LoadingIndicator *spinner_;
+        QSharedPointer<OverlayModal> progressModal_;
+        QSharedPointer<LoadingIndicator> spinner_;
 
         // Matrix Client API provider.
         QSharedPointer<MatrixClient> client_;
 
         // Tray icon that shows the unread message count.
         TrayIcon *trayIcon_;
+
+        // Notifications display.
+        QSharedPointer<SnackBar> snackBar_;
 };

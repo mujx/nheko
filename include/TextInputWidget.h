@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <deque>
+
 #include <QHBoxLayout>
 #include <QPaintEvent>
 #include <QTextEdit>
@@ -29,17 +31,36 @@
 
 namespace msgs = matrix::events::messages;
 
-static const QString EMOTE_COMMAND("/me ");
-
 class FilteredTextEdit : public QTextEdit
 {
         Q_OBJECT
+
 public:
         explicit FilteredTextEdit(QWidget *parent = nullptr);
-        void keyPressEvent(QKeyEvent *event);
+
+        void stopTyping();
+
+        QSize sizeHint() const override;
+        QSize minimumSizeHint() const override;
+
+        void submit();
 
 signals:
-        void enterPressed();
+        void startedTyping();
+        void stoppedTyping();
+        void message(QString);
+        void command(QString name, QString args);
+
+protected:
+        void keyPressEvent(QKeyEvent *event) override;
+
+private:
+        std::deque<QString> true_history_, working_history_;
+        size_t history_index_;
+        QTimer *typingTimer_;
+
+        void textChanged();
+        void afterCompletion(int);
 };
 
 class TextInputWidget : public QFrame
@@ -50,11 +71,12 @@ public:
         TextInputWidget(QWidget *parent = 0);
         ~TextInputWidget();
 
+        void stopTyping();
+
 public slots:
-        void onSendButtonClicked();
         void openFileSelection();
         void hideUploadSpinner();
-        inline void focusLineEdit();
+        void focusLineEdit() { input_->setFocus(); };
 
 private slots:
         void addSelectedEmoji(const QString &emoji);
@@ -63,10 +85,17 @@ signals:
         void sendTextMessage(QString msg);
         void sendEmoteMessage(QString msg);
         void uploadImage(QString filename);
+        void sendJoinRoomRequest(const QString &room);
+
+        void startedTyping();
+        void stoppedTyping();
+
+protected:
+        void focusInEvent(QFocusEvent *event);
 
 private:
         void showUploadSpinner();
-        QString parseEmoteCommand(const QString &cmd);
+        void command(QString name, QString args);
 
         QHBoxLayout *topLayout_;
         FilteredTextEdit *input_;
@@ -77,9 +106,3 @@ private:
         FlatButton *sendMessageBtn_;
         EmojiPickButton *emojiBtn_;
 };
-
-inline void
-TextInputWidget::focusLineEdit()
-{
-        input_->setFocus();
-}

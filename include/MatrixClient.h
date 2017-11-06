@@ -17,12 +17,14 @@
 
 #pragma once
 
-#include <QtNetwork/QNetworkAccessManager>
+#include <QNetworkAccessManager>
+#include <QUrl>
 
 #include "MessageEvent.h"
-#include "Profile.h"
-#include "RoomMessages.h"
-#include "Sync.h"
+
+class SyncResponse;
+class Profile;
+class RoomMessages;
 
 /*
  * MatrixClient provides the high level API to communicate with
@@ -50,14 +52,16 @@ public:
         void fetchUserAvatar(const QString &userId, const QUrl &avatarUrl);
         void fetchOwnAvatar(const QUrl &avatar_url);
         void downloadImage(const QString &event_id, const QUrl &url);
-        void messages(const QString &room_id, const QString &from_token, int limit = 20) noexcept;
+        void messages(const QString &room_id, const QString &from_token, int limit = 30) noexcept;
         void uploadImage(const QString &roomid, const QString &filename);
         void joinRoom(const QString &roomIdOrAlias);
         void leaveRoom(const QString &roomId);
+        void sendTypingNotification(const QString &roomid, int timeoutInMillis = 20000);
+        void removeTypingNotification(const QString &roomid);
 
-        inline QUrl getHomeServer();
-        inline int transactionId();
-        inline void incrementTransactionId();
+        QUrl getHomeServer() { return server_; };
+        int transactionId() { return txn_id_; };
+        void incrementTransactionId() { txn_id_ += 1; };
 
         void reset() noexcept;
 
@@ -65,9 +69,12 @@ public slots:
         void getOwnProfile() noexcept;
         void logout() noexcept;
 
-        inline void setServer(const QString &server);
-        inline void setAccessToken(const QString &token);
-        inline void setNextBatchToken(const QString &next_batch);
+        void setServer(const QString &server)
+        {
+                server_ = QUrl(QString("https://%1").arg(server));
+        };
+        void setAccessToken(const QString &token) { token_ = token; };
+        void setNextBatchToken(const QString &next_batch) { next_batch_ = next_batch; };
 
 signals:
         void loginError(const QString &error);
@@ -91,56 +98,17 @@ signals:
         // Returned profile data for the user's account.
         void getOwnProfileResponse(const QUrl &avatar_url, const QString &display_name);
         void initialSyncCompleted(const SyncResponse &response);
+        void initialSyncFailed(const QString &msg);
         void syncCompleted(const SyncResponse &response);
         void syncFailed(const QString &msg);
+        void joinFailed(const QString &msg);
         void messageSent(const QString &event_id, const QString &roomid, const int txn_id);
         void emoteSent(const QString &event_id, const QString &roomid, const int txn_id);
         void messagesRetrieved(const QString &room_id, const RoomMessages &msgs);
         void joinedRoom(const QString &room_id);
         void leftRoom(const QString &room_id);
 
-private slots:
-        void onResponse(QNetworkReply *reply);
-
 private:
-        enum class Endpoint {
-                GetOwnAvatar,
-                GetOwnProfile,
-                GetProfile,
-                Image,
-                InitialSync,
-                ImageUpload,
-                Login,
-                Logout,
-                Messages,
-                Register,
-                RoomAvatar,
-                SendRoomMessage,
-                Sync,
-                UserAvatar,
-                Versions,
-                JoinRoom,
-                LeaveRoom,
-        };
-
-        // Response handlers.
-        void onGetOwnAvatarResponse(QNetworkReply *reply);
-        void onGetOwnProfileResponse(QNetworkReply *reply);
-        void onImageResponse(QNetworkReply *reply);
-        void onInitialSyncResponse(QNetworkReply *reply);
-        void onImageUploadResponse(QNetworkReply *reply);
-        void onLoginResponse(QNetworkReply *reply);
-        void onLogoutResponse(QNetworkReply *reply);
-        void onMessagesResponse(QNetworkReply *reply);
-        void onRegisterResponse(QNetworkReply *reply);
-        void onRoomAvatarResponse(QNetworkReply *reply);
-        void onSendRoomMessage(QNetworkReply *reply);
-        void onSyncResponse(QNetworkReply *reply);
-        void onUserAvatarResponse(QNetworkReply *reply);
-        void onVersionsResponse(QNetworkReply *reply);
-        void onJoinRoomResponse(QNetworkReply *reply);
-        void onLeaveRoomResponse(QNetworkReply *reply);
-
         // Client API prefix.
         QString clientApiUrl_;
 
@@ -159,39 +127,3 @@ private:
         // Token to be used for the next sync.
         QString next_batch_;
 };
-
-inline QUrl
-MatrixClient::getHomeServer()
-{
-        return server_;
-}
-
-inline int
-MatrixClient::transactionId()
-{
-        return txn_id_;
-}
-
-inline void
-MatrixClient::setServer(const QString &server)
-{
-        server_ = QUrl(QString("https://%1").arg(server));
-}
-
-inline void
-MatrixClient::setAccessToken(const QString &token)
-{
-        token_ = token;
-}
-
-inline void
-MatrixClient::setNextBatchToken(const QString &next_batch)
-{
-        next_batch_ = next_batch;
-}
-
-inline void
-MatrixClient::incrementTransactionId()
-{
-        txn_id_ += 1;
-}

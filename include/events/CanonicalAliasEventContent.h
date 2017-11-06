@@ -22,10 +22,8 @@
 #include "CanonicalAliasEventContent.h"
 #include "Deserializable.h"
 
-namespace matrix
-{
-namespace events
-{
+namespace matrix {
+namespace events {
 /*
  * This event is used to inform the room about which alias should be considered
  * the canonical one. This could be for display purposes or as suggestion to
@@ -40,16 +38,11 @@ public:
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;
 
-        inline QString alias() const;
+        QString alias() const { return alias_; };
 
 private:
         QString alias_;
 };
 
-inline QString
-CanonicalAliasEventContent::alias() const
-{
-        return alias_;
-}
 } // namespace events
 } // namespace matrix

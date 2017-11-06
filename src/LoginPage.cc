@@ -15,16 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDebug>
-
-#include "Config.h"
-#include "InputValidator.h"
 #include "LoginPage.h"
+#include "Config.h"
+#include "FlatButton.h"
+#include "InputValidator.h"
+#include "LoadingIndicator.h"
+#include "MatrixClient.h"
+#include "OverlayModal.h"
+#include "RaisedButton.h"
+#include "TextField.h"
 
 LoginPage::LoginPage(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QWidget(parent)
   , inferredServerAddress_()
-  , client_{ client }
+  , client_{client}
 {
         setStyleSheet("background-color: #fff");
 
@@ -42,16 +46,16 @@ LoginPage::LoginPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         top_bar_layout_->addStretch(1);
 
         QIcon icon;
-        icon.addFile(":/icons/icons/left-angle.png", QSize(), QIcon::Normal, QIcon::Off);
+        icon.addFile(":/icons/icons/ui/angle-pointing-to-left.png");
 
         back_button_->setIcon(icon);
-        back_button_->setIconSize(QSize(24, 24));
+        back_button_->setIconSize(QSize(32, 32));
 
-        QIcon advanced_settings_icon;
-        advanced_settings_icon.addFile(":/icons/icons/cog.png", QSize(), QIcon::Normal, QIcon::Off);
+        QIcon logo;
+        logo.addFile(":/logos/login.png");
 
         logo_ = new QLabel(this);
-        logo_->setPixmap(QPixmap(":/logos/nheko-128.png"));
+        logo_->setPixmap(logo.pixmap(128));
 
         logo_layout_ = new QHBoxLayout();
         logo_layout_->setContentsMargins(0, 0, 0, 20);

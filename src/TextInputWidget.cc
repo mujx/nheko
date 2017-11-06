@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QAbstractTextDocumentLayout>
 #include <QDebug>
 #include <QFile>
 #include <QFileDialog>
@@ -25,19 +26,143 @@
 #include "Config.h"
 #include "TextInputWidget.h"
 
+static constexpr size_t INPUT_HISTORY_SIZE = 127;
+
 FilteredTextEdit::FilteredTextEdit(QWidget *parent)
-  : QTextEdit(parent)
+  : QTextEdit{parent}
+  , history_index_{0}
 {
+        connect(document()->documentLayout(),
+                &QAbstractTextDocumentLayout::documentSizeChanged,
+                this,
+                &FilteredTextEdit::updateGeometry);
+        QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        policy.setHeightForWidth(true);
+        setSizePolicy(policy);
+        working_history_.push_back("");
+        connect(this, &QTextEdit::textChanged, this, &FilteredTextEdit::textChanged);
         setAcceptRichText(false);
+
+        typingTimer_ = new QTimer(this);
+        typingTimer_->setInterval(1000);
+        typingTimer_->setSingleShot(true);
+
+        connect(typingTimer_, &QTimer::timeout, this, &FilteredTextEdit::stopTyping);
 }
 
 void
 FilteredTextEdit::keyPressEvent(QKeyEvent *event)
 {
-        if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
-                emit enterPressed();
-        else
+        const bool isModifier = (event->modifiers() != Qt::NoModifier);
+
+        if (!isModifier) {
+                if (!typingTimer_->isActive())
+                        emit startedTyping();
+
+                typingTimer_->start();
+        }
+
+        switch (event->key()) {
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+                if (!(event->modifiers() & Qt::ShiftModifier)) {
+                        stopTyping();
+                        submit();
+                } else {
+                        QTextEdit::keyPressEvent(event);
+                }
+                break;
+        case Qt::Key_Up: {
+                auto initial_cursor = textCursor();
                 QTextEdit::keyPressEvent(event);
+                if (textCursor() == initial_cursor &&
+                    history_index_ + 1 < working_history_.size()) {
+                        ++history_index_;
+                        setPlainText(working_history_[history_index_]);
+                        moveCursor(QTextCursor::End);
+                }
+                break;
+        }
+        case Qt::Key_Down: {
+                auto initial_cursor = textCursor();
+                QTextEdit::keyPressEvent(event);
+                if (textCursor() == initial_cursor && history_index_ > 0) {
+                        --history_index_;
+                        setPlainText(working_history_[history_index_]);
+                        moveCursor(QTextCursor::End);
+                }
+                break;
+        }
+        default:
+                QTextEdit::keyPressEvent(event);
+                break;
+        }
+}
+
+void
+FilteredTextEdit::stopTyping()
+{
+        typingTimer_->stop();
+        emit stoppedTyping();
+}
+
+QSize
+FilteredTextEdit::sizeHint() const
+{
+        ensurePolished();
+        auto margins = viewportMargins();
+        margins += document()->documentMargin();
+        QSize size = document()->size().toSize();
+        size.rwidth() += margins.left() + margins.right();
+        size.rheight() += margins.top() + margins.bottom();
+        return size;
+}
+
+QSize
+FilteredTextEdit::minimumSizeHint() const
+{
+        ensurePolished();
+        auto margins = viewportMargins();
+        margins += document()->documentMargin();
+        margins += contentsMargins();
+        QSize size(fontMetrics().averageCharWidth() * 10,
+                   fontMetrics().lineSpacing() + margins.top() + margins.bottom());
+        return size;
+}
+
+void
+FilteredTextEdit::submit()
+{
+        if (true_history_.size() == INPUT_HISTORY_SIZE)
+                true_history_.pop_back();
+        true_history_.push_front(toPlainText());
+        working_history_ = true_history_;
+        working_history_.push_front("");
+        history_index_ = 0;
+
+        QString text = toPlainText();
+        if (text.startsWith('/')) {
+                int command_end = text.indexOf(' ');
+                if (command_end == -1)
+                        command_end = text.size();
+                auto name = text.mid(1, command_end - 1);
+                auto args = text.mid(command_end + 1);
+                if (name.isEmpty() || name == "/") {
+                        message(args);
+                } else {
+                        command(name, args);
+                }
+        } else {
+                message(std::move(text));
+        }
+
+        clear();
+}
+
+void
+FilteredTextEdit::textChanged()
+{
+        working_history_[history_index_] = toPlainText();
 }
 
 TextInputWidget::TextInputWidget(QWidget *parent)
@@ -45,51 +170,48 @@ TextInputWidget::TextInputWidget(QWidget *parent)
 {
         setFont(QFont("Emoji One"));
 
+        setFixedHeight(conf::textInput::height);
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         setCursor(Qt::ArrowCursor);
-        setStyleSheet("background-color: #fff; height: 45px;");
+        setStyleSheet("background-color: #fff;");
 
         topLayout_ = new QHBoxLayout();
-        topLayout_->setSpacing(2);
-        topLayout_->setMargin(4);
+        topLayout_->setSpacing(0);
+        topLayout_->setContentsMargins(15, 0, 15, 5);
 
         QIcon send_file_icon;
-        send_file_icon.addFile(":/icons/icons/clip-dark.png", QSize(), QIcon::Normal, QIcon::Off);
+        send_file_icon.addFile(":/icons/icons/ui/paper-clip-outline.png");
 
         sendFileBtn_ = new FlatButton(this);
-        sendFileBtn_->setForegroundColor(QColor("#acc7dc"));
         sendFileBtn_->setIcon(send_file_icon);
         sendFileBtn_->setIconSize(QSize(24, 24));
 
         spinner_ = new LoadingIndicator(this);
-        spinner_->setColor("#acc7dc");
-        spinner_->setFixedHeight(40);
-        spinner_->setFixedWidth(40);
+        spinner_->setFixedHeight(32);
+        spinner_->setFixedWidth(32);
         spinner_->hide();
 
         QFont font;
-        font.setPixelSize(conf::fontSize);
+        font.setPixelSize(conf::textInputFontSize);
 
         input_ = new FilteredTextEdit(this);
-        input_->setFixedHeight(45);
+        input_->setFixedHeight(32);
         input_->setFont(font);
+        input_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         input_->setPlaceholderText(tr("Write a message..."));
-        input_->setStyleSheet("color: #333333; border-radius: 0; padding-top: 10px;");
+        input_->setStyleSheet("color: #333333; border: none; padding-top: 5px; margin: 0 5px");
 
         sendMessageBtn_ = new FlatButton(this);
-        sendMessageBtn_->setForegroundColor(QColor("#acc7dc"));
 
         QIcon send_message_icon;
-        send_message_icon.addFile(
-          ":/icons/icons/share-dark.png", QSize(), QIcon::Normal, QIcon::Off);
+        send_message_icon.addFile(":/icons/icons/ui/cursor.png");
         sendMessageBtn_->setIcon(send_message_icon);
         sendMessageBtn_->setIconSize(QSize(24, 24));
 
         emojiBtn_ = new EmojiPickButton(this);
-        emojiBtn_->setForegroundColor(QColor("#acc7dc"));
 
         QIcon emoji_icon;
-        emoji_icon.addFile(":/icons/icons/smile.png", QSize(), QIcon::Normal, QIcon::Off);
+        emoji_icon.addFile(":/icons/icons/ui/smile.png");
         emojiBtn_->setIcon(emoji_icon);
         emojiBtn_->setIconSize(QSize(24, 24));
 
@@ -100,13 +222,18 @@ TextInputWidget::TextInputWidget(QWidget *parent)
 
         setLayout(topLayout_);
 
-        connect(sendMessageBtn_, SIGNAL(clicked()), this, SLOT(onSendButtonClicked()));
+        connect(sendMessageBtn_, &FlatButton::clicked, input_, &FilteredTextEdit::submit);
         connect(sendFileBtn_, SIGNAL(clicked()), this, SLOT(openFileSelection()));
-        connect(input_, SIGNAL(enterPressed()), sendMessageBtn_, SIGNAL(clicked()));
+        connect(input_, &FilteredTextEdit::message, this, &TextInputWidget::sendTextMessage);
+        connect(input_, &FilteredTextEdit::command, this, &TextInputWidget::command);
         connect(emojiBtn_,
                 SIGNAL(emojiSelected(const QString &)),
                 this,
                 SLOT(addSelectedEmoji(const QString &)));
+
+        connect(input_, &FilteredTextEdit::startedTyping, this, &TextInputWidget::startedTyping);
+
+        connect(input_, &FilteredTextEdit::stoppedTyping, this, &TextInputWidget::stoppedTyping);
 }
 
 void
@@ -134,34 +261,13 @@ TextInputWidget::addSelectedEmoji(const QString &emoji)
 }
 
 void
-TextInputWidget::onSendButtonClicked()
+TextInputWidget::command(QString command, QString args)
 {
-        auto msgText = input_->document()->toPlainText().trimmed();
-
-        if (msgText.isEmpty())
-                return;
-
-        if (msgText.startsWith(EMOTE_COMMAND)) {
-                auto text = parseEmoteCommand(msgText);
-
-                if (!text.isEmpty())
-                        emit sendEmoteMessage(text);
-        } else {
-                emit sendTextMessage(msgText);
+        if (command == "me") {
+                sendEmoteMessage(args);
+        } else if (command == "join") {
+                sendJoinRoomRequest(args);
         }
-
-        input_->clear();
-}
-
-QString
-TextInputWidget::parseEmoteCommand(const QString &cmd)
-{
-        auto text = cmd.right(cmd.size() - EMOTE_COMMAND.size()).trimmed();
-
-        if (!text.isEmpty())
-                return text;
-
-        return QString("");
 }
 
 void
@@ -214,3 +320,15 @@ TextInputWidget::hideUploadSpinner()
 }
 
 TextInputWidget::~TextInputWidget() {}
+
+void
+TextInputWidget::stopTyping()
+{
+        input_->stopTyping();
+}
+
+void
+TextInputWidget::focusInEvent(QFocusEvent *event)
+{
+        input_->setFocus(event->reason());
+}

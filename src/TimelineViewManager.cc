@@ -21,9 +21,9 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QSettings>
-#include <QStackedWidget>
-#include <QWidget>
 
+#include "MatrixClient.h"
+#include "Sync.h"
 #include "TimelineView.h"
 #include "TimelineViewManager.h"
 
@@ -100,7 +100,7 @@ TimelineViewManager::clearAll()
 void
 TimelineViewManager::initialize(const Rooms &rooms)
 {
-        for (auto it = rooms.join().constBegin(); it != rooms.join().constEnd(); it++) {
+        for (auto it = rooms.join().constBegin(); it != rooms.join().constEnd(); ++it) {
                 addRoom(it.value(), it.key());
         }
 }
@@ -148,7 +148,7 @@ TimelineViewManager::addRoom(const QString &room_id)
 void
 TimelineViewManager::sync(const Rooms &rooms)
 {
-        for (auto it = rooms.join().constBegin(); it != rooms.join().constEnd(); it++) {
+        for (auto it = rooms.join().constBegin(); it != rooms.join().constEnd(); ++it) {
                 auto roomid = it.key();
 
                 if (!views_.contains(roomid)) {
@@ -194,7 +194,7 @@ QString
 TimelineViewManager::chooseRandomColor()
 {
         std::random_device random_device;
-        std::mt19937 engine{ random_device() };
+        std::mt19937 engine{random_device()};
         std::uniform_real_distribution<float> dist(0, 1);
 
         float hue        = dist(engine);
@@ -255,4 +255,14 @@ TimelineViewManager::displayName(const QString &userid)
                 return DISPLAY_NAMES.value(userid);
 
         return userid;
+}
+
+bool
+TimelineViewManager::hasLoaded() const
+{
+        for (const auto &view : views_)
+                if (!view->hasLoaded())
+                        return false;
+
+        return true;
 }

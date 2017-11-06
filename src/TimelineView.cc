@@ -15,21 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QApplication>
 #include <QDebug>
-#include <QJsonArray>
-#include <QScrollBar>
 #include <QSettings>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QSpacerItem>
+#include <QTimer>
 
-#include "Event.h"
-#include "MessageEvent.h"
-#include "MessageEventContent.h"
-
+#include "FloatingButton.h"
 #include "ImageItem.h"
+#include "RoomMessages.h"
+#include "ScrollBar.h"
+#include "Sync.h"
 #include "TimelineItem.h"
 #include "TimelineView.h"
-#include "TimelineViewManager.h"
 
 namespace events = matrix::events;
 namespace msgs   = matrix::events::messages;
@@ -52,8 +49,8 @@ TimelineView::TimelineView(const Timeline &timeline,
                            const QString &room_id,
                            QWidget *parent)
   : QWidget(parent)
-  , room_id_{ room_id }
-  , client_{ client }
+  , room_id_{room_id}
+  , client_{client}
 {
         init();
         addEvents(timeline);
@@ -63,8 +60,8 @@ TimelineView::TimelineView(QSharedPointer<MatrixClient> client,
                            const QString &room_id,
                            QWidget *parent)
   : QWidget(parent)
-  , room_id_{ room_id }
-  , client_{ client }
+  , room_id_{room_id}
+  , client_{client}
 {
         init();
         client_->messages(room_id_, "");
@@ -82,22 +79,21 @@ TimelineView::sliderRangeChanged(int min, int max)
 
         // If the scrollbar is close to the bottom and a new message
         // is added we move the scrollbar.
-        if (max - scroll_area_->verticalScrollBar()->value() < SCROLL_BAR_GAP)
+        if (max - scroll_area_->verticalScrollBar()->value() < SCROLL_BAR_GAP) {
                 scroll_area_->verticalScrollBar()->setValue(max);
-
-        if (isPaginationScrollPending_) {
-                isPaginationScrollPending_ = false;
-
-                int currentHeight = scroll_widget_->size().height();
-                int diff          = currentHeight - oldHeight_;
-                int newPosition   = oldPosition_ + diff;
-
-                // Keep the scroll bar to the bottom if it hasn't been activated yet.
-                if (oldPosition_ == 0 && !scroll_area_->verticalScrollBar()->isVisible())
-                        newPosition = max;
-
-                scroll_area_->verticalScrollBar()->setValue(newPosition);
+                return;
         }
+
+        int currentHeight = scroll_widget_->size().height();
+        int diff          = currentHeight - oldHeight_;
+        int newPosition   = oldPosition_ + diff;
+
+        // Keep the scroll bar to the bottom if it hasn't been activated yet.
+        if (oldPosition_ == 0 && !scroll_area_->verticalScrollBar()->isVisible())
+                newPosition = max;
+
+        if (lastMessageDirection_ == TimelineDirection::Top)
+                scroll_area_->verticalScrollBar()->setValue(newPosition);
 }
 
 void
@@ -140,6 +136,16 @@ TimelineView::sliderMoved(int position)
         if (!scroll_area_->verticalScrollBar()->isVisible())
                 return;
 
+        const int maxScroll     = scroll_area_->verticalScrollBar()->maximum();
+        const int currentScroll = scroll_area_->verticalScrollBar()->value();
+
+        if (maxScroll - currentScroll > SCROLL_BAR_GAP) {
+                scrollDownBtn_->show();
+                scrollDownBtn_->raise();
+        } else {
+                scrollDownBtn_->hide();
+        }
+
         // The scrollbar is high enough so we can start retrieving old events.
         if (position < SCROLL_BAR_GAP) {
                 if (isTimelineFinished)
@@ -173,6 +179,10 @@ TimelineView::addBackwardsEvents(const QString &room_id, const RoomMessages &msg
         isTimelineFinished = false;
         QList<TimelineItem *> items;
 
+        // Reset the sender of the first message in the timeline
+        // cause we're about to insert a new one.
+        firstSender_.clear();
+
         // Parse in reverse order to determine where we should not show sender's
         // name.
         auto ii = msgs.chunk().size();
@@ -195,9 +205,12 @@ TimelineView::addBackwardsEvents(const QString &room_id, const RoomMessages &msg
         for (const auto &item : items)
                 addTimelineItem(item, TimelineDirection::Top);
 
-        prev_batch_token_          = msgs.end();
-        isPaginationInProgress_    = false;
-        isPaginationScrollPending_ = true;
+        lastMessageDirection_ = TimelineDirection::Top;
+
+        QApplication::processEvents();
+
+        prev_batch_token_       = msgs.end();
+        isPaginationInProgress_ = false;
 
         // Exclude the top stretch.
         if (!msgs.chunk().isEmpty() && scroll_layout_->count() > 1)
@@ -349,6 +362,10 @@ TimelineView::addEvents(const Timeline &timeline)
                 }
         }
 
+        lastMessageDirection_ = TimelineDirection::Bottom;
+
+        QApplication::processEvents();
+
         if (isInitialSync) {
                 prev_batch_token_ = timeline.previousBatch();
                 isInitialSync     = false;
@@ -368,6 +385,18 @@ TimelineView::init()
 {
         QSettings settings;
         local_user_ = settings.value("auth/user_id").toString();
+
+        QIcon icon;
+        icon.addFile(":/icons/icons/ui/angle-arrow-down.png");
+        scrollDownBtn_ = new FloatingButton(icon, this);
+        scrollDownBtn_->setBackgroundColor(QColor("#F5F5F5"));
+        scrollDownBtn_->setForegroundColor(QColor("black"));
+        scrollDownBtn_->hide();
+
+        connect(scrollDownBtn_, &QPushButton::clicked, this, [=]() {
+                const int max = scroll_area_->verticalScrollBar()->maximum();
+                scroll_area_->verticalScrollBar()->setValue(max);
+        });
 
         top_layout_ = new QVBoxLayout(this);
         top_layout_->setSpacing(0);
@@ -488,6 +517,10 @@ TimelineView::addUserMessage(matrix::events::MessageEventType ty, const QString 
         TimelineItem *view_item = new TimelineItem(ty, user_id, body, with_sender, scroll_widget_);
         scroll_layout_->addWidget(view_item);
 
+        lastMessageDirection_ = TimelineDirection::Bottom;
+
+        QApplication::processEvents();
+
         lastSender_ = user_id;
 
         PendingMessage message(txn_id, body, "", view_item);
@@ -505,6 +538,10 @@ TimelineView::addUserMessage(const QString &url, const QString &filename, int tx
 
         TimelineItem *view_item = new TimelineItem(image, user_id, with_sender, scroll_widget_);
         scroll_layout_->addWidget(view_item);
+
+        lastMessageDirection_ = TimelineDirection::Bottom;
+
+        QApplication::processEvents();
 
         lastSender_ = user_id;
 
@@ -544,7 +581,7 @@ TimelineView::isPendingMessage(const QString &eventid,
 void
 TimelineView::removePendingMessage(const QString &eventid, const QString &body)
 {
-        for (auto it = pending_msgs_.begin(); it != pending_msgs_.end(); it++) {
+        for (auto it = pending_msgs_.begin(); it != pending_msgs_.end(); ++it) {
                 int index = std::distance(pending_msgs_.begin(), it);
 
                 if (it->event_id == eventid || it->body == body) {

@@ -56,6 +56,7 @@ endif()
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
 
 if (APPLE)
     find_package(Qt5MacExtras REQUIRED)
@@ -140,8 +141,8 @@ endif()
 #
 set(SRC_FILES
     src/AvatarProvider.cc
-    src/ChatPage.cc
     src/Cache.cc
+    src/ChatPage.cc
     src/Deserializable.cc
     src/EmojiCategory.cc
     src/EmojiItemDelegate.cc
@@ -150,9 +151,6 @@ set(SRC_FILES
     src/EmojiProvider.cc
     src/ImageItem.cc
     src/ImageOverlayDialog.cc
-    src/TimelineItem.cc
-    src/TimelineView.cc
-    src/TimelineViewManager.cc
     src/InputValidator.cc
     src/JoinRoomDialog.cc
     src/LeaveRoomDialog.cc
@@ -162,34 +160,44 @@ set(SRC_FILES
     src/MainWindow.cc
     src/MatrixClient.cc
     src/Profile.cc
-    src/RoomInfoListItem.cc
-    src/RoomMessages.cc
-    src/RoomList.cc
-    src/RoomState.cc
+    src/QuickSwitcher.cc
     src/Register.cc
     src/RegisterPage.cc
+    src/RoomInfoListItem.cc
+    src/RoomList.cc
+    src/RoomMessages.cc
+    src/RoomState.cc
+    src/SideBarActions.cc
+    src/UserSettingsPage.cc
     src/Splitter.cc
     src/Sync.cc
     src/TextInputWidget.cc
-    src/TrayIcon.cc
+    src/TimelineItem.cc
+    src/TimelineView.cc
+    src/TimelineViewManager.cc
     src/TopRoomBar.cc
+    src/TrayIcon.cc
+    src/TypingDisplay.cc
     src/UserInfoWidget.cc
     src/Versions.cc
     src/WelcomePage.cc
-    src/QuickSwitcher.cc
     src/main.cc
 
     src/ui/Avatar.cc
     src/ui/Badge.cc
     src/ui/LoadingIndicator.cc
     src/ui/FlatButton.cc
+    src/ui/FloatingButton.cc
+    src/ui/Label.cc
     src/ui/OverlayModal.cc
     src/ui/ScrollBar.cc
+    src/ui/SnackBar.cc
     src/ui/RaisedButton.cc
     src/ui/Ripple.cc
     src/ui/RippleOverlay.cc
     src/ui/OverlayWidget.cc
     src/ui/TextField.cc
+    src/ui/ToggleButton.cc
     src/ui/Theme.cc
     src/ui/ThemeManager.cc
 )
@@ -234,38 +242,45 @@ qt5_wrap_cpp(MOC_HEADERS
     include/EmojiItemDelegate.h
     include/EmojiPanel.h
     include/EmojiPickButton.h
+    include/ui/FloatingButton.h
     include/ImageItem.h
     include/ImageOverlayDialog.h
     include/JoinRoomDialog.h
-    include/TimelineItem.h
-    include/TimelineView.h
-    include/TimelineViewManager.h
     include/LeaveRoomDialog.h
     include/LoginPage.h
     include/LogoutDialog.h
     include/MainWindow.h
     include/MatrixClient.h
+    include/QuickSwitcher.h
     include/RegisterPage.h
     include/RoomInfoListItem.h
     include/RoomList.h
+    include/SideBarActions.h
+    include/UserSettingsPage.h
     include/Splitter.h
-    include/UserInfoWidget.h
+    include/TextInputWidget.h
+    include/TimelineItem.h
+    include/TimelineView.h
+    include/TimelineViewManager.h
     include/TopRoomBar.h
     include/TrayIcon.h
-    include/TextInputWidget.h
-    include/QuickSwitcher.h
+    include/TypingDisplay.h
+    include/UserInfoWidget.h
     include/WelcomePage.h
 
     include/ui/Avatar.h
     include/ui/Badge.h
     include/ui/LoadingIndicator.h
     include/ui/FlatButton.h
+    include/ui/Label.h
     include/ui/OverlayWidget.h
     include/ui/ScrollBar.h
+    include/ui/SnackBar.h
     include/ui/RaisedButton.h
     include/ui/Ripple.h
     include/ui/RippleOverlay.h
     include/ui/TextField.h
+    include/ui/ToggleButton.h
     include/ui/Theme.h
     include/ui/ThemeManager.h
 )
@@ -297,9 +312,6 @@ add_library(matrix_events ${MATRIX_EVENTS} src/Deserializable.cc)
 target_link_libraries(matrix_events Qt5::Core)
 
 if (BUILD_TESTS)
-    #
-    # Build tests.
-    #
     enable_testing()
 
     find_package(GTest REQUIRED)
@@ -317,16 +329,13 @@ if (BUILD_TESTS)
     add_test(MatrixEvents events_test)
     add_test(MatrixEventCollection event_collection_test)
     add_test(MatrixMessageEvents message_events)
-else()
-    #
-    # Build the executable.
-    #
-if(APPVEYOR_BUILD)
-    set (NHEKO_LIBS matrix_events Qt5::Widgets Qt5::Network lmdb)
-else()
-    set (NHEKO_LIBS matrix_events Qt5::Widgets Qt5::Network ${LMDB_LIBRARY})
 endif()
 
+if(APPVEYOR_BUILD)
+    set (NHEKO_LIBS matrix_events Qt5::Widgets Qt5::Network Qt5::Concurrent lmdb)
+else()
+    set (NHEKO_LIBS matrix_events Qt5::Widgets Qt5::Network Qt5::Concurrent ${LMDB_LIBRARY})
+endif()
     set (NHEKO_DEPS ${SRC_FILES} ${UI_HEADERS} ${MOC_HEADERS} ${QRC} ${LANG_QRC} ${QM_SRC} ${META_FILES_TO_INCLUDE})
 
     if(APPLE)

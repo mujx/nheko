@@ -17,6 +17,7 @@
 
 #include <QApplication>
 #include <QList>
+#include <QMenu>
 #include <QTimer>
 
 #include "TrayIcon.h"
@@ -122,9 +123,6 @@ TrayIcon::TrayIcon(const QString &filename, QWidget *parent)
         menu->addAction(quitAction_);
 
         setContextMenu(menu);
-
-        // We wait a little for the icon to load.
-        QTimer::singleShot(500, this, [=]() { show(); });
 }
 
 void

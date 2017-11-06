@@ -41,6 +41,9 @@ namespace events = matrix::events;
 class RoomState
 {
 public:
+        RoomState();
+        RoomState(const QJsonArray &events);
+
         // Calculate room data that are not immediatly accessible. Like room name and
         // avatar.
         //
@@ -49,9 +52,9 @@ public:
         void resolveAvatar();
         void parse(const QJsonObject &object);
 
-        inline QUrl getAvatar() const;
-        inline QString getName() const;
-        inline QString getTopic() const;
+        QUrl getAvatar() const { return avatar_; };
+        QString getName() const { return name_; };
+        QString getTopic() const { return topic.content().topic().simplified(); };
 
         void removeLeaveMemberships();
         void update(const RoomState &state);
@@ -71,7 +74,8 @@ public:
         events::StateEvent<events::TopicEventContent> topic;
 
         // Contains the m.room.member events for all the joined users.
-        QMap<QString, events::StateEvent<events::MemberEventContent>> memberships;
+        using UserID = QString;
+        QMap<UserID, events::StateEvent<events::MemberEventContent>> memberships;
 
 private:
         QUrl avatar_;
@@ -81,21 +85,3 @@ private:
         // avatar event this should be empty.
         QString userAvatar_;
 };
-
-inline QString
-RoomState::getTopic() const
-{
-        return topic.content().topic().simplified();
-}
-
-inline QString
-RoomState::getName() const
-{
-        return name_;
-}
-
-inline QUrl
-RoomState::getAvatar() const
-{
-        return avatar_;
-}

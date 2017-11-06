@@ -15,24 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDebug>
-
 #include "EmojiPickButton.h"
+#include "EmojiPanel.h"
 
 EmojiPickButton::EmojiPickButton(QWidget *parent)
   : FlatButton(parent)
-  , panel_{ nullptr }
-{
-}
+  , panel_{nullptr}
+{}
 
 void
 EmojiPickButton::enterEvent(QEvent *e)
 {
         Q_UNUSED(e);
 
-        if (panel_ == nullptr) {
-                panel_ = new EmojiPanel(this);
-                connect(panel_, &EmojiPanel::emojiSelected, this, &EmojiPickButton::emojiSelected);
+        if (panel_.isNull()) {
+                panel_ = QSharedPointer<EmojiPanel>(new EmojiPanel(this));
+                connect(
+                  panel_.data(), &EmojiPanel::emojiSelected, this, &EmojiPickButton::emojiSelected);
         }
 
         QPoint pos(rect().x(), rect().y());

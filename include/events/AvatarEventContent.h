@@ -22,10 +22,8 @@
 
 #include "Deserializable.h"
 
-namespace matrix
-{
-namespace events
-{
+namespace matrix {
+namespace events {
 /*
  * A picture that is associated with the room.
  */
@@ -38,16 +36,11 @@ public:
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;
 
-        inline QUrl url() const;
+        QUrl url() const { return url_; };
 
 private:
         QUrl url_;
 };
 
-inline QUrl
-AvatarEventContent::url() const
-{
-        return url_;
-}
 } // namespace events
 } // namespace matrix

@@ -20,15 +20,13 @@
 #include "MessageEventContent.h"
 #include "RoomEvent.h"
 
-namespace matrix
-{
-namespace events
-{
+namespace matrix {
+namespace events {
 template<class MsgContent>
 class MessageEvent : public RoomEvent<MessageEventContent>
 {
 public:
-        inline MsgContent msgContent() const;
+        MsgContent msgContent() const;
 
         void deserialize(const QJsonValue &data) override;
 
@@ -52,9 +50,9 @@ MessageEvent<MsgContent>::deserialize(const QJsonValue &data)
         msg_content_.deserialize(data.toObject().value("content").toObject());
 }
 
-namespace messages
+namespace messages {
+struct ThumbnailInfo
 {
-struct ThumbnailInfo {
         int h;
         int w;
         int size;

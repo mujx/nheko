@@ -20,8 +20,9 @@
 #include <QEvent>
 #include <QWidget>
 
-#include "EmojiPanel.h"
 #include "FlatButton.h"
+
+class EmojiPanel;
 
 class EmojiPickButton : public FlatButton
 {
@@ -43,5 +44,5 @@ private:
         // Horizontal distance from panel's bottom right corner.
         int horizontal_distance_ = 70;
 
-        EmojiPanel *panel_;
+        QSharedPointer<EmojiPanel> panel_;
 };

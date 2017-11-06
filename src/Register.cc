@@ -15,23 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-
 #include "Deserializable.h"
+
 #include "Register.h"
 
 RegisterRequest::RegisterRequest(const QString &username, const QString &password)
   : user_(username)
   , password_(password)
-{
-}
+{}
 
 QByteArray
 RegisterRequest::serialize() noexcept
 {
-        QJsonObject body{ { "username", user_ }, { "password", password_ } };
+        QJsonObject body{{"username", user_}, {"password", password_}};
 
         return QJsonDocument(body).toJson(QJsonDocument::Compact);
 }

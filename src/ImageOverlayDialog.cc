@@ -16,17 +16,14 @@
  */
 
 #include <QApplication>
-#include <QDebug>
 #include <QDesktopWidget>
 #include <QPainter>
-#include <QScreen>
-#include <QTimer>
 
 #include "ImageOverlayDialog.h"
 
 ImageOverlayDialog::ImageOverlayDialog(QPixmap image, QWidget *parent)
-  : QWidget{ parent }
-  , originalImage_{ image }
+  : QWidget{parent}
+  , originalImage_{image}
 {
         setMouseTracking(true);
         setParent(0);

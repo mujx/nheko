@@ -20,7 +20,7 @@
 #include <QJsonDocument>
 #include <QVector>
 
-#include "Deserializable.h"
+class Deserializable;
 
 class VersionsResponse : public Deserializable
 {
@@ -30,7 +30,8 @@ public:
         bool isVersionSupported(unsigned int major, unsigned int minor, unsigned int patch);
 
 private:
-        struct Version_ {
+        struct Version_
+        {
                 unsigned int major_;
                 unsigned int minor_;
                 unsigned int patch_;

@@ -17,21 +17,37 @@
 
 #pragma once
 
+#include <QHBoxLayout>
+#include <QMap>
 #include <QPixmap>
 #include <QTimer>
 #include <QWidget>
 
-#include "Cache.h"
-#include "MatrixClient.h"
-#include "QuickSwitcher.h"
-#include "RoomList.h"
-#include "RoomSettings.h"
-#include "RoomState.h"
-#include "Splitter.h"
-#include "TextInputWidget.h"
-#include "TimelineViewManager.h"
-#include "TopRoomBar.h"
-#include "UserInfoWidget.h"
+#include "MemberEventContent.h"
+#include "MessageEvent.h"
+#include "StateEvent.h"
+
+class Cache;
+class MatrixClient;
+class OverlayModal;
+class QuickSwitcher;
+class RoomList;
+class RoomSettings;
+class RoomState;
+class SideBarActions;
+class Splitter;
+class SyncResponse;
+class TextInputWidget;
+class TimelineViewManager;
+class TopRoomBar;
+class TypingDisplay;
+class UserInfoWidget;
+class JoinedRoom;
+class LeftRoom;
+
+constexpr int CONSENSUS_TIMEOUT      = 1000;
+constexpr int SHOW_CONTENT_TIMEOUT   = 3000;
+constexpr int TYPING_REFRESH_TIMEOUT = 10000;
 
 class ChatPage : public QWidget
 {
@@ -43,12 +59,16 @@ public:
 
         // Initialize all the components of the UI.
         void bootstrap(QString userid, QString homeserver, QString token);
+        void showQuickSwitcher();
 
 signals:
         void contentLoaded();
         void close();
         void changeWindowTitle(const QString &msg);
         void unreadMessages(int count);
+        void showNotification(const QString &msg);
+        void showLoginPage(const QString &msg);
+        void showUserSettingsPage();
 
 private slots:
         void showUnreadMessageNotification(int count);
@@ -59,18 +79,32 @@ private slots:
         void syncCompleted(const SyncResponse &response);
         void syncFailed(const QString &msg);
         void changeTopRoomInfo(const QString &room_id);
-        void startSync();
         void logout();
         void addRoom(const QString &room_id);
         void removeRoom(const QString &room_id);
 
-protected:
-        void keyPressEvent(QKeyEvent *event) override;
-
 private:
-        void updateDisplayNames(const RoomState &state);
+        using UserID      = QString;
+        using RoomStates  = QMap<UserID, RoomState>;
+        using JoinedRooms = QMap<UserID, JoinedRoom>;
+        using LeftRooms   = QMap<UserID, LeftRoom>;
+        using Membership  = matrix::events::StateEvent<matrix::events::MemberEventContent>;
+        using Memberships = QMap<UserID, Membership>;
+
+        void removeLeftRooms(const LeftRooms &rooms);
+        void updateJoinedRooms(const JoinedRooms &rooms);
+
+        Memberships getMemberships(const QJsonArray &events) const;
+        RoomStates generateMembershipDifference(const JoinedRooms &rooms,
+                                                const RoomStates &states) const;
+
+        void updateTypingUsers(const QString &roomid, const QList<QString> &user_ids);
+        void updateUserMetadata(const QJsonArray &events);
+        void updateUserDisplayName(const Membership &event);
+        void updateUserAvatarUrl(const Membership &event);
         void loadStateFromCache();
-        void showQuickSwitcher();
+        void deleteConfigs();
+        void resetUI();
 
         QHBoxLayout *topLayout_;
         Splitter *splitter;
@@ -89,12 +123,15 @@ private:
 
         RoomList *room_list_;
         TimelineViewManager *view_manager_;
+        SideBarActions *sidebarActions_;
 
         TopRoomBar *top_bar_;
         TextInputWidget *text_input_;
+        TypingDisplay *typingDisplay_;
 
-        QTimer *sync_timer_;
-        int sync_interval_;
+        // Safety net if consensus is not possible or too slow.
+        QTimer *showContentTimer_;
+        QTimer *consensusTimer_;
 
         QString current_room_;
         QMap<QString, QPixmap> room_avatars_;
@@ -104,12 +141,20 @@ private:
         QMap<QString, RoomState> state_manager_;
         QMap<QString, QSharedPointer<RoomSettings>> settingsManager_;
 
-        QuickSwitcher *quickSwitcher_     = nullptr;
-        OverlayModal *quickSwitcherModal_ = nullptr;
+        // Keeps track of the users currently typing on each room.
+        QMap<QString, QList<QString>> typingUsers_;
+        QTimer *typingRefresher_;
+
+        QSharedPointer<QuickSwitcher> quickSwitcher_;
+        QSharedPointer<OverlayModal> quickSwitcherModal_;
 
         // Matrix Client API provider.
         QSharedPointer<MatrixClient> client_;
 
         // LMDB wrapper.
         QSharedPointer<Cache> cache_;
+
+        // If the number of failures exceeds a certain threshold we
+        // return to the login page.
+        int initialSyncFailures = 0;
 };

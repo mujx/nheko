@@ -22,11 +22,10 @@
 
 #include "Deserializable.h"
 
-namespace matrix
+namespace matrix {
+namespace events {
+enum class EventType
 {
-namespace events
-{
-enum class EventType {
         /// m.room.aliases
         RoomAliases,
         /// m.room.avatar
@@ -67,8 +66,8 @@ class Event
   , public Serializable
 {
 public:
-        inline Content content() const;
-        inline EventType eventType() const;
+        Content content() const;
+        EventType eventType() const;
 
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;

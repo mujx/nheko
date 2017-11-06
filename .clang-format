@@ -1,13 +1,14 @@
 ---
 Language: Cpp
+Standard: Cpp11
 AccessModifierOffset: -8
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: true
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: true
 BasedOnStyle: Mozilla
-BreakBeforeBraces: Linux
 ColumnLimit: 100
 IndentCaseLabels: false
 IndentWidth: 8
 KeepEmptyLinesAtTheStartOfBlocks: false
 PointerAlignment: Right
+Cpp11BracedListStyle: true

@@ -15,12 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDebug>
-#include <QToolTip>
-
-#include "Config.h"
-#include "InputValidator.h"
 #include "RegisterPage.h"
+#include "Avatar.h"
+#include "Config.h"
+#include "FlatButton.h"
+#include "InputValidator.h"
+#include "MatrixClient.h"
+#include "RaisedButton.h"
+#include "TextField.h"
 
 RegisterPage::RegisterPage(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QWidget(parent)
@@ -38,17 +40,20 @@ RegisterPage::RegisterPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         back_button_->setMinimumSize(QSize(30, 30));
 
         QIcon icon;
-        icon.addFile(":/icons/icons/left-angle.png", QSize(), QIcon::Normal, QIcon::Off);
+        icon.addFile(":/icons/icons/ui/angle-pointing-to-left.png");
 
         back_button_->setIcon(icon);
-        back_button_->setIconSize(QSize(24, 24));
+        back_button_->setIconSize(QSize(32, 32));
 
         back_layout_->addWidget(back_button_, 0, Qt::AlignLeft | Qt::AlignVCenter);
         back_layout_->addStretch(1);
 
+        QIcon logo;
+        logo.addFile(":/logos/register.png");
+
         logo_ = new Avatar(this);
-        logo_->setImage(QImage(":/logos/nheko-128.png"));
-        logo_->setSize(80);
+        logo_->setIcon(logo);
+        logo_->setSize(128);
 
         logo_layout_ = new QHBoxLayout();
         logo_layout_->setMargin(0);

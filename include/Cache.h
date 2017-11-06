@@ -20,7 +20,7 @@
 #include <QDir>
 #include <lmdb++.h>
 
-#include "RoomState.h"
+class RoomState;
 
 class Cache
 {
@@ -33,11 +33,11 @@ public:
         QString nextBatchToken() const;
         QMap<QString, RoomState> states();
 
-        inline void deleteData();
-        inline void unmount();
-        inline QString memberDbName(const QString &roomid);
+        void deleteData();
+        void unmount() { isMounted_ = false; };
 
         void removeRoom(const QString &roomid);
+        void setup();
 
 private:
         void setNextBatchToken(lmdb::txn &txn, const QString &token);
@@ -52,22 +52,3 @@ private:
         QString userId_;
         QString cacheDirectory_;
 };
-
-inline void
-Cache::unmount()
-{
-        isMounted_ = false;
-}
-
-inline QString
-Cache::memberDbName(const QString &roomid)
-{
-        return QString("m.%1").arg(roomid);
-}
-
-inline void
-Cache::deleteData()
-{
-        if (!cacheDirectory_.isEmpty())
-                QDir(cacheDirectory_).removeRecursively();
-}

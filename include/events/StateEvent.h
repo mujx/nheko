@@ -21,16 +21,14 @@
 
 #include "RoomEvent.h"
 
-namespace matrix
-{
-namespace events
-{
+namespace matrix {
+namespace events {
 template<class Content>
 class StateEvent : public RoomEvent<Content>
 {
 public:
-        inline QString stateKey() const;
-        inline Content previousContent() const;
+        QString stateKey() const;
+        Content previousContent() const;
 
         void deserialize(const QJsonValue &data);
         QJsonObject serialize() const;

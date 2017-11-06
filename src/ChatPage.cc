@@ -15,25 +15,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QApplication>
 #include <QDebug>
 #include <QSettings>
+#include <QtConcurrent>
 
 #include "AvatarProvider.h"
+#include "Cache.h"
 #include "ChatPage.h"
 #include "MainWindow.h"
+#include "MatrixClient.h"
+#include "OverlayModal.h"
+#include "QuickSwitcher.h"
+#include "RoomList.h"
+#include "RoomSettings.h"
+#include "RoomState.h"
+#include "SideBarActions.h"
 #include "Splitter.h"
 #include "Sync.h"
+#include "TextInputWidget.h"
 #include "Theme.h"
 #include "TimelineViewManager.h"
+#include "TopRoomBar.h"
+#include "TypingDisplay.h"
 #include "UserInfoWidget.h"
 
-#include "StateEvent.h"
+constexpr int MAX_INITIAL_SYNC_FAILURES = 5;
+constexpr int SYNC_RETRY_TIMEOUT        = 10000;
 
 namespace events = matrix::events;
 
 ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QWidget(parent)
-  , sync_interval_(2000)
   , client_(client)
 {
         setStyleSheet("background-color: #fff;");
@@ -61,8 +74,13 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         sideBarMainLayout_->setSpacing(0);
         sideBarMainLayout_->setMargin(0);
 
+        sidebarActions_ = new SideBarActions(this);
+        connect(
+          sidebarActions_, &SideBarActions::showSettings, this, &ChatPage::showUserSettingsPage);
+
         sideBarLayout_->addLayout(sideBarTopLayout_);
         sideBarLayout_->addLayout(sideBarMainLayout_);
+        sideBarLayout_->addWidget(sidebarActions_);
 
         sideBarTopWidget_ = new QWidget(sideBar_);
         sideBarTopWidget_->setStyleSheet("background-color: #d6dde3; color: #ebebeb;");
@@ -101,21 +119,32 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         view_manager_ = new TimelineViewManager(client, this);
         mainContentLayout_->addWidget(view_manager_);
 
-        text_input_ = new TextInputWidget(this);
+        text_input_    = new TextInputWidget(this);
+        typingDisplay_ = new TypingDisplay(this);
+        contentLayout_->addWidget(typingDisplay_);
         contentLayout_->addWidget(text_input_);
+
+        typingRefresher_ = new QTimer(this);
+        typingRefresher_->setInterval(TYPING_REFRESH_TIMEOUT);
 
         user_info_widget_ = new UserInfoWidget(sideBarTopWidget_);
         sideBarTopWidgetLayout_->addWidget(user_info_widget_);
-
-        sync_timer_ = new QTimer(this);
-        sync_timer_->setSingleShot(true);
-        connect(sync_timer_, SIGNAL(timeout()), this, SLOT(startSync()));
 
         connect(user_info_widget_, SIGNAL(logout()), client_.data(), SLOT(logout()));
         connect(client_.data(), SIGNAL(loggedOut()), this, SLOT(logout()));
 
         connect(
           top_bar_, &TopRoomBar::leaveRoom, this, [=]() { client_->leaveRoom(current_room_); });
+
+        connect(room_list_, &RoomList::roomChanged, this, [=](const QString &roomid) {
+                QStringList users;
+
+                if (typingUsers_.contains(roomid))
+                        users = typingUsers_[roomid];
+
+                typingDisplay_->setUsers(users);
+        });
+        connect(room_list_, &RoomList::roomChanged, text_input_, &TextInputWidget::stopTyping);
 
         connect(room_list_, &RoomList::roomChanged, this, &ChatPage::changeTopRoomInfo);
         connect(room_list_, &RoomList::roomChanged, text_input_, &TextInputWidget::focusLineEdit);
@@ -135,6 +164,20 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                         if (settingsManager_[roomid]->isNotificationsEnabled())
                                 room_list_->updateUnreadMessageCount(roomid, count);
                 });
+
+        connect(text_input_, &TextInputWidget::startedTyping, this, [=]() {
+                typingRefresher_->start();
+                client_->sendTypingNotification(current_room_);
+        });
+
+        connect(text_input_, &TextInputWidget::stoppedTyping, this, [=]() {
+                typingRefresher_->stop();
+                client_->removeTypingNotification(current_room_);
+        });
+
+        connect(typingRefresher_, &QTimer::timeout, this, [=]() {
+                client_->sendTypingNotification(current_room_);
+        });
 
         connect(view_manager_,
                 &TimelineViewManager::updateRoomsLastMessage,
@@ -156,10 +199,16 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 view_manager_,
                 SLOT(sendEmoteMessage(const QString &)));
 
+        connect(text_input_,
+                &TextInputWidget::sendJoinRoomRequest,
+                client_.data(),
+                &MatrixClient::joinRoom);
+
         connect(text_input_, &TextInputWidget::uploadImage, this, [=](QString filename) {
                 client_->uploadImage(current_room_, filename);
         });
 
+        connect(client_.data(), &MatrixClient::joinFailed, this, &ChatPage::showNotification);
         connect(client_.data(),
                 &MatrixClient::imageUploaded,
                 this,
@@ -177,6 +226,29 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 SIGNAL(initialSyncCompleted(const SyncResponse &)),
                 this,
                 SLOT(initialSyncCompleted(const SyncResponse &)));
+        connect(client_.data(), &MatrixClient::initialSyncFailed, this, [=](const QString &msg) {
+                if (client_->getHomeServer().isEmpty()) {
+                        deleteConfigs();
+                        return;
+                }
+
+                initialSyncFailures += 1;
+
+                if (initialSyncFailures >= MAX_INITIAL_SYNC_FAILURES) {
+                        initialSyncFailures = 0;
+
+                        deleteConfigs();
+
+                        emit showLoginPage(msg);
+                        emit contentLoaded();
+                        return;
+                }
+
+                qWarning() << msg;
+                qWarning() << "Retrying initial sync";
+
+                client_->initialSync();
+        });
         connect(client_.data(),
                 SIGNAL(syncCompleted(const SyncResponse &)),
                 this,
@@ -193,14 +265,30 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 SIGNAL(ownAvatarRetrieved(const QPixmap &)),
                 this,
                 SLOT(setOwnAvatar(const QPixmap &)));
-        connect(client_.data(),
-                SIGNAL(joinedRoom(const QString &)),
-                this,
-                SLOT(addRoom(const QString &)));
+        connect(client_.data(), &MatrixClient::joinedRoom, this, [=]() {
+                emit showNotification("You joined the room.");
+        });
         connect(client_.data(),
                 SIGNAL(leftRoom(const QString &)),
                 this,
                 SLOT(removeRoom(const QString &)));
+
+        showContentTimer_ = new QTimer(this);
+        showContentTimer_->setSingleShot(true);
+        connect(showContentTimer_, &QTimer::timeout, this, [=]() {
+                consensusTimer_->stop();
+                emit contentLoaded();
+        });
+
+        consensusTimer_ = new QTimer(this);
+        connect(consensusTimer_, &QTimer::timeout, this, [=]() {
+                if (view_manager_->hasLoaded()) {
+                        // Remove the spinner overlay.
+                        emit contentLoaded();
+                        showContentTimer_->stop();
+                        consensusTimer_->stop();
+                }
+        });
 
         AvatarProvider::init(client);
 }
@@ -208,9 +296,31 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
 void
 ChatPage::logout()
 {
-        sync_timer_->stop();
+        deleteConfigs();
 
-        // Delete all config parameters.
+        resetUI();
+
+        emit close();
+}
+
+void
+ChatPage::resetUI()
+{
+        room_avatars_.clear();
+        room_list_->clear();
+        settingsManager_.clear();
+        state_manager_.clear();
+        top_bar_->reset();
+        user_info_widget_->reset();
+        view_manager_->clearAll();
+        AvatarProvider::clear();
+
+        showUnreadMessageNotification(0);
+}
+
+void
+ChatPage::deleteConfigs()
+{
         QSettings settings;
         settings.beginGroup("auth");
         settings.remove("");
@@ -224,21 +334,7 @@ ChatPage::logout()
 
         cache_->deleteData();
 
-        // Clear the environment.
-        room_list_->clear();
-        view_manager_->clearAll();
-
-        top_bar_->reset();
-        user_info_widget_->reset();
         client_->reset();
-
-        state_manager_.clear();
-        settingsManager_.clear();
-        room_avatars_.clear();
-
-        AvatarProvider::clear();
-
-        emit close();
 }
 
 void
@@ -248,22 +344,23 @@ ChatPage::bootstrap(QString userid, QString homeserver, QString token)
         client_->setAccessToken(token);
         client_->getOwnProfile();
 
+        cache_ = QSharedPointer<Cache>(new Cache(userid));
+
         try {
-                cache_ = QSharedPointer<Cache>(new Cache(userid));
-        } catch (const std::exception &e) {
-                qCritical() << e.what();
+                cache_->setup();
+
+                if (cache_->isInitialized()) {
+                        loadStateFromCache();
+                        return;
+                }
+        } catch (const lmdb::error &e) {
+                qCritical() << "Cache failure" << e.what();
+                cache_->unmount();
+                cache_->deleteData();
+                qInfo() << "Falling back to initial sync ...";
         }
 
-        if (cache_->isInitialized())
-                loadStateFromCache();
-        else
-                client_->initialSync();
-}
-
-void
-ChatPage::startSync()
-{
-        client_->sync();
+        client_->initialSync();
 }
 
 void
@@ -280,101 +377,23 @@ ChatPage::syncFailed(const QString &msg)
                 return;
 
         qWarning() << "Sync error:" << msg;
-        sync_timer_->start(sync_interval_ * 5);
-}
-
-// TODO: Should be moved in another class that manages this global list.
-void
-ChatPage::updateDisplayNames(const RoomState &state)
-{
-        for (const auto member : state.memberships) {
-                auto displayName = member.content().displayName();
-
-                if (!displayName.isEmpty())
-                        TimelineViewManager::DISPLAY_NAMES.insert(member.stateKey(), displayName);
-        }
+        QTimer::singleShot(SYNC_RETRY_TIMEOUT, this, [=]() { client_->sync(); });
 }
 
 void
 ChatPage::syncCompleted(const SyncResponse &response)
 {
-        auto joined = response.rooms().join();
+        updateJoinedRooms(response.rooms().join());
+        removeLeftRooms(response.rooms().leave());
 
-        for (auto it = joined.constBegin(); it != joined.constEnd(); it++) {
-                RoomState room_state;
-
-                // Merge the new updates for rooms that we are tracking.
-                if (state_manager_.contains(it.key())) {
-                        room_state = state_manager_[it.key()];
-                }
-
-                room_state.updateFromEvents(it.value().state().events());
-                room_state.updateFromEvents(it.value().timeline().events());
-
-                updateDisplayNames(room_state);
-
-                if (state_manager_.contains(it.key())) {
-                        // TODO: Use pointers instead of copying.
-                        auto oldState = state_manager_[it.key()];
-                        oldState.update(room_state);
-                        state_manager_.insert(it.key(), oldState);
-                } else {
-                        RoomState room_state;
-
-                        // Build the current state from the timeline and state events.
-                        room_state.updateFromEvents(it.value().state().events());
-                        room_state.updateFromEvents(it.value().timeline().events());
-
-                        // Remove redundant memberships.
-                        room_state.removeLeaveMemberships();
-
-                        // Resolve room name and avatar. e.g in case of one-to-one chats.
-                        room_state.resolveName();
-                        room_state.resolveAvatar();
-
-                        updateDisplayNames(room_state);
-
-                        state_manager_.insert(it.key(), room_state);
-                        settingsManager_.insert(
-                          it.key(), QSharedPointer<RoomSettings>(new RoomSettings(it.key())));
-
-                        for (const auto membership : room_state.memberships) {
-                                auto uid = membership.sender();
-                                auto url = membership.content().avatarUrl();
-
-                                if (!url.toString().isEmpty())
-                                        AvatarProvider::setAvatarUrl(uid, url);
-                        }
-
-                        view_manager_->addRoom(it.value(), it.key());
-                }
-
-                if (it.key() == current_room_)
-                        changeTopRoomInfo(it.key());
-        }
-
-        auto leave = response.rooms().leave();
-
-        for (auto it = leave.constBegin(); it != leave.constEnd(); it++) {
-                if (state_manager_.contains(it.key())) {
-                        removeRoom(it.key());
-                }
-        }
-
-        try {
-                cache_->setState(response.nextBatch(), state_manager_);
-        } catch (const lmdb::error &e) {
-                qCritical() << "The cache couldn't be updated: " << e.what();
-                // TODO: Notify the user.
-                cache_->unmount();
-        }
-
-        client_->setNextBatchToken(response.nextBatch());
+        auto stateDiff = generateMembershipDifference(response.rooms().join(), state_manager_);
+        QtConcurrent::run(cache_.data(), &Cache::setState, response.nextBatch(), stateDiff);
 
         room_list_->sync(state_manager_);
         view_manager_->sync(response.rooms());
 
-        sync_timer_->start(sync_interval_);
+        client_->setNextBatchToken(response.nextBatch());
+        client_->sync();
 }
 
 void
@@ -382,7 +401,7 @@ ChatPage::initialSyncCompleted(const SyncResponse &response)
 {
         auto joined = response.rooms().join();
 
-        for (auto it = joined.constBegin(); it != joined.constEnd(); it++) {
+        for (auto it = joined.constBegin(); it != joined.constEnd(); ++it) {
                 RoomState room_state;
 
                 // Build the current state from the timeline and state events.
@@ -396,29 +415,19 @@ ChatPage::initialSyncCompleted(const SyncResponse &response)
                 room_state.resolveName();
                 room_state.resolveAvatar();
 
-                updateDisplayNames(room_state);
-
                 state_manager_.insert(it.key(), room_state);
                 settingsManager_.insert(it.key(),
                                         QSharedPointer<RoomSettings>(new RoomSettings(it.key())));
 
                 for (const auto membership : room_state.memberships) {
-                        auto uid = membership.sender();
-                        auto url = membership.content().avatarUrl();
-
-                        if (!url.toString().isEmpty())
-                                AvatarProvider::setAvatarUrl(uid, url);
+                        updateUserDisplayName(membership);
+                        updateUserAvatarUrl(membership);
                 }
+
+                QApplication::processEvents();
         }
 
-        try {
-                cache_->setState(response.nextBatch(), state_manager_);
-        } catch (const lmdb::error &e) {
-                qCritical() << "The cache couldn't be initialized: " << e.what();
-                cache_->unmount();
-        }
-
-        client_->setNextBatchToken(response.nextBatch());
+        QtConcurrent::run(cache_.data(), &Cache::setState, response.nextBatch(), state_manager_);
 
         // Populate timelines with messages.
         view_manager_->initialize(response.rooms());
@@ -426,7 +435,8 @@ ChatPage::initialSyncCompleted(const SyncResponse &response)
         // Initialize room list.
         room_list_->setInitialRooms(settingsManager_, state_manager_);
 
-        sync_timer_->start(sync_interval_);
+        client_->setNextBatchToken(response.nextBatch());
+        client_->sync();
 
         emit contentLoaded();
 }
@@ -492,28 +502,19 @@ ChatPage::loadStateFromCache()
 {
         qDebug() << "Restoring state from cache";
 
-        try {
-                qDebug() << "Restored nextBatchToken" << cache_->nextBatchToken();
-                client_->setNextBatchToken(cache_->nextBatchToken());
-        } catch (const lmdb::error &e) {
-                qCritical() << "Failed to load next_batch_token from cache" << e.what();
-                // TODO: Clean the environment
-                return;
-        }
+        qDebug() << "Restored nextBatchToken" << cache_->nextBatchToken();
+        client_->setNextBatchToken(cache_->nextBatchToken());
 
         // Fetch all the joined room's state.
         auto rooms = cache_->states();
 
-        for (auto it = rooms.constBegin(); it != rooms.constEnd(); it++) {
+        for (auto it = rooms.constBegin(); it != rooms.constEnd(); ++it) {
                 RoomState room_state = it.value();
 
                 // Clean up and prepare state for use.
                 room_state.removeLeaveMemberships();
                 room_state.resolveName();
                 room_state.resolveAvatar();
-
-                // Update the global list with user's display names.
-                updateDisplayNames(room_state);
 
                 // Save the current room state.
                 state_manager_.insert(it.key(), room_state);
@@ -524,11 +525,8 @@ ChatPage::loadStateFromCache()
 
                 // Resolve user avatars.
                 for (const auto membership : room_state.memberships) {
-                        auto uid = membership.sender();
-                        auto url = membership.content().avatarUrl();
-
-                        if (!url.toString().isEmpty())
-                                AvatarProvider::setAvatarUrl(uid, url);
+                        updateUserDisplayName(membership);
+                        updateUserAvatarUrl(membership);
                 }
         }
 
@@ -538,47 +536,52 @@ ChatPage::loadStateFromCache()
         // Initialize room list from the restored state and settings.
         room_list_->setInitialRooms(settingsManager_, state_manager_);
 
-        // Remove the spinner overlay.
-        emit contentLoaded();
+        // Check periodically if the timelines have been loaded.
+        consensusTimer_->start(CONSENSUS_TIMEOUT);
 
-        sync_timer_->start(sync_interval_);
-}
+        // Show the content if consensus can't be achieved.
+        showContentTimer_->start(SHOW_CONTENT_TIMEOUT);
 
-void
-ChatPage::keyPressEvent(QKeyEvent *event)
-{
-        if (event->key() == Qt::Key_K) {
-                if (event->modifiers() == Qt::ControlModifier)
-                        showQuickSwitcher();
-        }
+        // Start receiving events.
+        client_->sync();
 }
 
 void
 ChatPage::showQuickSwitcher()
 {
-        if (quickSwitcher_ == nullptr) {
-                quickSwitcher_ = new QuickSwitcher(this);
+        if (quickSwitcher_.isNull()) {
+                quickSwitcher_ = QSharedPointer<QuickSwitcher>(
+                  new QuickSwitcher(this),
+                  [=](QuickSwitcher *switcher) { switcher->deleteLater(); });
 
-                connect(quickSwitcher_,
+                connect(quickSwitcher_.data(),
                         &QuickSwitcher::roomSelected,
                         room_list_,
                         &RoomList::highlightSelectedRoom);
-                connect(quickSwitcher_, &QuickSwitcher::closing, this, [=]() {
-                        if (this->quickSwitcherModal_ != nullptr)
+
+                connect(quickSwitcher_.data(), &QuickSwitcher::closing, this, [=]() {
+                        if (!this->quickSwitcherModal_.isNull())
                                 this->quickSwitcherModal_->fadeOut();
+                        this->text_input_->setFocus(Qt::FocusReason::PopupFocusReason);
                 });
         }
 
-        if (quickSwitcherModal_ == nullptr) {
-                quickSwitcherModal_ = new OverlayModal(MainWindow::instance(), quickSwitcher_);
+        if (quickSwitcherModal_.isNull()) {
+                quickSwitcherModal_ = QSharedPointer<OverlayModal>(
+                  new OverlayModal(MainWindow::instance(), quickSwitcher_.data()),
+                  [=](OverlayModal *modal) { modal->deleteLater(); });
                 quickSwitcherModal_->setDuration(0);
                 quickSwitcherModal_->setColor(QColor(30, 30, 30, 170));
         }
 
         QMap<QString, QString> rooms;
 
-        for (auto it = state_manager_.constBegin(); it != state_manager_.constEnd(); ++it)
-                rooms.insert(it.value().getName(), it.key());
+        for (auto it = state_manager_.constBegin(); it != state_manager_.constEnd(); ++it) {
+                QString deambiguator = it.value().canonical_alias.content().alias();
+                if (deambiguator == "")
+                        deambiguator = it.key();
+                rooms.insert(it.value().getName() + " (" + deambiguator + ")", it.key());
+        }
 
         quickSwitcher_->setRoomList(rooms);
         quickSwitcherModal_->fadeIn();
@@ -595,9 +598,9 @@ ChatPage::addRoom(const QString &room_id)
                                         QSharedPointer<RoomSettings>(new RoomSettings(room_id)));
 
                 room_list_->addRoom(settingsManager_[room_id], state_manager_[room_id], room_id);
-
-                this->changeTopRoomInfo(room_id);
                 room_list_->highlightSelectedRoom(room_id);
+
+                changeTopRoomInfo(room_id);
         }
 }
 
@@ -612,11 +615,216 @@ ChatPage::removeRoom(const QString &room_id)
                 qCritical() << "The cache couldn't be updated: " << e.what();
                 // TODO: Notify the user.
                 cache_->unmount();
+                cache_->deleteData();
         }
         room_list_->removeRoom(room_id, room_id == current_room_);
 }
 
-ChatPage::~ChatPage()
+void
+ChatPage::updateTypingUsers(const QString &roomid, const QList<QString> &user_ids)
 {
-        sync_timer_->stop();
+        QStringList users;
+
+        QSettings settings;
+        QString user_id = settings.value("auth/user_id").toString();
+
+        for (const auto uid : user_ids) {
+                if (uid == user_id)
+                        continue;
+                users.append(TimelineViewManager::displayName(uid));
+        }
+
+        users.sort();
+
+        if (current_room_ == roomid) {
+                typingDisplay_->setUsers(users);
+        }
+
+        typingUsers_.insert(roomid, users);
 }
+
+void
+ChatPage::updateUserMetadata(const QJsonArray &events)
+{
+        events::EventType ty;
+
+        for (const auto &event : events) {
+                try {
+                        ty = events::extractEventType(event.toObject());
+                } catch (const DeserializationException &e) {
+                        qWarning() << e.what() << event;
+                        continue;
+                }
+
+                if (!events::isStateEvent(ty))
+                        continue;
+
+                try {
+                        switch (ty) {
+                        case events::EventType::RoomMember: {
+                                events::StateEvent<events::MemberEventContent> member;
+                                member.deserialize(event);
+
+                                updateUserAvatarUrl(member);
+                                updateUserDisplayName(member);
+
+                                break;
+                        }
+                        default: {
+                                continue;
+                        }
+                        }
+                } catch (const DeserializationException &e) {
+                        qWarning() << e.what() << event;
+                        continue;
+                }
+        }
+}
+
+void
+ChatPage::updateUserAvatarUrl(const events::StateEvent<events::MemberEventContent> &membership)
+{
+        auto uid = membership.sender();
+        auto url = membership.content().avatarUrl();
+
+        if (!url.toString().isEmpty())
+                AvatarProvider::setAvatarUrl(uid, url);
+}
+
+void
+ChatPage::updateUserDisplayName(const events::StateEvent<events::MemberEventContent> &membership)
+{
+        auto displayName = membership.content().displayName();
+
+        if (!displayName.isEmpty())
+                TimelineViewManager::DISPLAY_NAMES.insert(membership.stateKey(), displayName);
+}
+
+void
+ChatPage::removeLeftRooms(const QMap<QString, LeftRoom> &rooms)
+{
+        for (auto it = rooms.constBegin(); it != rooms.constEnd(); ++it) {
+                if (state_manager_.contains(it.key()))
+                        removeRoom(it.key());
+        }
+}
+
+void
+ChatPage::updateJoinedRooms(const QMap<QString, JoinedRoom> &rooms)
+{
+        for (auto it = rooms.constBegin(); it != rooms.constEnd(); ++it) {
+                updateTypingUsers(it.key(), it.value().typingUserIDs());
+
+                const auto newStateEvents    = it.value().state().events();
+                const auto newTimelineEvents = it.value().timeline().events();
+
+                // Merge the new updates for rooms that we are tracking.
+                if (state_manager_.contains(it.key())) {
+                        auto oldState = &state_manager_[it.key()];
+                        oldState->updateFromEvents(newStateEvents);
+                        oldState->updateFromEvents(newTimelineEvents);
+                        oldState->resolveName();
+                        oldState->resolveAvatar();
+                } else {
+                        // Build the current state from the timeline and state events.
+                        RoomState room_state;
+                        room_state.updateFromEvents(newStateEvents);
+                        room_state.updateFromEvents(newTimelineEvents);
+
+                        // Resolve room name and avatar. e.g in case of one-to-one chats.
+                        room_state.resolveName();
+                        room_state.resolveAvatar();
+
+                        state_manager_.insert(it.key(), room_state);
+
+                        // TODO Doesn't work on the sidebar.
+                        settingsManager_.insert(
+                          it.key(), QSharedPointer<RoomSettings>(new RoomSettings(it.key())));
+
+                        view_manager_->addRoom(it.value(), it.key());
+                }
+
+                updateUserMetadata(newStateEvents);
+                updateUserMetadata(newTimelineEvents);
+
+                if (it.key() == current_room_)
+                        changeTopRoomInfo(it.key());
+
+                QApplication::processEvents();
+        }
+}
+
+QMap<QString, RoomState>
+ChatPage::generateMembershipDifference(const QMap<QString, JoinedRoom> &rooms,
+                                       const QMap<QString, RoomState> &states) const
+{
+        QMap<QString, RoomState> stateDiff;
+
+        for (auto it = rooms.constBegin(); it != rooms.constEnd(); ++it) {
+                if (!states.contains(it.key()))
+                        continue;
+
+                auto events = it.value().state().events();
+
+                for (auto event : it.value().timeline().events())
+                        events.append(event);
+
+                RoomState local;
+                local.aliases            = states[it.key()].aliases;
+                local.avatar             = states[it.key()].avatar;
+                local.canonical_alias    = states[it.key()].canonical_alias;
+                local.history_visibility = states[it.key()].history_visibility;
+                local.join_rules         = states[it.key()].join_rules;
+                local.name               = states[it.key()].name;
+                local.power_levels       = states[it.key()].power_levels;
+                local.topic              = states[it.key()].topic;
+                local.memberships        = getMemberships(events);
+
+                stateDiff.insert(it.key(), local);
+        }
+
+        return stateDiff;
+}
+
+using Memberships = QMap<QString, matrix::events::StateEvent<events::MemberEventContent>>;
+
+Memberships
+ChatPage::getMemberships(const QJsonArray &events) const
+{
+        Memberships memberships;
+
+        events::EventType ty;
+
+        for (const auto &event : events) {
+                try {
+                        ty = events::extractEventType(event.toObject());
+                } catch (const DeserializationException &e) {
+                        qWarning() << e.what() << event;
+                        continue;
+                }
+
+                if (!events::isStateEvent(ty))
+                        continue;
+
+                try {
+                        switch (ty) {
+                        case events::EventType::RoomMember: {
+                                events::StateEvent<events::MemberEventContent> member;
+                                member.deserialize(event);
+                                memberships.insert(member.stateKey(), member);
+                                break;
+                        }
+                        default: {
+                                continue;
+                        }
+                        }
+                } catch (const DeserializationException &e) {
+                        qWarning() << e.what() << event;
+                        continue;
+                }
+        }
+
+        return memberships;
+}
+
+ChatPage::~ChatPage() {}

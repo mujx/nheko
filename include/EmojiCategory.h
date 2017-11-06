@@ -17,15 +17,14 @@
 
 #pragma once
 
-#include <QHBoxLayout>
 #include <QLabel>
+#include <QLayout>
 #include <QListView>
 #include <QStandardItemModel>
-#include <QVBoxLayout>
-#include <QWidget>
 
 #include "EmojiItemDelegate.h"
-#include "EmojiProvider.h"
+
+class EmojiProvider;
 
 class EmojiCategory : public QWidget
 {
@@ -39,7 +38,10 @@ signals:
         void emojiSelected(const QString &emoji);
 
 private slots:
-        inline void clickIndex(const QModelIndex &);
+        void clickIndex(const QModelIndex &index)
+        {
+                emit emojiSelected(index.data(Qt::UserRole).toString());
+        };
 
 private:
         QVBoxLayout *mainLayout_;
@@ -52,9 +54,3 @@ private:
 
         QLabel *category_;
 };
-
-inline void
-EmojiCategory::clickIndex(const QModelIndex &index)
-{
-        emit emojiSelected(index.data(Qt::UserRole).toString());
-}

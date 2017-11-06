@@ -21,10 +21,8 @@
 
 #include "Deserializable.h"
 
-namespace matrix
-{
-namespace events
-{
+namespace matrix {
+namespace events {
 /*
  * A human-friendly room name designed to be displayed to the end-user.
  */
@@ -37,16 +35,11 @@ public:
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;
 
-        inline QString name() const;
+        QString name() const { return name_; };
 
 private:
         QString name_;
 };
 
-inline QString
-NameEventContent::name() const
-{
-        return name_;
-}
 } // namespace events
 } // namespace matrix

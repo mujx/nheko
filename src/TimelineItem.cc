@@ -16,14 +16,16 @@
  */
 
 #include <QDateTime>
-#include <QDebug>
 #include <QFontDatabase>
 #include <QRegExp>
+#include <QSettings>
 #include <QTextEdit>
 
+#include "Avatar.h"
 #include "AvatarProvider.h"
 #include "Config.h"
 #include "ImageItem.h"
+#include "Sync.h"
 #include "TimelineItem.h"
 #include "TimelineViewManager.h"
 
@@ -83,14 +85,14 @@ TimelineItem::TimelineItem(events::MessageEventType ty,
 
         if (ty == events::MessageEventType::Emote) {
                 body            = QString("* %1 %2").arg(displayName).arg(body);
-                descriptionMsg_ = { "", userid, body, descriptiveTime(timestamp) };
+                descriptionMsg_ = {"", userid, body, descriptiveTime(timestamp)};
         } else {
                 descriptionMsg_ = {
-                        "You: ", userid, body, descriptiveTime(QDateTime::currentDateTime())
-                };
+                  "You: ", userid, body, descriptiveTime(QDateTime::currentDateTime())};
         }
 
         body = body.toHtmlEscaped();
+        body.replace("\n", "<br/>");
         body.replace(URL_REGEX, URL_HTML);
         generateTimestamp(timestamp);
 
@@ -112,14 +114,14 @@ TimelineItem::TimelineItem(ImageItem *image,
                            const QString &userid,
                            bool withSender,
                            QWidget *parent)
-  : QWidget{ parent }
+  : QWidget{parent}
 {
         init();
 
         auto displayName = TimelineViewManager::displayName(userid);
         auto timestamp   = QDateTime::currentDateTime();
 
-        descriptionMsg_ = { "You", userid, " sent an image", descriptiveTime(timestamp) };
+        descriptionMsg_ = {"You", userid, " sent an image", descriptiveTime(timestamp)};
 
         generateTimestamp(timestamp);
 
@@ -156,10 +158,10 @@ TimelineItem::TimelineItem(ImageItem *image,
         auto displayName = TimelineViewManager::displayName(event.sender());
 
         QSettings settings;
-        descriptionMsg_ = { event.sender() == settings.value("auth/user_id") ? "You" : displayName,
-                            event.sender(),
-                            " sent an image",
-                            descriptiveTime(QDateTime::fromMSecsSinceEpoch(event.timestamp())) };
+        descriptionMsg_ = {event.sender() == settings.value("auth/user_id") ? "You" : displayName,
+                           event.sender(),
+                           " sent an image",
+                           descriptiveTime(QDateTime::fromMSecsSinceEpoch(event.timestamp()))};
 
         generateTimestamp(timestamp);
 
@@ -191,12 +193,13 @@ TimelineItem::TimelineItem(const events::MessageEvent<msgs::Notice> &event,
   : QWidget(parent)
 {
         init();
-        descriptionMsg_ = { TimelineViewManager::displayName(event.sender()),
-                            event.sender(),
-                            " sent a notification",
-                            descriptiveTime(QDateTime::fromMSecsSinceEpoch(event.timestamp())) };
+        descriptionMsg_ = {TimelineViewManager::displayName(event.sender()),
+                           event.sender(),
+                           " sent a notification",
+                           descriptiveTime(QDateTime::fromMSecsSinceEpoch(event.timestamp()))};
 
-        auto body      = event.content().body().trimmed().toHtmlEscaped();
+        auto body = event.content().body().trimmed().toHtmlEscaped();
+        body.replace("\n", "<br/>");
         auto timestamp = QDateTime::fromMSecsSinceEpoch(event.timestamp());
 
         generateTimestamp(timestamp);
@@ -236,13 +239,14 @@ TimelineItem::TimelineItem(const events::MessageEvent<msgs::Emote> &event,
         auto displayName = TimelineViewManager::displayName(event.sender());
         auto emoteMsg    = QString("* %1 %2").arg(displayName).arg(body);
 
-        descriptionMsg_ = { "",
-                            event.sender(),
-                            emoteMsg,
-                            descriptiveTime(QDateTime::fromMSecsSinceEpoch(event.timestamp())) };
+        descriptionMsg_ = {"",
+                           event.sender(),
+                           emoteMsg,
+                           descriptiveTime(QDateTime::fromMSecsSinceEpoch(event.timestamp()))};
 
         generateTimestamp(timestamp);
         emoteMsg = emoteMsg.toHtmlEscaped();
+        emoteMsg.replace("\n", "<br/>");
         emoteMsg.replace(URL_REGEX, URL_HTML);
 
         if (with_sender) {
@@ -274,14 +278,15 @@ TimelineItem::TimelineItem(const events::MessageEvent<msgs::Text> &event,
         auto displayName = TimelineViewManager::displayName(event.sender());
 
         QSettings settings;
-        descriptionMsg_ = { event.sender() == settings.value("auth/user_id") ? "You" : displayName,
-                            event.sender(),
-                            QString(": %1").arg(body),
-                            descriptiveTime(QDateTime::fromMSecsSinceEpoch(event.timestamp())) };
+        descriptionMsg_ = {event.sender() == settings.value("auth/user_id") ? "You" : displayName,
+                           event.sender(),
+                           QString(": %1").arg(body),
+                           descriptiveTime(QDateTime::fromMSecsSinceEpoch(event.timestamp()))};
 
         generateTimestamp(timestamp);
 
         body = body.toHtmlEscaped();
+        body.replace("\n", "<br/>");
         body.replace(URL_REGEX, URL_HTML);
 
         if (with_sender) {
@@ -371,17 +376,17 @@ TimelineItem::replaceEmoji(const QString &body)
 {
         QString fmtBody = "";
 
-        for (auto &c : body) {
-                int code = c.unicode();
+        QVector<uint> utf32_string = body.toUcs4();
 
+        for (auto &code : utf32_string) {
                 // TODO: Be more precise here.
                 if (code > 9000)
                         fmtBody += QString("<span style=\"font-family: Emoji "
                                            "One; font-size: %1px\">")
                                      .arg(conf::emojiSize) +
-                                   QString(c) + "</span>";
+                                   QString::fromUcs4(&code, 1) + "</span>";
                 else
-                        fmtBody += c;
+                        fmtBody += QString::fromUcs4(&code, 1);
         }
 
         return fmtBody;

@@ -12,13 +12,25 @@ feels more like a mainstream chat app ([Riot], Telegram etc) and less like an IR
 ### Features
 
 Most of the features you would expect from a chat application are missing right now
-but you can of course receive and send messages in the rooms that you are a member of.
+but we are getting close to a more feature complete client.
+Specifically there is support for:
+- Joining & leaving rooms
+- Sending & receiving images and emoji.
+- Typing notifications.
 
 ### Installation
+
+There are pre-built nigtly releases [here](https://github.com/mujx/nheko/releases/tag/nightly) for Linux ([AppImage](https://appimage.org/)), Mac and Windows.
 
 #### Arch Linux
 ```bash
 pacaur -S nheko-git
+```
+
+#### Fedora
+```bash
+sudo dnf copr enable xvitaly/matrix
+sudo dnf install nheko
 ```
 
 #### Gentoo Linux
@@ -26,10 +38,6 @@ pacaur -S nheko-git
 sudo layman -a matrix
 sudo emerge -a nheko
 ```
-
-#### Windows
-
-You can find a NSIS installer [here](https://ci.appveyor.com/project/mujx/nheko/branch/master/artifacts).
 
 ### Build Requirements
 
@@ -95,15 +103,7 @@ make -C build
 
 The `nheko` binary will be located in the `build` directory.
 
-##### MacOS
-
-You can create an app bundle with `make app`. The output will be located at
-`dist/MacOS/Nheko.app` which can be copied to `/Applications/Nheko.app`.
-
-You can also create a disk image with `make dmg`. The output will be located at
-`dist/MacOS/Nheko.dmg`
-
-##### Nix
+#### Nix
 
 Download the repo as mentioned above and run
 
@@ -129,6 +129,7 @@ Here is a screen shot to get a feel for the UI, but things will probably change.
 ### Third party
 
 - [Emoji One](http://emojione.com)
+- [Font Awesome](http://fontawesome.io/)
 - [Open Sans](https://fonts.google.com/specimen/Open+Sans)
 
 [Matrix]:https://matrix.org

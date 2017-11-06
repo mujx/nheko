@@ -21,11 +21,10 @@
 
 #include "Deserializable.h"
 
-namespace matrix
+namespace matrix {
+namespace events {
+enum class JoinRule
 {
-namespace events
-{
-enum class JoinRule {
         // A user who wishes to join the room must first receive
         // an invite to the room from someone already inside of the room.
         Invite,
@@ -52,16 +51,11 @@ public:
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;
 
-        inline JoinRule joinRule() const;
+        JoinRule joinRule() const { return join_rule_; };
 
 private:
         JoinRule join_rule_;
 };
 
-inline JoinRule
-JoinRulesEventContent::joinRule() const
-{
-        return join_rule_;
-}
 } // namespace events
 } // namespace matrix

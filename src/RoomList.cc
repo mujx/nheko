@@ -16,12 +16,17 @@
  */
 
 #include <QDebug>
-#include <QJsonArray>
-#include <QRegularExpression>
+#include <QObject>
 
+#include "JoinRoomDialog.h"
+#include "LeaveRoomDialog.h"
 #include "MainWindow.h"
+#include "MatrixClient.h"
+#include "OverlayModal.h"
 #include "RoomInfoListItem.h"
 #include "RoomList.h"
+#include "RoomSettings.h"
+#include "RoomState.h"
 #include "Sync.h"
 
 RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
@@ -136,7 +141,7 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
                 return;
         }
 
-        for (auto it = states.constBegin(); it != states.constEnd(); it++) {
+        for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
                 auto room_id = it.key();
                 auto state   = it.value();
 
@@ -168,22 +173,29 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
 void
 RoomList::openLeaveRoomDialog(const QString &room_id)
 {
-        leaveRoomDialog_ = new LeaveRoomDialog(this);
-        connect(leaveRoomDialog_, &LeaveRoomDialog::closing, this, [=](bool leaving) {
-                closeLeaveRoomDialog(leaving, room_id);
-        });
+        if (leaveRoomDialog_.isNull()) {
+                leaveRoomDialog_ = QSharedPointer<LeaveRoomDialog>(new LeaveRoomDialog(this));
 
-        leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
-        leaveRoomModal->setDuration(0);
-        leaveRoomModal->setColor(QColor(55, 55, 55, 170));
+                connect(leaveRoomDialog_.data(),
+                        &LeaveRoomDialog::closing,
+                        this,
+                        [=](bool leaving) { closeLeaveRoomDialog(leaving, room_id); });
+        }
 
-        leaveRoomModal->fadeIn();
+        if (leaveRoomModal_.isNull()) {
+                leaveRoomModal_ = QSharedPointer<OverlayModal>(
+                  new OverlayModal(MainWindow::instance(), leaveRoomDialog_.data()));
+                leaveRoomModal_->setDuration(0);
+                leaveRoomModal_->setColor(QColor(30, 30, 30, 170));
+        }
+
+        leaveRoomModal_->fadeIn();
 }
 
 void
 RoomList::sync(const QMap<QString, RoomState> &states)
 {
-        for (auto it = states.constBegin(); it != states.constEnd(); it++) {
+        for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
                 auto room_id = it.key();
                 auto state   = it.value();
 
@@ -220,7 +232,7 @@ RoomList::highlightSelectedRoom(const QString &room_id)
 
         calculateUnreadMessageCount();
 
-        for (auto it = rooms_.constBegin(); it != rooms_.constEnd(); it++) {
+        for (auto it = rooms_.constBegin(); it != rooms_.constEnd(); ++it) {
                 if (it.key() != room_id) {
                         it.value()->setPressedState(false);
                 } else {
@@ -266,7 +278,7 @@ RoomList::closeJoinRoomDialog(bool isJoining, QString roomAlias)
 void
 RoomList::closeLeaveRoomDialog(bool leaving, const QString &room_id)
 {
-        leaveRoomModal->fadeOut();
+        leaveRoomModal_->fadeOut();
 
         if (leaving) {
                 client_->leaveRoom(room_id);

@@ -15,21 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDebug>
 #include <QTimer>
 
+#include "Avatar.h"
 #include "Config.h"
 #include "FlatButton.h"
+#include "LogoutDialog.h"
 #include "MainWindow.h"
+#include "OverlayModal.h"
 #include "UserInfoWidget.h"
 
 UserInfoWidget::UserInfoWidget(QWidget *parent)
   : QWidget(parent)
   , display_name_("User")
   , user_id_("@user:homeserver.org")
-  , logoutModal_{ nullptr }
-  , logoutDialog_{ nullptr }
-  , logoutButtonSize_{ 32 }
+  , logoutModal_{nullptr}
+  , logoutDialog_{nullptr}
+  , logoutButtonSize_{20}
 {
         QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
         setSizePolicy(sizePolicy);
@@ -77,15 +79,13 @@ UserInfoWidget::UserInfoWidget(QWidget *parent)
         buttonLayout_->setMargin(0);
 
         logoutButton_ = new FlatButton(this);
-        logoutButton_->setForegroundColor(QColor("#555459"));
-        logoutButton_->setFixedSize(logoutButtonSize_, logoutButtonSize_);
         logoutButton_->setCornerRadius(logoutButtonSize_ / 2);
 
         QIcon icon;
-        icon.addFile(":/icons/icons/power-button-off.png", QSize(), QIcon::Normal, QIcon::Off);
+        icon.addFile(":/icons/icons/ui/power-button-off.png");
 
         logoutButton_->setIcon(icon);
-        logoutButton_->setIconSize(QSize(logoutButtonSize_ / 2, logoutButtonSize_ / 2));
+        logoutButton_->setIconSize(QSize(logoutButtonSize_, logoutButtonSize_));
 
         buttonLayout_->addWidget(logoutButton_);
 
@@ -93,18 +93,19 @@ UserInfoWidget::UserInfoWidget(QWidget *parent)
 
         // Show the confirmation dialog.
         connect(logoutButton_, &QPushButton::clicked, this, [=]() {
-                if (logoutDialog_ == nullptr) {
-                        logoutDialog_ = new LogoutDialog(this);
-                        connect(logoutDialog_,
+                if (logoutDialog_.isNull()) {
+                        logoutDialog_ = QSharedPointer<LogoutDialog>(new LogoutDialog(this));
+                        connect(logoutDialog_.data(),
                                 SIGNAL(closing(bool)),
                                 this,
                                 SLOT(closeLogoutDialog(bool)));
                 }
 
-                if (logoutModal_ == nullptr) {
-                        logoutModal_ = new OverlayModal(MainWindow::instance(), logoutDialog_);
+                if (logoutModal_.isNull()) {
+                        logoutModal_ = QSharedPointer<OverlayModal>(
+                          new OverlayModal(MainWindow::instance(), logoutDialog_.data()));
                         logoutModal_->setDuration(0);
-                        logoutModal_->setColor(QColor(55, 55, 55, 170));
+                        logoutModal_->setColor(QColor(30, 30, 30, 170));
                 }
 
                 logoutModal_->fadeIn();

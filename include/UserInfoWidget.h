@@ -17,15 +17,13 @@
 
 #pragma once
 
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
+#include <QLabel>
+#include <QLayout>
 
-#include "Avatar.h"
-#include "FlatButton.h"
-#include "LogoutDialog.h"
-#include "OverlayModal.h"
+class Avatar;
+class FlatButton;
+class LogoutDialog;
+class OverlayModal;
 
 class UserInfoWidget : public QWidget
 {
@@ -68,8 +66,8 @@ private:
 
         QImage avatar_image_;
 
-        OverlayModal *logoutModal_;
-        LogoutDialog *logoutDialog_;
+        QSharedPointer<OverlayModal> logoutModal_;
+        QSharedPointer<LogoutDialog> logoutDialog_;
 
         int logoutButtonSize_;
 };

@@ -22,13 +22,11 @@
 #include "Deserializable.h"
 #include "MessageEvent.h"
 
-namespace matrix
+namespace matrix {
+namespace events {
+namespace messages {
+struct VideoInfo
 {
-namespace events
-{
-namespace messages
-{
-struct VideoInfo {
         int h;
         int w;
         int size;
@@ -42,8 +40,8 @@ struct VideoInfo {
 class Video : public Deserializable
 {
 public:
-        inline QString url() const;
-        inline VideoInfo info() const;
+        QString url() const { return url_; };
+        VideoInfo info() const { return info_; };
 
         void deserialize(const QJsonObject &object) override;
 
@@ -51,18 +49,6 @@ private:
         QString url_;
         VideoInfo info_;
 };
-
-inline QString
-Video::url() const
-{
-        return url_;
-}
-
-inline VideoInfo
-Video::info() const
-{
-        return info_;
-}
 
 } // namespace messages
 } // namespace events

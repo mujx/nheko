@@ -21,10 +21,8 @@
 
 #include "Deserializable.h"
 
-namespace matrix
-{
-namespace events
-{
+namespace matrix {
+namespace events {
 /*
  * A topic is a short message detailing what is currently being discussed in the
  * room.
@@ -38,16 +36,11 @@ public:
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;
 
-        inline QString topic() const;
+        QString topic() const { return topic_; };
 
 private:
         QString topic_;
 };
 
-inline QString
-TopicEventContent::topic() const
-{
-        return topic_;
-}
 } // namespace events
 } // namespace matrix

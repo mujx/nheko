@@ -17,18 +17,17 @@
 
 #pragma once
 
-#include <QHBoxLayout>
 #include <QLabel>
+#include <QLayout>
 #include <QSharedPointer>
-#include <QVBoxLayout>
 #include <QWidget>
 
-#include "FlatButton.h"
-#include "LoadingIndicator.h"
-#include "MatrixClient.h"
-#include "OverlayModal.h"
-#include "RaisedButton.h"
-#include "TextField.h"
+class FlatButton;
+class LoadingIndicator;
+class MatrixClient;
+class OverlayModal;
+class RaisedButton;
+class TextField;
 
 class LoginPage : public QWidget
 {
@@ -43,6 +42,10 @@ public:
 signals:
         void backButtonClicked();
 
+public slots:
+        // Displays errors produced during the login.
+        void loginError(QString error_message);
+
 private slots:
         // Callback for the back button.
         void onBackButtonClicked();
@@ -55,9 +58,6 @@ private slots:
 
         // Callback for probing the manually entered server
         void onServerAddressEntered();
-
-        // Displays errors produced during the login.
-        void loginError(QString error_message);
 
         // Callback for errors produced during server probing
         void versionError(QString error_message);

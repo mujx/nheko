@@ -15,20 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-
-#include "Deserializable.h"
 #include "Login.h"
+#include "Deserializable.h"
 
 LoginRequest::LoginRequest() {}
 
 LoginRequest::LoginRequest(QString username, QString password)
   : user_(username)
   , password_(password)
-{
-}
+{}
 
 QByteArray
 LoginRequest::serialize() noexcept
@@ -44,10 +39,10 @@ LoginRequest::serialize() noexcept
 #endif
 
         QJsonObject body{
-                { "type", "m.login.password" },
-                { "user", user_ },
-                { "password", password_ },
-                { "initial_device_display_name", initialDeviceName },
+          {"type", "m.login.password"},
+          {"user", user_},
+          {"password", password_},
+          {"initial_device_display_name", initialDeviceName},
         };
 
         return QJsonDocument(body).toJson(QJsonDocument::Compact);

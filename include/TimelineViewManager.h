@@ -17,16 +17,16 @@
 
 #pragma once
 
-#include <QDebug>
+#include <QMap>
 #include <QSharedPointer>
 #include <QStackedWidget>
-#include <QWidget>
 
-#include "MatrixClient.h"
-#include "MessageEvent.h"
-#include "RoomInfoListItem.h"
-#include "Sync.h"
-#include "TimelineView.h"
+class JoinedRoom;
+class MatrixClient;
+class RoomInfoListItem;
+class Rooms;
+class TimelineView;
+struct DescInfo;
 
 class TimelineViewManager : public QStackedWidget
 {
@@ -46,6 +46,9 @@ public:
 
         void sync(const Rooms &rooms);
         void clearAll();
+
+        // Check if all the timelines have been loaded.
+        bool hasLoaded() const;
 
         static QString chooseRandomColor();
         static QString displayName(const QString &userid);

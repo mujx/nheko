@@ -15,13 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDebug>
 #include <QJsonArray>
 #include <QSettings>
 
 #include "RoomState.h"
 
 namespace events = matrix::events;
+
+RoomState::RoomState() {}
+RoomState::RoomState(const QJsonArray &events) { updateFromEvents(events); }
 
 void
 RoomState::resolveName()

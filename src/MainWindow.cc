@@ -15,22 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MainWindow.h"
-#include "Config.h"
-
 #include <QApplication>
 #include <QLayout>
 #include <QNetworkReply>
 #include <QSettings>
 #include <QShortcut>
-#include <QSystemTrayIcon>
+
+#include "ChatPage.h"
+#include "Config.h"
+#include "LoadingIndicator.h"
+#include "LoginPage.h"
+#include "MainWindow.h"
+#include "MatrixClient.h"
+#include "OverlayModal.h"
+#include "RegisterPage.h"
+#include "SnackBar.h"
+#include "TrayIcon.h"
+#include "UserSettingsPage.h"
+#include "WelcomePage.h"
 
 MainWindow *MainWindow::instance_ = nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
-  , progress_modal_{ nullptr }
-  , spinner_{ nullptr }
+  , progressModal_{nullptr}
+  , spinner_{nullptr}
 {
         QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         setSizePolicy(sizePolicy);
@@ -46,13 +55,15 @@ MainWindow::MainWindow(QWidget *parent)
         font.setStyleStrategy(QFont::PreferAntialias);
         setFont(font);
 
-        client_   = QSharedPointer<MatrixClient>(new MatrixClient("matrix.org"));
-        trayIcon_ = new TrayIcon(":/logos/nheko-32.png", this);
+        client_       = QSharedPointer<MatrixClient>(new MatrixClient("matrix.org"));
+        userSettings_ = QSharedPointer<UserSettings>(new UserSettings);
+        trayIcon_     = new TrayIcon(":/logos/nheko-32.png", this);
 
-        welcome_page_  = new WelcomePage(this);
-        login_page_    = new LoginPage(client_, this);
-        register_page_ = new RegisterPage(client_, this);
-        chat_page_     = new ChatPage(client_, this);
+        welcome_page_     = new WelcomePage(this);
+        login_page_       = new LoginPage(client_, this);
+        register_page_    = new RegisterPage(client_, this);
+        chat_page_        = new ChatPage(client_, this);
+        userSettingsPage_ = new UserSettingsPage(userSettings_, this);
 
         // Initialize sliding widget manager.
         pageStack_ = new QStackedWidget(this);
@@ -60,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent)
         pageStack_->addWidget(login_page_);
         pageStack_->addWidget(register_page_);
         pageStack_->addWidget(chat_page_);
+        pageStack_->addWidget(userSettingsPage_);
 
         setCentralWidget(pageStack_);
 
@@ -73,6 +85,17 @@ MainWindow::MainWindow(QWidget *parent)
         connect(
           chat_page_, SIGNAL(changeWindowTitle(QString)), this, SLOT(setWindowTitle(QString)));
         connect(chat_page_, SIGNAL(unreadMessages(int)), trayIcon_, SLOT(setUnreadCount(int)));
+        connect(chat_page_, &ChatPage::showLoginPage, this, [=](const QString &msg) {
+                login_page_->loginError(msg);
+                showLoginPage();
+        });
+
+        connect(userSettingsPage_, &UserSettingsPage::moveBack, this, [=]() {
+                pageStack_->setCurrentWidget(chat_page_);
+        });
+
+        connect(
+          userSettingsPage_, SIGNAL(trayOptionChanged(bool)), trayIcon_, SLOT(setVisible(bool)));
 
         connect(trayIcon_,
                 SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
@@ -80,6 +103,8 @@ MainWindow::MainWindow(QWidget *parent)
                 SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
         connect(chat_page_, SIGNAL(contentLoaded()), this, SLOT(removeOverlayProgressBar()));
+        connect(
+          chat_page_, &ChatPage::showUserSettingsPage, this, &MainWindow::showUserSettingsPage);
 
         connect(client_.data(),
                 SIGNAL(loginSuccess(QString, QString, QString)),
@@ -89,7 +114,14 @@ MainWindow::MainWindow(QWidget *parent)
         QShortcut *quitShortcut = new QShortcut(QKeySequence::Quit, this);
         connect(quitShortcut, &QShortcut::activated, this, QApplication::quit);
 
+        QShortcut *quickSwitchShortcut = new QShortcut(QKeySequence("Ctrl+K"), this);
+        connect(quickSwitchShortcut, &QShortcut::activated, this, [=]() {
+                chat_page_->showQuickSwitcher();
+        });
+
         QSettings settings;
+
+        trayIcon_->setVisible(userSettings_->isTrayEnabled());
 
         if (hasActiveUser()) {
                 QString token       = settings.value("auth/access_token").toString();
@@ -132,18 +164,23 @@ MainWindow::removeOverlayProgressBar()
         connect(timer, &QTimer::timeout, [=]() {
                 timer->deleteLater();
 
-                if (progress_modal_ != nullptr) {
-                        progress_modal_->deleteLater();
-                        progress_modal_->fadeOut();
-                }
+                if (!progressModal_.isNull())
+                        progressModal_->fadeOut();
 
-                if (spinner_ != nullptr)
-                        spinner_->deleteLater();
+                if (!spinner_.isNull())
+                        spinner_->stop();
 
-                spinner_->stop();
+                progressModal_.reset();
+                spinner_.reset();
+        });
 
-                progress_modal_ = nullptr;
-                spinner_        = nullptr;
+        // FIXME:  Snackbar doesn't work if it's initialized in the constructor.
+        QTimer::singleShot(100, this, [=]() {
+                snackBar_ = QSharedPointer<SnackBar>(new SnackBar(this));
+                connect(chat_page_,
+                        &ChatPage::showNotification,
+                        snackBar_.data(),
+                        &SnackBar::showMessage);
         });
 
         timer->start(500);
@@ -166,18 +203,22 @@ MainWindow::showChatPage(QString userid, QString homeserver, QString token)
         QTimer::singleShot(
           modalOpacityDuration + 100, this, [=]() { pageStack_->setCurrentWidget(chat_page_); });
 
-        if (spinner_ == nullptr) {
-                spinner_ = new LoadingIndicator(this);
+        if (spinner_.isNull()) {
+                spinner_ = QSharedPointer<LoadingIndicator>(
+                  new LoadingIndicator(this),
+                  [=](LoadingIndicator *indicator) { indicator->deleteLater(); });
                 spinner_->setColor("#acc7dc");
-                spinner_->setFixedHeight(120);
-                spinner_->setFixedWidth(120);
+                spinner_->setFixedHeight(100);
+                spinner_->setFixedWidth(100);
                 spinner_->start();
         }
 
-        if (progress_modal_ == nullptr) {
-                progress_modal_ = new OverlayModal(this, spinner_);
-                progress_modal_->fadeIn();
-                progress_modal_->setDuration(modalOpacityDuration);
+        if (progressModal_.isNull()) {
+                progressModal_ =
+                  QSharedPointer<OverlayModal>(new OverlayModal(this, spinner_.data()),
+                                               [=](OverlayModal *modal) { modal->deleteLater(); });
+                progressModal_->fadeIn();
+                progressModal_->setDuration(modalOpacityDuration);
         }
 
         login_page_->reset();
@@ -205,9 +246,15 @@ MainWindow::showRegisterPage()
 }
 
 void
+MainWindow::showUserSettingsPage()
+{
+        pageStack_->setCurrentWidget(userSettingsPage_);
+}
+
+void
 MainWindow::closeEvent(QCloseEvent *event)
 {
-        if (isVisible()) {
+        if (isVisible() && userSettings_->isTrayEnabled()) {
                 event->ignore();
                 hide();
         }

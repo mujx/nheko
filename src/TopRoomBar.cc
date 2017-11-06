@@ -17,13 +17,20 @@
 
 #include <QStyleOption>
 
+#include "Avatar.h"
 #include "Config.h"
+#include "FlatButton.h"
+#include "Label.h"
+#include "LeaveRoomDialog.h"
 #include "MainWindow.h"
+#include "Menu.h"
+#include "OverlayModal.h"
+#include "RoomSettings.h"
 #include "TopRoomBar.h"
 
 TopRoomBar::TopRoomBar(QWidget *parent)
   : QWidget(parent)
-  , buttonSize_{ 32 }
+  , buttonSize_{32}
 {
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         setMinimumSize(QSize(0, 65));
@@ -52,30 +59,31 @@ TopRoomBar::TopRoomBar(QWidget *parent)
         QFont descriptionFont("Open Sans");
         descriptionFont.setPixelSize(conf::topRoomBar::fonts::roomDescription);
 
-        topicLabel_ = new QLabel(this);
+        topicLabel_ = new Label(this);
         topicLabel_->setFont(descriptionFont);
         topicLabel_->setTextFormat(Qt::RichText);
         topicLabel_->setTextInteractionFlags(Qt::TextBrowserInteraction);
         topicLabel_->setOpenExternalLinks(true);
+        connect(topicLabel_, &Label::clicked, [=](QMouseEvent *e) {
+                if (e->button() == Qt::LeftButton && !topicLabel_->hasSelectedText())
+                        topicLabel_->setWordWrap(!topicLabel_->wordWrap());
+        });
 
         textLayout_->addWidget(nameLabel_);
         textLayout_->addWidget(topicLabel_);
 
         settingsBtn_ = new FlatButton(this);
-        settingsBtn_->setForegroundColor(QColor("#acc7dc"));
         settingsBtn_->setFixedSize(buttonSize_, buttonSize_);
         settingsBtn_->setCornerRadius(buttonSize_ / 2);
 
         QIcon settings_icon;
-        settings_icon.addFile(
-          ":/icons/icons/vertical-ellipsis.png", QSize(), QIcon::Normal, QIcon::Off);
+        settings_icon.addFile(":/icons/icons/ui/vertical-ellipsis.png");
         settingsBtn_->setIcon(settings_icon);
         settingsBtn_->setIconSize(QSize(buttonSize_ / 2, buttonSize_ / 2));
 
         topLayout_->addWidget(avatar_);
-        topLayout_->addLayout(textLayout_);
-        topLayout_->addStretch(1);
-        topLayout_->addWidget(settingsBtn_);
+        topLayout_->addLayout(textLayout_, 1);
+        topLayout_->addWidget(settingsBtn_, 0, Qt::AlignRight);
 
         menu_ = new Menu(this);
 
@@ -86,15 +94,24 @@ TopRoomBar::TopRoomBar(QWidget *parent)
 
         leaveRoom_ = new QAction(tr("Leave room"), this);
         connect(leaveRoom_, &QAction::triggered, this, [=]() {
-                leaveRoomDialog_ = new LeaveRoomDialog(this);
-                connect(
-                  leaveRoomDialog_, SIGNAL(closing(bool)), this, SLOT(closeLeaveRoomDialog(bool)));
+                if (leaveRoomDialog_.isNull()) {
+                        leaveRoomDialog_ =
+                          QSharedPointer<LeaveRoomDialog>(new LeaveRoomDialog(this));
 
-                leaveRoomModal = new OverlayModal(MainWindow::instance(), leaveRoomDialog_);
-                leaveRoomModal->setDuration(100);
-                leaveRoomModal->setColor(QColor(55, 55, 55, 170));
+                        connect(leaveRoomDialog_.data(),
+                                SIGNAL(closing(bool)),
+                                this,
+                                SLOT(closeLeaveRoomDialog(bool)));
+                }
 
-                leaveRoomModal->fadeIn();
+                if (leaveRoomModal_.isNull()) {
+                        leaveRoomModal_ = QSharedPointer<OverlayModal>(
+                          new OverlayModal(MainWindow::instance(), leaveRoomDialog_.data()));
+                        leaveRoomModal_->setDuration(0);
+                        leaveRoomModal_->setColor(QColor(30, 30, 30, 170));
+                }
+
+                leaveRoomModal_->fadeIn();
         });
 
         menu_->addAction(toggleNotifications_);
@@ -117,7 +134,7 @@ TopRoomBar::TopRoomBar(QWidget *parent)
 void
 TopRoomBar::closeLeaveRoomDialog(bool leaving)
 {
-        leaveRoomModal->fadeOut();
+        leaveRoomModal_->fadeOut();
 
         if (leaving) {
                 emit leaveRoom();
@@ -142,6 +159,9 @@ TopRoomBar::reset()
         nameLabel_->setText("");
         topicLabel_->setText("");
         avatar_->setLetter(QChar('?'));
+
+        roomName_.clear();
+        roomTopic_.clear();
 }
 
 void
@@ -154,12 +174,67 @@ TopRoomBar::paintEvent(QPaintEvent *event)
 
         QPainter painter(this);
         style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
+
+        // Number of pixels that we can move sidebar splitter per frame. If label contains text
+        // which fills entire it's width then label starts blocking it's layout from shrinking.
+        // Making label little bit shorter leaves some space for it to shrink.
+        const auto perFrameResize = 20;
+
+        QString elidedText =
+          QFontMetrics(nameLabel_->font())
+            .elidedText(roomName_, Qt::ElideRight, nameLabel_->width() - perFrameResize);
+        nameLabel_->setText(elidedText);
+
+        if (topicLabel_->wordWrap())
+                elidedText = roomTopic_;
+        else
+                elidedText =
+                  QFontMetrics(topicLabel_->font())
+                    .elidedText(roomTopic_, Qt::ElideRight, topicLabel_->width() - perFrameResize);
+        elidedText.replace(URL_REGEX, URL_HTML);
+        topicLabel_->setText(elidedText);
+}
+
+void
+TopRoomBar::mousePressEvent(QMouseEvent *event)
+{
+        if (childAt(event->pos()) == topicLabel_) {
+                event->accept();
+        }
 }
 
 void
 TopRoomBar::setRoomSettings(QSharedPointer<RoomSettings> settings)
 {
         roomSettings_ = settings;
+}
+
+void
+TopRoomBar::updateRoomAvatar(const QImage &avatar_image)
+{
+        avatar_->setImage(avatar_image);
+        update();
+}
+
+void
+TopRoomBar::updateRoomAvatar(const QIcon &icon)
+{
+        avatar_->setIcon(icon);
+        update();
+}
+
+void
+TopRoomBar::updateRoomName(const QString &name)
+{
+        roomName_ = name;
+        update();
+}
+
+void
+TopRoomBar::updateRoomTopic(QString topic)
+{
+        roomTopic_ = topic;
+        update();
 }
 
 TopRoomBar::~TopRoomBar() {}

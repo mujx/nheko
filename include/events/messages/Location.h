@@ -22,13 +22,11 @@
 #include "Deserializable.h"
 #include "MessageEvent.h"
 
-namespace matrix
+namespace matrix {
+namespace events {
+namespace messages {
+struct LocationInfo
 {
-namespace events
-{
-namespace messages
-{
-struct LocationInfo {
         QString thumbnail_url;
         ThumbnailInfo thumbnail_info;
 };
@@ -36,8 +34,8 @@ struct LocationInfo {
 class Location : public Deserializable
 {
 public:
-        inline QString geoUri() const;
-        inline LocationInfo info() const;
+        QString geoUri() const { return geo_uri_; };
+        LocationInfo info() const { return info_; };
 
         void deserialize(const QJsonObject &object) override;
 
@@ -46,18 +44,6 @@ private:
 
         LocationInfo info_;
 };
-
-inline QString
-Location::geoUri() const
-{
-        return geo_uri_;
-}
-
-inline LocationInfo
-Location::info() const
-{
-        return info_;
-}
 
 } // namespace messages
 } // namespace events

@@ -19,6 +19,7 @@
 #include <QLayout>
 
 #include "Config.h"
+#include "RaisedButton.h"
 #include "WelcomePage.h"
 
 WelcomePage::WelcomePage(QWidget *parent)
@@ -29,11 +30,14 @@ WelcomePage::WelcomePage(QWidget *parent)
         auto topLayout_ = new QVBoxLayout(this);
         topLayout_->setSpacing(20);
 
-        QFont headingFont("Open Sans", 23);
-        QFont subTitleFont("Open Sans", 22);
+        QFont headingFont("Open Sans", 22);
+        QFont subTitleFont("Open Sans", 21);
+
+        QIcon icon;
+        icon.addFile(":/logos/splash.png");
 
         auto logo_ = new QLabel(this);
-        logo_->setPixmap(QPixmap(":/logos/nheko-256.png"));
+        logo_->setPixmap(icon.pixmap(256));
         logo_->setAlignment(Qt::AlignCenter);
 
         QString heading(tr("Welcome to nheko! The desktop client for the Matrix protocol."));

@@ -18,12 +18,17 @@
 #pragma once
 
 #include <QImage>
-#include <QObject>
 #include <QSharedPointer>
 #include <QUrl>
 
-#include "MatrixClient.h"
-#include "TimelineItem.h"
+class MatrixClient;
+class TimelineItem;
+
+struct AvatarData
+{
+        QImage img;
+        QUrl url;
+};
 
 class AvatarProvider : public QObject
 {
@@ -40,8 +45,8 @@ private:
         static void updateAvatar(const QString &uid, const QImage &img);
 
         static QSharedPointer<MatrixClient> client_;
-        static QMap<QString, QList<TimelineItem *>> toBeResolved_;
 
-        static QMap<QString, QImage> userAvatars_;
-        static QMap<QString, QUrl> avatarUrls_;
+        using UserID = QString;
+        static QMap<UserID, AvatarData> avatars_;
+        static QMap<UserID, QList<TimelineItem *>> toBeResolved_;
 };

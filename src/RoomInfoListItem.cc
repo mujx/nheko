@@ -15,14 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
 
 #include "Config.h"
+#include "Menu.h"
 #include "Ripple.h"
+#include "RippleOverlay.h"
 #include "RoomInfoListItem.h"
-#include "RoomState.h"
+#include "RoomSettings.h"
 #include "Theme.h"
 
 RoomInfoListItem::RoomInfoListItem(QSharedPointer<RoomSettings> settings,
@@ -32,7 +33,7 @@ RoomInfoListItem::RoomInfoListItem(QSharedPointer<RoomSettings> settings,
   : QWidget(parent)
   , state_(state)
   , roomId_(room_id)
-  , roomSettings_{ settings }
+  , roomSettings_{settings}
   , isPressed_(false)
   , maxHeight_(IconSize + 2 * Padding)
   , unreadMsgCount_(0)
@@ -311,6 +312,21 @@ RoomInfoListItem::mousePressEvent(QMouseEvent *event)
         ripple->opacityAnimation()->setDuration(400);
 
         ripple_overlay_->addRipple(ripple);
+}
+
+void
+RoomInfoListItem::setAvatar(const QImage &img)
+{
+        roomAvatar_ = QPixmap::fromImage(
+          img.scaled(IconSize, IconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        update();
+}
+
+void
+RoomInfoListItem::setDescriptionMessage(const DescInfo &info)
+{
+        lastMsgInfo_ = info;
+        update();
 }
 
 RoomInfoListItem::~RoomInfoListItem() {}

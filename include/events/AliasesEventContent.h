@@ -22,10 +22,8 @@
 
 #include "Deserializable.h"
 
-namespace matrix
-{
-namespace events
-{
+namespace matrix {
+namespace events {
 class AliasesEventContent
   : public Deserializable
   , public Serializable
@@ -34,16 +32,11 @@ public:
         void deserialize(const QJsonValue &data) override;
         QJsonObject serialize() const override;
 
-        inline QList<QString> aliases() const;
+        QList<QString> aliases() const { return aliases_; };
 
 private:
         QList<QString> aliases_;
 };
 
-inline QList<QString>
-AliasesEventContent::aliases() const
-{
-        return aliases_;
-}
 } // namespace events
 } // namespace matrix

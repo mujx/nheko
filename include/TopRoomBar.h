@@ -18,21 +18,21 @@
 #pragma once
 
 #include <QAction>
-#include <QDebug>
 #include <QIcon>
 #include <QImage>
 #include <QLabel>
+#include <QMenu>
 #include <QPaintEvent>
 #include <QSharedPointer>
 #include <QVBoxLayout>
-#include <QWidget>
 
-#include "Avatar.h"
-#include "FlatButton.h"
-#include "LeaveRoomDialog.h"
-#include "Menu.h"
-#include "OverlayModal.h"
-#include "RoomSettings.h"
+class Avatar;
+class FlatButton;
+class Label;
+class LeaveRoomDialog;
+class Menu;
+class OverlayModal;
+class RoomSettings;
 
 static const QString URL_HTML = "<a href=\"\\1\" style=\"color: #333333\">\\1</a>";
 static const QRegExp URL_REGEX("((?:https?|ftp)://\\S+)");
@@ -44,10 +44,10 @@ public:
         TopRoomBar(QWidget *parent = 0);
         ~TopRoomBar();
 
-        inline void updateRoomAvatar(const QImage &avatar_image);
-        inline void updateRoomAvatar(const QIcon &icon);
-        inline void updateRoomName(const QString &name);
-        inline void updateRoomTopic(QString topic);
+        void updateRoomAvatar(const QImage &avatar_image);
+        void updateRoomAvatar(const QIcon &icon);
+        void updateRoomName(const QString &name);
+        void updateRoomTopic(QString topic);
         void updateRoomAvatarFromName(const QString &name);
         void setRoomSettings(QSharedPointer<RoomSettings> settings);
 
@@ -58,6 +58,7 @@ signals:
 
 protected:
         void paintEvent(QPaintEvent *event) override;
+        void mousePressEvent(QMouseEvent *event) override;
 
 private slots:
         void closeLeaveRoomDialog(bool leaving);
@@ -67,7 +68,7 @@ private:
         QVBoxLayout *textLayout_;
 
         QLabel *nameLabel_;
-        QLabel *topicLabel_;
+        Label *topicLabel_;
 
         QSharedPointer<RoomSettings> roomSettings_;
 
@@ -77,45 +78,13 @@ private:
 
         FlatButton *settingsBtn_;
 
-        OverlayModal *leaveRoomModal;
-        LeaveRoomDialog *leaveRoomDialog_;
+        QSharedPointer<OverlayModal> leaveRoomModal_;
+        QSharedPointer<LeaveRoomDialog> leaveRoomDialog_;
 
         Avatar *avatar_;
 
         int buttonSize_;
+
+        QString roomName_;
+        QString roomTopic_;
 };
-
-inline void
-TopRoomBar::updateRoomAvatar(const QImage &avatar_image)
-{
-        avatar_->setImage(avatar_image);
-        update();
-}
-
-inline void
-TopRoomBar::updateRoomAvatar(const QIcon &icon)
-{
-        avatar_->setIcon(icon);
-        update();
-}
-
-inline void
-TopRoomBar::updateRoomName(const QString &name)
-{
-        QString elidedText =
-          QFontMetrics(nameLabel_->font()).elidedText(name, Qt::ElideRight, width() * 0.8);
-        nameLabel_->setText(elidedText);
-        update();
-}
-
-inline void
-TopRoomBar::updateRoomTopic(QString topic)
-{
-        topic.replace(URL_REGEX, URL_HTML);
-
-        QString elidedText =
-          QFontMetrics(topicLabel_->font()).elidedText(topic, Qt::ElideRight, width() * 0.6);
-
-        topicLabel_->setText(topic);
-        update();
-}
