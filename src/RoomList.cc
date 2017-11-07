@@ -49,7 +49,7 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
         scrollArea_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         scrollArea_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
         scrollArea_->setWidgetResizable(true);
-        scrollArea_->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
+        scrollArea_->setAlignment(Qt::AlignLeading | Qt::AlignTop | Qt::AlignVCenter);
 
         scrollAreaContents_ = new QWidget();
 
@@ -89,6 +89,8 @@ RoomList::addRoom(const QSharedPointer<RoomSettings> &settings,
         client_->fetchRoomAvatar(room_id, state.getAvatar());
 
         contentsLayout_->insertWidget(0, room_item);
+
+        setFilterRooms(filterRooms_);
 }
 
 void
@@ -163,6 +165,8 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
 
         if (rooms_.isEmpty())
                 return;
+
+        setFilterRooms(filterRooms_);
 
         auto first_room = rooms_.first();
         first_room->setPressedState(true);
@@ -241,6 +245,8 @@ RoomList::highlightSelectedRoom(const QString &room_id)
                           qobject_cast<QWidget *>(it.value().data()));
                 }
         }
+
+        selectedRoom_ = room_id;
 }
 
 void
@@ -283,4 +289,51 @@ RoomList::closeLeaveRoomDialog(bool leaving, const QString &room_id)
         if (leaving) {
                 client_->leaveRoom(room_id);
         }
+}
+
+void
+RoomList::setFilterRooms(bool filterRooms)
+{
+        filterRooms_ = filterRooms;
+
+        for (int i = 0; i < contentsLayout_->count(); i++) {
+                // If roomFilter_ contains the room for the current RoomInfoListItem,
+                // show the list item, otherwise hide it
+                RoomInfoListItem *listitem =
+                  (RoomInfoListItem *)contentsLayout_->itemAt(i)->widget();
+
+                if (listitem != nullptr) {
+                        if (!filterRooms) {
+                                contentsLayout_->itemAt(i)->widget()->show();
+                        } else if (roomFilter_.contains(listitem->roomId())) {
+                                contentsLayout_->itemAt(i)->widget()->show();
+                        } else {
+                                contentsLayout_->itemAt(i)->widget()->hide();
+                        }
+                }
+        }
+
+        if (filterRooms_ && !roomFilter_.contains(selectedRoom_)) {
+                RoomInfoListItem *firstVisibleRoom = nullptr;
+                for (int i = 0; i < contentsLayout_->count(); i++) {
+                        QWidget *item = contentsLayout_->itemAt(i)->widget();
+                        if (item != nullptr && item->isVisible()) {
+                                firstVisibleRoom = (RoomInfoListItem *)item;
+                                break;
+                        }
+                }
+                if (firstVisibleRoom != nullptr) {
+                        highlightSelectedRoom(firstVisibleRoom->roomId());
+                }
+        } else {
+                scrollArea_->ensureWidgetVisible(
+                  qobject_cast<QWidget *>(rooms_.value(selectedRoom_).data()));
+        }
+}
+
+void
+RoomList::setRoomFilter(QList<QString> room_ids)
+{
+        roomFilter_ = room_ids;
+        setFilterRooms(true);
 }

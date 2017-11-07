@@ -143,6 +143,9 @@ set(SRC_FILES
     src/AvatarProvider.cc
     src/Cache.cc
     src/ChatPage.cc
+    src/CommunitiesListItem.cc
+    src/CommunitiesList.cc
+    src/Community.cc
     src/Deserializable.cc
     src/EmojiCategory.cc
     src/EmojiItemDelegate.cc
@@ -238,6 +241,9 @@ include_directories(${LMDB_INCLUDE_DIR})
 qt5_wrap_cpp(MOC_HEADERS
     include/AvatarProvider.h
     include/ChatPage.h
+    include/CommunitiesListItem.h
+    include/CommunitiesList.h
+    include/Community.h
     include/EmojiCategory.h
     include/EmojiItemDelegate.h
     include/EmojiPanel.h
