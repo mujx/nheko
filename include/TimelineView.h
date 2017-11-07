@@ -125,10 +125,10 @@ private:
         // sender's name.
         bool isSenderRendered(const QString &user_id, TimelineDirection direction);
 
-        bool isPendingMessage(const QString &eventid,
+        bool isPendingMessage(const QString &txnid,
                               const QString &sender,
                               const QString &userid);
-        void removePendingMessage(const QString &eventid);
+        void removePendingMessage(const QString &txnid);
 
         bool isDuplicate(const QString &event_id) { return eventIds_.contains(event_id); };
 
