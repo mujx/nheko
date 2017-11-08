@@ -205,6 +205,7 @@ MainWindow::showChatPage(QString userid, QString homeserver, QString token)
                   [=](LoadingIndicator *indicator) { indicator->deleteLater(); });
                 spinner_->setFixedHeight(100);
                 spinner_->setFixedWidth(100);
+                spinner_->setObjectName("ChatPageLoadSpinner");
                 spinner_->start();
         }
 

@@ -332,8 +332,8 @@ TimelineItem::generateBody(const QString &userid, const QString &body)
                         sender = userid.split(":")[0].split("@")[1];
         }
 
-        QString userContent("<span> %1 </span>");
-        QString bodyContent("<span> %1 </span>");
+        QString userContent("%1");
+        QString bodyContent("%1");
 
         QFont usernameFont = font_;
         usernameFont.setBold(true);
@@ -357,7 +357,7 @@ TimelineItem::generateBody(const QString &userid, const QString &body)
 void
 TimelineItem::generateTimestamp(const QDateTime &time)
 {
-        QString msg("<span> %1 </span>");
+        QString msg("%1");
 
         QFont timestampFont;
         timestampFont.setPixelSize(conf::timeline::fonts::timestamp);
@@ -401,8 +401,6 @@ TimelineItem::setupAvatarLayout(const QString &userName)
 
         userAvatar_ = new Avatar(this);
         userAvatar_->setLetter(QChar(userName[0]).toUpper());
-        //        userAvatar_->setBackgroundColor(QColor("#eee"));
-        //        userAvatar_->setTextColor(QColor("black"));
         userAvatar_->setSize(conf::timeline::avatarSize);
 
         // TODO: The provided user name should be a UserId class

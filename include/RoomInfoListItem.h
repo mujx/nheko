@@ -44,6 +44,12 @@ class RoomInfoListItem : public QWidget
           QColor hoverBackgroundColor READ hoverBackgroundColor WRITE setHoverBackgroundColor)
         Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
 
+        Q_PROPERTY(QColor titleColor READ titleColor WRITE setTitleColor)
+        Q_PROPERTY(QColor subtitleColor READ subtitleColor WRITE setSubtitleColor)
+
+        Q_PROPERTY(QColor highlightedTitleColor READ highlightedTitleColor WRITE setHighlightedTitleColor)
+        Q_PROPERTY(QColor highlightedSubtitleColor READ highlightedSubtitleColor WRITE setHighlightedSubtitleColor)
+
 public:
         RoomInfoListItem(QSharedPointer<RoomSettings> settings,
                          RoomState state,
@@ -67,12 +73,24 @@ public:
         inline QColor hoverBackgroundColor() const { return hoverBackgroundColor_; }
         inline QColor backgroundColor() const { return backgroundColor_; }
 
+        inline QColor highlightedTitleColor() const { return highlightedTitleColor_; }
+        inline QColor highlightedSubtitleColor() const { return highlightedSubtitleColor_; }
+
+        inline QColor titleColor() const { return titleColor_; }
+        inline QColor subtitleColor() const { return subtitleColor_; }
+
         inline void setHighlightedBackgroundColor(QColor &color)
         {
                 highlightedBackgroundColor_ = color;
         }
         inline void setHoverBackgroundColor(QColor &color) { hoverBackgroundColor_ = color; }
         inline void setBackgroundColor(QColor &color) { backgroundColor_ = color; }
+
+        inline void setHighlightedTitleColor(QColor &color) { highlightedTitleColor_ = color; }
+        inline void setHighlightedSubtitleColor(QColor &color) { highlightedSubtitleColor_ = color; }
+
+        inline void setTitleColor(QColor &color) { titleColor_ = color; }
+        inline void setSubtitleColor(QColor &color) { subtitleColor_ = color; }
 
 signals:
         void clicked(const QString &room_id);
@@ -118,4 +136,10 @@ private:
         QColor highlightedBackgroundColor_;
         QColor hoverBackgroundColor_;
         QColor backgroundColor_;
+
+        QColor highlightedTitleColor_;
+        QColor highlightedSubtitleColor_;
+
+        QColor titleColor_;
+        QColor subtitleColor_;
 };

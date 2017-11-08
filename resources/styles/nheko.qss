@@ -1,11 +1,10 @@
 * {
         background-color: white;
-        color: black;
-        font-size: 12px;
+        color: #333;
 }
 
 QLabel {
-        color: black;
+        color: #333;
 }
 
 QMenu, QMenu > * {
@@ -13,17 +12,27 @@ QMenu, QMenu > * {
 }
 
 FlatButton {
-        /* qproperty-foregroundColor: black; */
+        qproperty-foregroundColor: #333;
 }
 
 RoomInfoListItem {
         qproperty-highlightedBackgroundColor: #38A3D8;
         qproperty-hoverBackgroundColor: rgba(200,200,200,128);
         qproperty-backgroundColor: white;
+
+        qproperty-titleColor: #333;
+        qproperty-subtitleColor: #5d6565;
+
+        qproperty-highlightedTitleColor: white;
+        qproperty-highlightedSubtitleColor: white;
 }
 
-LoadingIndicator {
-        /* qproperty-color: ; */
+#ChatPageLoadSpinner {
+        qproperty-color: #acc7dc;
+}
+
+#FileUploadSpinner {
+        qproperty-color: #333;
 }
 
 UserInfoWidget, UserInfoWidget > * {
@@ -31,9 +40,9 @@ UserInfoWidget, UserInfoWidget > * {
         color: #ebebeb;
 }
 
-#userAvatar {
-        background-color: white;
-        color: #333333;
+Avatar {
+        qproperty-textColor: black;
+        qproperty-backgroundColor: #eee;
 }
 
 #displayNameLabel {

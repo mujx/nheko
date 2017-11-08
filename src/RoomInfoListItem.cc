@@ -95,16 +95,17 @@ RoomInfoListItem::paintEvent(QPaintEvent *event)
         p.setRenderHint(QPainter::SmoothPixmapTransform);
         p.setRenderHint(QPainter::Antialiasing);
 
-        if (isPressed_)
-                p.fillRect(rect(), highlightedBackgroundColor_);
-        else if (underMouse())
-                p.fillRect(rect(), hoverBackgroundColor_);
-        else
-                p.fillRect(rect(), backgroundColor_);
-
         QFont font;
         font.setPixelSize(conf::fontSize);
         QFontMetrics metrics(font);
+
+        if (isPressed_) {
+                p.fillRect(rect(), highlightedBackgroundColor_);
+        } else if (underMouse()) {
+                p.fillRect(rect(), hoverBackgroundColor_);
+        } else {
+                p.fillRect(rect(), backgroundColor_);
+        }
 
         // p.setPen(QColor("#333"));
 
@@ -114,6 +115,13 @@ RoomInfoListItem::paintEvent(QPaintEvent *event)
         int bottom_y = maxHeight_ - Padding - Padding / 3 - metrics.ascent() / 2;
 
         if (width() > ui::sidebar::SmallSize) {
+                if (isPressed_) {
+                    QPen pen(highlightedTitleColor_);
+                    p.setPen(pen);
+                } else {
+                    QPen pen(titleColor_);
+                    p.setPen(pen);
+                }
                 font.setPixelSize(conf::roomlist::fonts::heading);
                 p.setFont(font);
 
@@ -124,6 +132,14 @@ RoomInfoListItem::paintEvent(QPaintEvent *event)
                 auto name = metrics.elidedText(
                   state_.getName(), Qt::ElideRight, (width() - IconSize - 2 * Padding) * 0.8);
                 p.drawText(QPoint(2 * Padding + IconSize, top_y), name);
+
+                if (isPressed_) {
+                    QPen pen(highlightedSubtitleColor_);
+                    p.setPen(pen);
+                } else {
+                    QPen pen(subtitleColor_);
+                    p.setPen(pen);
+                }
 
                 font.setPixelSize(conf::fontSize);
                 p.setFont(font);

@@ -188,7 +188,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         spinner_ = new LoadingIndicator(this);
         spinner_->setFixedHeight(32);
         spinner_->setFixedWidth(32);
-        spinner_->setColor(palette().color(QPalette::Text));
+        spinner_->setObjectName("FileUploadSpinner");
         spinner_->hide();
 
         QFont font;
@@ -199,7 +199,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         input_->setFont(font);
         input_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         input_->setPlaceholderText(tr("Write a message..."));
-        input_->setStyleSheet("border: none; padding-top: 5px; background-color: rgba(0,0,0,0);");
+        input_->setStyleSheet("border: none; padding-top: 5px;");
 
         sendMessageBtn_ = new FlatButton(this);
 
