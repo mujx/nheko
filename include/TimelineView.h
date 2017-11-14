@@ -91,8 +91,8 @@ public:
 
         // Add new events at the end of the timeline.
         int addEvents(const Timeline &timeline);
-        void addUserMessage(matrix::events::MessageEventType ty, const QString &msg, int txn_id);
-        void addUserMessage(const QString &url, const QString &filename, int txn_id);
+        void addUserMessage(matrix::events::MessageEventType ty, const QString &msg);
+        void addUserMessage(const QString &url, const QString &filename);
         void updatePendingMessage(int txn_id, QString event_id);
         void scrollDown();
 

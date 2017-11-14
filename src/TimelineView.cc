@@ -507,7 +507,7 @@ TimelineView::updatePendingMessage(int txn_id, QString event_id)
 }
 
 void
-TimelineView::addUserMessage(matrix::events::MessageEventType ty, const QString &body, int txn_id)
+TimelineView::addUserMessage(matrix::events::MessageEventType ty, const QString &body)
 {
         QSettings settings;
         auto user_id     = settings.value("auth/user_id").toString();
@@ -522,12 +522,13 @@ TimelineView::addUserMessage(matrix::events::MessageEventType ty, const QString 
 
         lastSender_ = user_id;
 
+        int txn_id = client_->incrementTransactionId();
         PendingMessage message(ty, txn_id, body, "", "", view_item);
         handleNewUserMessage(message);
 }
 
 void
-TimelineView::addUserMessage(const QString &url, const QString &filename, int txn_id)
+TimelineView::addUserMessage(const QString &url, const QString &filename)
 {
         QSettings settings;
         auto user_id     = settings.value("auth/user_id").toString();
@@ -544,6 +545,7 @@ TimelineView::addUserMessage(const QString &url, const QString &filename, int tx
 
         lastSender_ = user_id;
 
+        int txn_id = client_->incrementTransactionId();
         PendingMessage message(matrix::events::MessageEventType::Image, txn_id, url, filename, "", view_item);
         handleNewUserMessage(message);
 }
@@ -628,7 +630,7 @@ TimelineView::removePendingMessage(const QString &txnid)
 void
 TimelineView::handleFailedMessage(int txnid)
 {
+        Q_UNUSED(txnid);
         // Note: We do this even if the message has already been echoed.
-        (void)txnid; // We don't need it.
         QTimer::singleShot(500, this, SLOT(sendNextPendingMessage()));
 }

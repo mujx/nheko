@@ -67,7 +67,7 @@ TimelineViewManager::queueTextMessage(const QString &msg)
         auto room_id = active_room_;
         auto view    = views_[room_id];
 
-        view->addUserMessage(matrix::events::MessageEventType::Text, msg, client_->incrementTransactionId());
+        view->addUserMessage(matrix::events::MessageEventType::Text, msg);
 }
 
 void
@@ -76,8 +76,7 @@ TimelineViewManager::queueEmoteMessage(const QString &msg)
         auto room_id = active_room_;
         auto view    = views_[room_id];
 
-        view->addUserMessage(
-          matrix::events::MessageEventType::Emote, msg, client_->incrementTransactionId());
+        view->addUserMessage(matrix::events::MessageEventType::Emote, msg);
 }
 
 void
@@ -92,7 +91,7 @@ TimelineViewManager::queueImageMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage(url, filename, client_->incrementTransactionId());
+        view->addUserMessage(url, filename);
 }
 
 void
