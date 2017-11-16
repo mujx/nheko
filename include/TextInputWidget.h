@@ -89,10 +89,10 @@ signals:
 
         void startedTyping();
         void stoppedTyping();
-        void focusInEvent(QFocusEvent *event);
 
 protected:
 
+        void focusInEvent(QFocusEvent *event) override;
         void paintEvent(QPaintEvent *) override;
 
 private:
