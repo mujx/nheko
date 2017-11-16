@@ -91,7 +91,6 @@ signals:
         void stoppedTyping();
 
 protected:
-
         void focusInEvent(QFocusEvent *event) override;
         void paintEvent(QPaintEvent *) override;
 

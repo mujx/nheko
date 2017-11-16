@@ -79,7 +79,7 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         sideBarLayout_->addWidget(sidebarActions_);
 
         // Content
-        content_       = new QFrame(this);
+        content_ = new QFrame(this);
         content_->setObjectName("mainContent");
         contentLayout_ = new QVBoxLayout(content_);
         contentLayout_->setSpacing(0);

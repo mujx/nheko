@@ -116,11 +116,11 @@ RoomInfoListItem::paintEvent(QPaintEvent *event)
 
         if (width() > ui::sidebar::SmallSize) {
                 if (isPressed_) {
-                    QPen pen(highlightedTitleColor_);
-                    p.setPen(pen);
+                        QPen pen(highlightedTitleColor_);
+                        p.setPen(pen);
                 } else {
-                    QPen pen(titleColor_);
-                    p.setPen(pen);
+                        QPen pen(titleColor_);
+                        p.setPen(pen);
                 }
                 font.setPixelSize(conf::roomlist::fonts::heading);
                 p.setFont(font);
@@ -134,11 +134,11 @@ RoomInfoListItem::paintEvent(QPaintEvent *event)
                 p.drawText(QPoint(2 * Padding + IconSize, top_y), name);
 
                 if (isPressed_) {
-                    QPen pen(highlightedSubtitleColor_);
-                    p.setPen(pen);
+                        QPen pen(highlightedSubtitleColor_);
+                        p.setPen(pen);
                 } else {
-                    QPen pen(subtitleColor_);
-                    p.setPen(pen);
+                        QPen pen(subtitleColor_);
+                        p.setPen(pen);
                 }
 
                 font.setPixelSize(conf::fontSize);

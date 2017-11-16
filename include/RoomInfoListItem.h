@@ -47,8 +47,10 @@ class RoomInfoListItem : public QWidget
         Q_PROPERTY(QColor titleColor READ titleColor WRITE setTitleColor)
         Q_PROPERTY(QColor subtitleColor READ subtitleColor WRITE setSubtitleColor)
 
-        Q_PROPERTY(QColor highlightedTitleColor READ highlightedTitleColor WRITE setHighlightedTitleColor)
-        Q_PROPERTY(QColor highlightedSubtitleColor READ highlightedSubtitleColor WRITE setHighlightedSubtitleColor)
+        Q_PROPERTY(
+          QColor highlightedTitleColor READ highlightedTitleColor WRITE setHighlightedTitleColor)
+        Q_PROPERTY(QColor highlightedSubtitleColor READ highlightedSubtitleColor WRITE
+                     setHighlightedSubtitleColor)
 
 public:
         RoomInfoListItem(QSharedPointer<RoomSettings> settings,
@@ -87,7 +89,10 @@ public:
         inline void setBackgroundColor(QColor &color) { backgroundColor_ = color; }
 
         inline void setHighlightedTitleColor(QColor &color) { highlightedTitleColor_ = color; }
-        inline void setHighlightedSubtitleColor(QColor &color) { highlightedSubtitleColor_ = color; }
+        inline void setHighlightedSubtitleColor(QColor &color)
+        {
+                highlightedSubtitleColor_ = color;
+        }
 
         inline void setTitleColor(QColor &color) { titleColor_ = color; }
         inline void setSubtitleColor(QColor &color) { subtitleColor_ = color; }
