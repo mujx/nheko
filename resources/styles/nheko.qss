@@ -6,6 +6,8 @@ QLabel {
         color: #333;
 }
 
+#chatPage, #chatPage > * { background-color: white; }
+
 TimelineView, TimelineView > * { background-color: white; }
 
 QMenu, QMenu > * { background-color: white; }
@@ -43,12 +45,6 @@ UserInfoWidget, UserInfoWidget > * {
 Avatar {
         qproperty-textColor: black;
         qproperty-backgroundColor: #eee;
-}
-
-RoomList {
-        border: 1px solid #ccc;
-        border-right: 0px none #000;
-        border-left: 0px none #000;
 }
 
 #displayNameLabel {

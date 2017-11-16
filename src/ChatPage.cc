@@ -49,6 +49,8 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QWidget(parent)
   , client_(client)
 {
+        setObjectName("chatPage");
+
         topLayout_ = new QHBoxLayout(this);
         topLayout_->setSpacing(0);
         topLayout_->setMargin(0);
