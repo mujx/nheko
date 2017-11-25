@@ -16,10 +16,13 @@
  */
 
 #include <QAbstractTextDocumentLayout>
+#include <QApplication>
+#include <QClipboard>
 #include <QDebug>
 #include <QFile>
 #include <QFileDialog>
 #include <QImageReader>
+#include <QMimeData>
 #include <QPainter>
 #include <QStyleOption>
 
@@ -31,6 +34,7 @@ static constexpr size_t INPUT_HISTORY_SIZE = 127;
 FilteredTextEdit::FilteredTextEdit(QWidget *parent)
   : QTextEdit{parent}
   , history_index_{0}
+  , isImage_{false}
 {
         connect(document()->documentLayout(),
                 &QAbstractTextDocumentLayout::documentSizeChanged,
@@ -93,9 +97,47 @@ FilteredTextEdit::keyPressEvent(QKeyEvent *event)
                 }
                 break;
         }
+        case Qt::Key_V: {
+                if (event->modifiers() == Qt::ControlModifier) {
+                        insertFromMimeData(QApplication::clipboard()->mimeData());
+                }
+                break;
+        }
         default:
                 QTextEdit::keyPressEvent(event);
                 break;
+        }
+}
+
+bool
+FilteredTextEdit::canInsertFromMimeData(const QMimeData *source) const
+{
+        return (source->hasImage() || source->hasText() ||
+                QTextEdit::canInsertFromMimeData(source));
+}
+
+void
+FilteredTextEdit::insertFromMimeData(const QMimeData *source)
+{
+        if (source->hasImage()) {
+                QImage img = qvariant_cast<QImage>(source->imageData());
+                pastedImagePath_ = QDir::tempPath() + '/' + "nheko_pasted_img.png";
+
+                // Save image into temporary path to be loaded later.
+                QFile file{pastedImagePath_};
+                if (!file.open(QIODevice::WriteOnly)) {
+                        qDebug() << "Failed to create temporary image file";
+                        return;
+                }
+                if (!img.save(file.fileName(), "PNG")) {
+                        qDebug() << "Failed to save image data";
+                        return;
+                }
+
+                isImage_ = true;
+                textCursor().insertImage(pastedImagePath_);
+        } else {
+                QTextEdit::insertFromMimeData(source);
         }
 }
 
@@ -155,6 +197,9 @@ FilteredTextEdit::submit()
                 } else {
                         command(name, args);
                 }
+        } else if (isImage_) {
+                emit image(pastedImagePath_);
+                isImage_ = false;
         } else {
                 message(std::move(text));
         }
@@ -229,6 +274,9 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         connect(sendFileBtn_, SIGNAL(clicked()), this, SLOT(openFileSelection()));
         connect(input_, &FilteredTextEdit::message, this, &TextInputWidget::sendTextMessage);
         connect(input_, &FilteredTextEdit::command, this, &TextInputWidget::command);
+        connect(input_, &FilteredTextEdit::image, this, [=](QString name) {
+                emit uploadImage(name);
+        });
         connect(emojiBtn_,
                 SIGNAL(emojiSelected(const QString &)),
                 this,

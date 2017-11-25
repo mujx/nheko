@@ -50,14 +50,20 @@ signals:
         void stoppedTyping();
         void message(QString);
         void command(QString name, QString args);
+        void image(QString name);
 
 protected:
         void keyPressEvent(QKeyEvent *event) override;
+        bool canInsertFromMimeData(const QMimeData *source) const override;
+        void insertFromMimeData(const QMimeData *source) override;
 
 private:
         std::deque<QString> true_history_, working_history_;
         size_t history_index_;
         QTimer *typingTimer_;
+
+        QString pastedImagePath_;
+        bool isImage_;
 
         void textChanged();
         void afterCompletion(int);
