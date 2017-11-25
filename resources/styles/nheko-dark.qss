@@ -85,11 +85,8 @@ dialogs--LeaveRoom,
 dialogs--CreateRoom,
 dialogs--InviteUsers,
 dialogs--ReadReceipts,
-dialogs--JoinRoom {
-    background-color: #383c4a;
-    color: #caccd1;
-}
-
+dialogs--JoinRoom,
+dialogs--PreviewImageOverlay,
 QListWidget {
     background-color: #383c4a;
     color: #caccd1;

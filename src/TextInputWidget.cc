@@ -16,10 +16,13 @@
  */
 
 #include <QAbstractTextDocumentLayout>
+#include <QApplication>
+#include <QClipboard>
 #include <QDebug>
 #include <QFile>
 #include <QFileDialog>
 #include <QImageReader>
+#include <QMimeData>
 #include <QMimeDatabase>
 #include <QMimeType>
 #include <QPainter>
@@ -27,6 +30,7 @@
 
 #include "Config.h"
 #include "TextInputWidget.h"
+#include "dialogs/PreviewImageOverlay.h"
 
 static constexpr size_t INPUT_HISTORY_SIZE = 127;
 
@@ -101,6 +105,43 @@ FilteredTextEdit::keyPressEvent(QKeyEvent *event)
         }
 }
 
+bool
+FilteredTextEdit::canInsertFromMimeData(const QMimeData *source) const
+{
+        return (source->hasImage() || source->hasText() ||
+                QTextEdit::canInsertFromMimeData(source));
+}
+
+void
+FilteredTextEdit::insertFromMimeData(const QMimeData *source)
+{
+        qDebug() << "insertFromMimeData source->text():" << source->text();
+
+        if (source->hasImage()) {
+                qDebug() << "PreviewImageOverlay show";
+                QPixmap const img = qvariant_cast<QPixmap>(source->imageData());
+                previewDialog_    = new dialogs::PreviewImageOverlay{img, this};
+                connect(previewDialog_,
+                        &dialogs::PreviewImageOverlay::confirmImageUpload,
+                        this,
+                        &FilteredTextEdit::receiveImage);
+                previewDialog_->show();
+        } else if (source->hasFormat("x-special/gnome-copied-files") &&
+                   QImageReader{source->text()}.canRead()) {
+                // Special case for X11 users. See "Notes for X11 Users" in source.
+                // Source: http://doc.qt.io/qt-5/qclipboard.html
+                qDebug() << "PreviewImageOverlay special gnome show";
+                previewDialog_ = new dialogs::PreviewImageOverlay{source->text(), this};
+                connect(previewDialog_,
+                        &dialogs::PreviewImageOverlay::confirmImageUpload,
+                        this,
+                        &FilteredTextEdit::receiveImage);
+                previewDialog_->show();
+        } else {
+                QTextEdit::insertFromMimeData(source);
+        }
+}
+
 void
 FilteredTextEdit::stopTyping()
 {
@@ -146,6 +187,7 @@ FilteredTextEdit::submit()
         history_index_ = 0;
 
         QString text = toPlainText();
+
         if (text.startsWith('/')) {
                 int command_end = text.indexOf(' ');
                 if (command_end == -1)
@@ -168,6 +210,31 @@ void
 FilteredTextEdit::textChanged()
 {
         working_history_[history_index_] = toPlainText();
+}
+
+void
+FilteredTextEdit::receiveImage(const QPixmap &img, const QString &img_name)
+{
+        qDebug() << "Received image from PreviewImageOverlay:" << img;
+
+        // Save image into temporary path to be loaded later.
+        QString img_path = QDir::tempPath() + '/' + img_name;
+        QFile file{img_path};
+
+        if (!file.open(QIODevice::WriteOnly)) {
+                qDebug() << "Failed to create temporary image file";
+                previewDialog_->close();
+                return;
+        }
+        if (!img.save(file.fileName(), "PNG")) {
+                qDebug() << "Failed to save image data";
+                previewDialog_->close();
+                return;
+        }
+
+        emit image(img_path);
+
+        previewDialog_->close();
 }
 
 TextInputWidget::TextInputWidget(QWidget *parent)
@@ -231,6 +298,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         connect(sendFileBtn_, SIGNAL(clicked()), this, SLOT(openFileSelection()));
         connect(input_, &FilteredTextEdit::message, this, &TextInputWidget::sendTextMessage);
         connect(input_, &FilteredTextEdit::command, this, &TextInputWidget::command);
+        connect(input_, &FilteredTextEdit::image, this, &TextInputWidget::uploadImage);
         connect(emojiBtn_,
                 SIGNAL(emojiSelected(const QString &)),
                 this,

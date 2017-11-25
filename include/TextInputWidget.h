@@ -29,6 +29,10 @@
 
 #include "emoji/PickButton.h"
 
+namespace dialogs {
+class PreviewImageOverlay;
+}
+
 class FilteredTextEdit : public QTextEdit
 {
         Q_OBJECT
@@ -48,16 +52,22 @@ signals:
         void stoppedTyping();
         void message(QString);
         void command(QString name, QString args);
+        void image(QString name);
 
 protected:
         void keyPressEvent(QKeyEvent *event) override;
+        bool canInsertFromMimeData(const QMimeData *source) const override;
+        void insertFromMimeData(const QMimeData *source) override;
 
 private:
         std::deque<QString> true_history_, working_history_;
         size_t history_index_;
         QTimer *typingTimer_;
 
+        dialogs::PreviewImageOverlay *previewDialog_;
+
         void textChanged();
+        void receiveImage(const QPixmap &img, const QString &img_name);
         void afterCompletion(int);
 };
 
