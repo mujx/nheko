@@ -66,6 +66,11 @@ FilteredTextEdit::keyPressEvent(QKeyEvent *event)
                 typingTimer_->start();
         }
 
+        if (event->matches(QKeySequence::Copy)) {
+                insertFromMimeData(QApplication::clipboard()->mimeData());
+                return;
+        }
+
         switch (event->key()) {
         case Qt::Key_Return:
         case Qt::Key_Enter:
@@ -94,12 +99,6 @@ FilteredTextEdit::keyPressEvent(QKeyEvent *event)
                         --history_index_;
                         setPlainText(working_history_[history_index_]);
                         moveCursor(QTextCursor::End);
-                }
-                break;
-        }
-        case Qt::Key_V: {
-                if (event->modifiers() == Qt::ControlModifier) {
-                        insertFromMimeData(QApplication::clipboard()->mimeData());
                 }
                 break;
         }
