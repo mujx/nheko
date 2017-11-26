@@ -185,6 +185,14 @@ FilteredTextEdit::submit()
         history_index_ = 0;
 
         QString text = toPlainText();
+
+        // Remove image from plaintext so it doesn't show in message.
+        if (isImage_) {
+                text.remove(QChar{0xfffc}); // Unicode for OBJECT REPLACEMENT CHARACTER
+                emit image(pastedImagePath_);
+                isImage_ = false;
+        }
+
         if (text.startsWith('/')) {
                 int command_end = text.indexOf(' ');
                 if (command_end == -1)
@@ -196,9 +204,6 @@ FilteredTextEdit::submit()
                 } else {
                         command(name, args);
                 }
-        } else if (isImage_) {
-                emit image(pastedImagePath_);
-                isImage_ = false;
         } else {
                 message(std::move(text));
         }
