@@ -66,11 +66,6 @@ FilteredTextEdit::keyPressEvent(QKeyEvent *event)
                 typingTimer_->start();
         }
 
-        if (event->matches(QKeySequence::Copy)) {
-                insertFromMimeData(QApplication::clipboard()->mimeData());
-                return;
-        }
-
         switch (event->key()) {
         case Qt::Key_Return:
         case Qt::Key_Enter:
