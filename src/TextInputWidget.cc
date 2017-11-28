@@ -114,7 +114,7 @@ void
 FilteredTextEdit::insertFromMimeData(const QMimeData *source)
 {
         if (source->hasImage()) {
-                QImage img = qvariant_cast<QImage>(source->imageData());
+                QImage img       = qvariant_cast<QImage>(source->imageData());
                 pastedImagePath_ = QDir::tempPath() + '/' + "nheko_pasted_img.png";
 
                 // Save image into temporary path to be loaded later.
@@ -129,6 +129,13 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
                 }
 
                 isImage_ = true;
+                textCursor().insertImage(pastedImagePath_);
+        } else if (source->hasFormat("x-special/gnome-copied-files") &&
+                   QImageReader{source->text()}.canRead()) {
+                // Special case for X11 users. See "Notes for X11 Users" in source.
+                // Source: http://doc.qt.io/qt-5/qclipboard.html
+                pastedImagePath_ = source->text();
+                isImage_         = true;
                 textCursor().insertImage(pastedImagePath_);
         } else {
                 QTextEdit::insertFromMimeData(source);
