@@ -202,16 +202,16 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client,
                 client_.data(),
                 &MatrixClient::joinRoom);
 
-        connect(text_input_, &TextInputWidget::uploadImage, this, [=](QString filename) {
-                client_->uploadImage(current_room_, filename);
+        connect(text_input_, &TextInputWidget::uploadImage, this, [=](QSharedPointer<QFile> file) {
+                client_->uploadImage(current_room_, file);
         });
 
-        connect(text_input_, &TextInputWidget::uploadFile, this, [=](QString filename) {
-                client_->uploadFile(current_room_, filename);
+        connect(text_input_, &TextInputWidget::uploadFile, this, [=](QSharedPointer<QFile> file) {
+                client_->uploadFile(current_room_, file);
         });
 
-        connect(text_input_, &TextInputWidget::uploadAudio, this, [=](QString filename) {
-                client_->uploadAudio(current_room_, filename);
+        connect(text_input_, &TextInputWidget::uploadAudio, this, [=](QSharedPointer<QFile> file) {
+                client_->uploadAudio(current_room_, file);
         });
 
         connect(
@@ -220,23 +220,23 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client,
         connect(client_.data(),
                 &MatrixClient::imageUploaded,
                 this,
-                [=](QString roomid, QString filename, QString url) {
+                [=](QString roomid, QSharedPointer<QFile> file, QString url) {
                         text_input_->hideUploadSpinner();
-                        view_manager_->queueImageMessage(roomid, filename, url);
+                        view_manager_->queueImageMessage(roomid, file, url);
                 });
         connect(client_.data(),
                 &MatrixClient::fileUploaded,
                 this,
-                [=](QString roomid, QString filename, QString url) {
+                [=](QString roomid, QSharedPointer<QFile> file, QString url) {
                         text_input_->hideUploadSpinner();
-                        view_manager_->queueFileMessage(roomid, filename, url);
+                        view_manager_->queueFileMessage(roomid, file, url);
                 });
         connect(client_.data(),
                 &MatrixClient::audioUploaded,
                 this,
-                [=](QString roomid, QString filename, QString url) {
+                [=](QString roomid, QSharedPointer<QFile> file, QString url) {
                         text_input_->hideUploadSpinner();
-                        view_manager_->queueAudioMessage(roomid, filename, url);
+                        view_manager_->queueAudioMessage(roomid, file, url);
                 });
 
         connect(room_list_, &RoomList::roomAvatarChanged, this, &ChatPage::updateTopBarAvatar);

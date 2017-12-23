@@ -89,14 +89,14 @@ AudioItem::AudioItem(QSharedPointer<MatrixClient> client,
 
 AudioItem::AudioItem(QSharedPointer<MatrixClient> client,
                      const QString &url,
-                     const QString &filename,
+                     QSharedPointer<QFile> file,
                      QWidget *parent)
   : QWidget(parent)
   , url_{url}
-  , text_{QFileInfo(filename).fileName()}
+  , text_{file->fileName()}
   , client_{client}
 {
-        readableFileSize_ = calculateFileSize(QFileInfo(filename).size());
+        readableFileSize_ = calculateFileSize(file->size());
 
         init();
 }

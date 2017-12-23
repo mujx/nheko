@@ -52,9 +52,9 @@ public:
         void downloadImage(const QString &event_id, const QUrl &url);
         void downloadFile(const QString &event_id, const QUrl &url);
         void messages(const QString &room_id, const QString &from_token, int limit = 30) noexcept;
-        void uploadImage(const QString &roomid, const QString &filename);
-        void uploadFile(const QString &roomid, const QString &filename);
-        void uploadAudio(const QString &roomid, const QString &filename);
+        void uploadImage(const QString &roomid, QSharedPointer<QIODevice> iodev);
+        void uploadFile(const QString &roomid, QSharedPointer<QIODevice> iodev);
+        void uploadAudio(const QString &roomid, QSharedPointer<QIODevice> iodev);
         void joinRoom(const QString &roomIdOrAlias);
         void leaveRoom(const QString &roomId);
         void sendTypingNotification(const QString &roomid, int timeoutInMillis = 20000);
@@ -94,9 +94,9 @@ signals:
                              const QString &homeserver,
                              const QString &token);
         void versionSuccess();
-        void imageUploaded(const QString &roomid, const QString &filename, const QString &url);
-        void fileUploaded(const QString &roomid, const QString &filename, const QString &url);
-        void audioUploaded(const QString &roomid, const QString &filename, const QString &url);
+        void imageUploaded(const QString &roomid, QSharedPointer<QFile> file, const QString &url);
+        void fileUploaded(const QString &roomid, QSharedPointer<QFile> file, const QString &url);
+        void audioUploaded(const QString &roomid, QSharedPointer<QFile> file, const QString &url);
 
         void roomAvatarRetrieved(const QString &roomid,
                                  const QPixmap &img,
@@ -123,7 +123,7 @@ signals:
         void roomCreationFailed(const QString &msg);
 
 private:
-        QNetworkReply *makeUploadRequest(const QString &filename);
+        QNetworkReply *makeUploadRequest(QSharedPointer<QIODevice> iodev);
 
         // Client API prefix.
         QString clientApiUrl_;

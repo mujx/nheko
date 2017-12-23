@@ -675,14 +675,14 @@ MatrixClient::messages(const QString &roomid, const QString &from_token, int lim
 }
 
 void
-MatrixClient::uploadImage(const QString &roomid, const QString &filename)
+MatrixClient::uploadImage(const QString &roomid, QSharedPointer<QIODevice> iodev)
 {
-        auto reply = makeUploadRequest(filename);
+        auto reply = makeUploadRequest(iodev);
 
         if (reply == nullptr)
                 return;
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, iodev]() {
                 reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -711,16 +711,16 @@ MatrixClient::uploadImage(const QString &roomid, const QString &filename)
                         return;
                 }
 
-                emit imageUploaded(roomid, filename, object.value("content_uri").toString());
+                emit imageUploaded(roomid, iodev.dynamicCast<QFile>(), object.value("content_uri").toString());
         });
 }
 
 void
-MatrixClient::uploadFile(const QString &roomid, const QString &filename)
+MatrixClient::uploadFile(const QString &roomid, QSharedPointer<QIODevice> iodev)
 {
-        auto reply = makeUploadRequest(filename);
+        auto reply = makeUploadRequest(iodev);
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, iodev]() {
                 reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -749,16 +749,16 @@ MatrixClient::uploadFile(const QString &roomid, const QString &filename)
                         return;
                 }
 
-                emit fileUploaded(roomid, filename, object.value("content_uri").toString());
+                emit fileUploaded(roomid, iodev.dynamicCast<QFile>(), object.value("content_uri").toString());
         });
 }
 
 void
-MatrixClient::uploadAudio(const QString &roomid, const QString &filename)
+MatrixClient::uploadAudio(const QString &roomid, QSharedPointer<QIODevice> iodev)
 {
-        auto reply = makeUploadRequest(filename);
+        auto reply = makeUploadRequest(iodev);
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, iodev]() {
                 reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -787,7 +787,7 @@ MatrixClient::uploadAudio(const QString &roomid, const QString &filename)
                         return;
                 }
 
-                emit audioUploaded(roomid, filename, object.value("content_uri").toString());
+                emit audioUploaded(roomid, iodev.dynamicCast<QFile>(), object.value("content_uri").toString());
         });
 }
 
@@ -1012,7 +1012,7 @@ MatrixClient::readEvent(const QString &room_id, const QString &event_id)
 }
 
 QNetworkReply *
-MatrixClient::makeUploadRequest(const QString &filename)
+MatrixClient::makeUploadRequest(QSharedPointer<QIODevice> iodev)
 {
         QUrlQuery query;
         query.addQueryItem("access_token", token_);
@@ -1021,20 +1021,19 @@ MatrixClient::makeUploadRequest(const QString &filename)
         endpoint.setPath(mediaApiUrl_ + "/upload");
         endpoint.setQuery(query);
 
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadWrite)) {
-                qDebug() << "Error while reading" << filename;
+        if (!iodev->open(QIODevice::ReadWrite)) {
+                qDebug() << "Error while reading buffer" << iodev.data();
                 return nullptr;
         }
 
         QMimeDatabase db;
-        QMimeType mime = db.mimeTypeForFile(filename, QMimeDatabase::MatchContent);
+        QMimeType mime = db.mimeTypeForData(iodev.data());
 
         QNetworkRequest request(QString(endpoint.toEncoded()));
-        request.setHeader(QNetworkRequest::ContentLengthHeader, file.size());
+        request.setHeader(QNetworkRequest::ContentLengthHeader, iodev->size());
         request.setHeader(QNetworkRequest::ContentTypeHeader, mime.name());
 
-        auto reply = post(request, file.readAll());
+        auto reply = post(request, iodev->readAll());
 
         return reply;
 }

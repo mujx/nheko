@@ -61,11 +61,11 @@ ImageItem::ImageItem(QSharedPointer<MatrixClient> client,
 
 ImageItem::ImageItem(QSharedPointer<MatrixClient> client,
                      const QString &url,
-                     const QString &filename,
+                     QSharedPointer<QFile> file,
                      QWidget *parent)
   : QWidget(parent)
   , url_{url}
-  , text_{QFileInfo(filename).fileName()}
+  , text_{file->fileName()}
   , client_{client}
 {
         setMouseTracking(true);
@@ -83,7 +83,7 @@ ImageItem::ImageItem(QSharedPointer<MatrixClient> client,
         url_                 = QString("%1/_matrix/media/r0/download/%2")
                  .arg(client_.data()->getHomeServer().toString(), media_params);
 
-        setImage(QPixmap(filename));
+        setImage(QPixmap(file->fileName()));
 }
 
 void

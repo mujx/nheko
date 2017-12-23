@@ -357,12 +357,13 @@ TextInputWidget::openFileSelection()
 
         const auto format = mime.name().split("/")[0];
 
+        QSharedPointer<QFile> file{new QFile{fileName, this}};
         if (format == "image")
-                emit uploadImage(fileName);
+                emit uploadImage(file);
         else if (format == "audio")
-                emit uploadAudio(fileName);
+                emit uploadAudio(file);
         else
-                emit uploadFile(fileName);
+                emit uploadFile(file);
 
         showUploadSpinner();
 }

@@ -93,9 +93,9 @@ signals:
         void sendTextMessage(QString msg);
         void sendEmoteMessage(QString msg);
 
-        void uploadImage(QString filename);
-        void uploadFile(QString filename);
-        void uploadAudio(QString filename);
+        void uploadImage(QSharedPointer<QFile> file);
+        void uploadFile(QSharedPointer<QFile> file);
+        void uploadAudio(QSharedPointer<QFile> file);
 
         void sendJoinRoomRequest(const QString &room);
 

@@ -36,7 +36,7 @@ public:
 
         ImageItem(QSharedPointer<MatrixClient> client,
                   const QString &url,
-                  const QString &filename,
+                  QSharedPointer<QFile> file,
                   QWidget *parent = nullptr);
 
         void setImage(const QPixmap &image);
