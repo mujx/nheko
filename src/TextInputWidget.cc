@@ -115,10 +115,7 @@ FilteredTextEdit::canInsertFromMimeData(const QMimeData *source) const
 void
 FilteredTextEdit::insertFromMimeData(const QMimeData *source)
 {
-        qDebug() << "insertFromMimeData source->text():" << source->text();
-
         if (source->hasImage()) {
-                qDebug() << "PreviewImageOverlay show";
                 QPixmap const img = qvariant_cast<QPixmap>(source->imageData());
                 previewDialog_    = new dialogs::PreviewImageOverlay{img, this};
                 connect(previewDialog_,
@@ -130,7 +127,6 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
                    QImageReader{source->text()}.canRead()) {
                 // Special case for X11 users. See "Notes for X11 Users" in source.
                 // Source: http://doc.qt.io/qt-5/qclipboard.html
-                qDebug() << "PreviewImageOverlay special gnome show";
                 previewDialog_ = new dialogs::PreviewImageOverlay{source->text(), this};
                 connect(previewDialog_,
                         &dialogs::PreviewImageOverlay::confirmImageUpload,
@@ -215,24 +211,23 @@ FilteredTextEdit::textChanged()
 void
 FilteredTextEdit::receiveImage(const QPixmap &img, const QString &img_name)
 {
-        qDebug() << "Received image from PreviewImageOverlay:" << img;
-
         // Save image into temporary path to be loaded later.
         QString img_path = QDir::tempPath() + '/' + img_name;
-        QFile file{img_path};
+        QSharedPointer<QFile> file{new QFile{img_path, this}};
 
-        if (!file.open(QIODevice::WriteOnly)) {
-                qDebug() << "Failed to create temporary image file";
+        if (!file->open(QIODevice::WriteOnly)) {
+                qDebug() << "Failed to open temporary image file:" << file->errorString();
                 previewDialog_->close();
                 return;
         }
-        if (!img.save(file.fileName(), "PNG")) {
-                qDebug() << "Failed to save image data";
+        if (!img.save(file->fileName(), "PNG")) {
+                qDebug() << "Failed to save image data to:" << file->fileName();
                 previewDialog_->close();
                 return;
         }
+        file->close();
 
-        emit image(img_path);
+        emit image(file);
 
         previewDialog_->close();
 }

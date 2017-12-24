@@ -52,7 +52,7 @@ signals:
         void stoppedTyping();
         void message(QString);
         void command(QString name, QString args);
-        void image(QString name);
+        void image(QSharedPointer<QFile> file);
 
 protected:
         void keyPressEvent(QKeyEvent *event) override;

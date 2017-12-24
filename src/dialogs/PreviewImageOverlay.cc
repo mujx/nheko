@@ -96,10 +96,10 @@ PreviewImageOverlay::init()
         vlayout->addWidget(imageName_);
         vlayout->addLayout(hlayout);
 
-        connect(upload_, &QPushButton::clicked, [=]() {
+        connect(upload_, &QPushButton::clicked, [&]() {
                 emit confirmImageUpload(image_, imageName_->text());
         });
-        connect(cancel_, &QPushButton::clicked, &dialogs::PreviewImageOverlay::close);
+        connect(cancel_, &QPushButton::clicked, [&]() { close(); });
 
         raise();
 }
