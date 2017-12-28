@@ -42,7 +42,8 @@ public:
 
         FileItem(QSharedPointer<MatrixClient> client,
                  const QString &url,
-                 QSharedPointer<QFile> file,
+                 const QSharedPointer<QIODevice> data,
+                 const QString &filename,
                  QWidget *parent = nullptr);
 
         QSize sizeHint() const override;

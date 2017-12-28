@@ -27,6 +27,8 @@
 #include "FlatButton.h"
 #include "LoadingIndicator.h"
 
+#include "dialogs/PreviewImageOverlay.h"
+
 #include "emoji/PickButton.h"
 
 namespace dialogs {
@@ -52,7 +54,7 @@ signals:
         void stoppedTyping();
         void message(QString);
         void command(QString name, QString args);
-        void image(QSharedPointer<QFile> file);
+        void image(const QSharedPointer<QIODevice> iodev, const QString &img_name);
 
 protected:
         void keyPressEvent(QKeyEvent *event) override;
@@ -64,10 +66,10 @@ private:
         size_t history_index_;
         QTimer *typingTimer_;
 
-        dialogs::PreviewImageOverlay *previewDialog_;
+        dialogs::PreviewImageOverlay previewDialog_;
 
         void textChanged();
-        void receiveImage(const QPixmap &img, const QString &img_name);
+        void receiveImage(const QByteArray &img, const QString &img_name);
         void afterCompletion(int);
 };
 
@@ -93,9 +95,9 @@ signals:
         void sendTextMessage(QString msg);
         void sendEmoteMessage(QString msg);
 
-        void uploadImage(QSharedPointer<QFile> file);
-        void uploadFile(QSharedPointer<QFile> file);
-        void uploadAudio(QSharedPointer<QFile> file);
+        void uploadImage(QSharedPointer<QIODevice> data, const QString &filename);
+        void uploadFile(QSharedPointer<QIODevice> data, const QString &filename);
+        void uploadAudio(QSharedPointer<QIODevice> data, const QString &filename);
 
         void sendJoinRoomRequest(const QString &room);
 

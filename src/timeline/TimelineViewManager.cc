@@ -85,7 +85,8 @@ TimelineViewManager::queueEmoteMessage(const QString &msg)
 
 void
 TimelineViewManager::queueImageMessage(const QString &roomid,
-                                       QSharedPointer<QFile> file,
+                                       const QSharedPointer<QIODevice> data,
+                                       const QString &filename,
                                        const QString &url)
 {
         if (!views_.contains(roomid)) {
@@ -95,12 +96,12 @@ TimelineViewManager::queueImageMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<ImageItem, mtx::events::MessageType::Image>(url, file);
+        view->addUserMessage<ImageItem, mtx::events::MessageType::Image>(url, data, filename);
 }
 
 void
 TimelineViewManager::queueFileMessage(const QString &roomid,
-                                      QSharedPointer<QFile> file,
+                                      const QString &filename,
                                       const QString &url)
 {
         if (!views_.contains(roomid)) {
@@ -110,12 +111,12 @@ TimelineViewManager::queueFileMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<FileItem, mtx::events::MessageType::File>(url, file);
+        view->addUserMessage<FileItem, mtx::events::MessageType::File>(url, nullptr, filename);
 }
 
 void
 TimelineViewManager::queueAudioMessage(const QString &roomid,
-                                       QSharedPointer<QFile> file,
+                                       const QString &filename,
                                        const QString &url)
 {
         if (!views_.contains(roomid)) {
@@ -125,7 +126,7 @@ TimelineViewManager::queueAudioMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<AudioItem, mtx::events::MessageType::Audio>(url, file);
+        view->addUserMessage<AudioItem, mtx::events::MessageType::Audio>(url, nullptr, filename);
 }
 
 void

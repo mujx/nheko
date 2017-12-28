@@ -43,20 +43,20 @@ struct PendingMessage
         mtx::events::MessageType ty;
         int txn_id;
         QString body;
-        QSharedPointer<QFile> file;
+        QString filename;
         QString event_id;
         TimelineItem *widget;
 
         PendingMessage(mtx::events::MessageType ty,
                        int txn_id,
                        QString body,
-                       QSharedPointer<QFile> file,
+                       const QString &fn,
                        QString event_id,
                        TimelineItem *widget)
           : ty(ty)
           , txn_id(txn_id)
           , body(body)
-          , file(file)
+          , filename(fn)
           , event_id(event_id)
           , widget(widget)
         {}
@@ -87,7 +87,9 @@ public:
         void addUserMessage(mtx::events::MessageType ty, const QString &msg);
 
         template<class Widget, mtx::events::MessageType MsgType>
-        void addUserMessage(const QString &url, QSharedPointer<QFile> file);
+        void addUserMessage(const QString &url,
+                            const QSharedPointer<QIODevice> data,
+                            const QString &filename);
         void updatePendingMessage(int txn_id, QString event_id);
         void scrollDown();
         void addDateSeparator(QDateTime datetime, int position);
@@ -216,11 +218,13 @@ private:
 
 template<class Widget, mtx::events::MessageType MsgType>
 void
-TimelineView::addUserMessage(const QString &url, QSharedPointer<QFile> file)
+TimelineView::addUserMessage(const QString &url,
+                             const QSharedPointer<QIODevice> data,
+                             const QString &filename)
 {
         auto with_sender = lastSender_ != local_user_;
 
-        auto widget = new Widget(client_, url, file, this);
+        auto widget = new Widget(client_, url, data, filename, this);
 
         TimelineItem *view_item =
           new TimelineItem(widget, local_user_, with_sender, scroll_widget_);
@@ -234,7 +238,7 @@ TimelineView::addUserMessage(const QString &url, QSharedPointer<QFile> file)
 
         int txn_id = client_->incrementTransactionId();
 
-        PendingMessage message(MsgType, txn_id, url, file, "", view_item);
+        PendingMessage message(MsgType, txn_id, url, filename, "", view_item);
         handleNewUserMessage(message);
 }
 

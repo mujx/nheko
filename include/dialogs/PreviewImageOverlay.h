@@ -17,12 +17,14 @@
 
 #pragma once
 
+#include <QLabel>
+#include <QLineEdit>
 #include <QPixmap>
 #include <QWidget>
 
-class QLabel;
-class QLineEdit;
-class QPushButton;
+#include "FlatButton.h"
+
+class QMimeData;
 
 namespace dialogs {
 
@@ -30,22 +32,26 @@ class PreviewImageOverlay : public QWidget
 {
         Q_OBJECT
 public:
-        PreviewImageOverlay(QPixmap image, QWidget *parent = nullptr);
-        PreviewImageOverlay(const QString &path, QWidget *parent = nullptr);
+        PreviewImageOverlay(QWidget *parent = nullptr);
+
+        void setImageAndCreate(const QByteArray &data, const QString &type);
+        void setImageAndCreate(const QString &path);
 
 signals:
-        void confirmImageUpload(const QPixmap &img, const QString &img_name);
+        void confirmImageUpload(const QByteArray &data, const QString &img_name);
 
 private:
         void init();
 
         QPixmap image_;
+        QByteArray imageData_;
+        QString imagePath_;
 
-        QLabel *titleLabel_;
-        QLabel *imageLabel_;
-        QLineEdit *imageName_;
+        QLabel titleLabel_;
+        QLabel imageLabel_;
+        QLineEdit imageName_;
 
-        QPushButton *upload_;
-        QPushButton *cancel_;
+        FlatButton upload_;
+        FlatButton cancel_;
 };
 } // dialogs

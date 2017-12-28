@@ -486,7 +486,7 @@ TimelineView::addUserMessage(mtx::events::MessageType ty, const QString &body)
         lastSender_ = local_user_;
 
         int txn_id = client_->incrementTransactionId();
-        PendingMessage message(ty, txn_id, body, nullptr, "", view_item);
+        PendingMessage message(ty, txn_id, body, "", "", view_item);
         handleNewUserMessage(message);
 }
 
@@ -513,8 +513,8 @@ TimelineView::sendNextPendingMessage()
                 client_->sendRoomMessage(m.ty,
                                          m.txn_id,
                                          room_id_,
-                                         m.file->fileName(),
-                                         QFileInfo(*m.file),
+                                         m.filename,
+                                         QFileInfo(m.filename),
                                          m.body);
                 break;
         default:

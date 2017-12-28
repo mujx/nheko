@@ -16,36 +16,41 @@
  */
 
 #include <QApplication>
+#include <QBuffer>
 #include <QDebug>
-#include <QDesktopWidget>
+#include <QFile>
 #include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPainter>
-#include <QPushButton>
 #include <QVBoxLayout>
+
+#include "Config.h"
 
 #include "dialogs/PreviewImageOverlay.h"
 
 using namespace dialogs;
 
-PreviewImageOverlay::PreviewImageOverlay(QPixmap image, QWidget *parent)
+PreviewImageOverlay::PreviewImageOverlay(QWidget *parent)
   : QWidget{parent}
-  , image_{image}
+  , titleLabel_{tr("Upload image?"), this}
+  , imageLabel_{this}
+  , imageName_{tr("clipboard"), this}
+  , upload_{tr("Upload"), this}
+  , cancel_{tr("Cancel"), this}
 {
-        init();
-}
+        auto hlayout = new QHBoxLayout;
+        hlayout->addWidget(&upload_);
+        hlayout->addWidget(&cancel_);
 
-PreviewImageOverlay::PreviewImageOverlay(const QString &path, QWidget *parent)
-  : QWidget{parent}
-{
-        if (!image_.load(path)) {
-                qDebug() << "Failed to read image from:" << path;
+        auto vlayout = new QVBoxLayout{this};
+        vlayout->addWidget(&titleLabel_);
+        vlayout->addWidget(&imageLabel_);
+        vlayout->addWidget(&imageName_);
+        vlayout->addLayout(hlayout);
+
+        connect(&upload_, &QPushButton::clicked, [&]() {
+                emit confirmImageUpload(imageData_, imageName_.text());
                 close();
-                return;
-        }
-
-        init();
+        });
+        connect(&cancel_, &QPushButton::clicked, [&]() { close(); });
 }
 
 void
@@ -56,50 +61,61 @@ PreviewImageOverlay::init()
         auto center   = window->frameGeometry().center();
         auto img_size = image_.size();
 
+        imageName_.setText(imagePath_);
+
         setAutoFillBackground(true);
         setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
         setWindowModality(Qt::WindowModal);
-        setPalette(QApplication::palette(window));
 
-        titleLabel_ = new QLabel{tr("Upload image?"), this};
-        imageLabel_ = new QLabel{this};
-        imageName_  = new QLineEdit{tr("nheko_pasted_img.png"), this};
-        upload_     = new QPushButton{tr("Upload"), this};
-        cancel_     = new QPushButton{tr("Cancel"), this};
-
-        titleLabel_->setStyleSheet("font-weight: bold; font-size: 22px;");
-        titleLabel_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        titleLabel_->setAlignment(Qt::AlignCenter);
-        imageLabel_->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-        imageLabel_->setAlignment(Qt::AlignCenter);
-        imageName_->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-        imageName_->setAlignment(Qt::AlignCenter);
-        upload_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        cancel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        titleLabel_.setStyleSheet(
+          QString{"font-weight: bold; font-size: %1px;"}.arg(conf::headerFontSize));
+        titleLabel_.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        titleLabel_.setAlignment(Qt::AlignCenter);
+        imageLabel_.setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        imageLabel_.setAlignment(Qt::AlignCenter);
+        imageName_.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        imageName_.setAlignment(Qt::AlignCenter);
+        upload_.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        cancel_.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        upload_.setFontSize(conf::btn::fontSize);
+        cancel_.setFontSize(conf::btn::fontSize);
 
         // Scale image preview to the size of the current window if it is larger.
         if ((img_size.height() * img_size.width()) > (winsize.height() * winsize.width())) {
-                imageLabel_->setPixmap(image_.scaled(winsize, Qt::KeepAspectRatio));
+                imageLabel_.setPixmap(image_.scaled(winsize, Qt::KeepAspectRatio));
         } else {
-                imageLabel_->setPixmap(image_);
+                imageLabel_.setPixmap(image_);
                 move(center.x() - (width() * 0.5), center.y() - (height() * 0.5));
         }
-        imageLabel_->setScaledContents(false);
-
-        auto hlayout = new QHBoxLayout;
-        hlayout->addWidget(upload_);
-        hlayout->addWidget(cancel_);
-
-        auto vlayout = new QVBoxLayout{this};
-        vlayout->addWidget(titleLabel_);
-        vlayout->addWidget(imageLabel_);
-        vlayout->addWidget(imageName_);
-        vlayout->addLayout(hlayout);
-
-        connect(upload_, &QPushButton::clicked, [&]() {
-                emit confirmImageUpload(image_, imageName_->text());
-        });
-        connect(cancel_, &QPushButton::clicked, [&]() { close(); });
+        imageLabel_.setScaledContents(false);
 
         raise();
+}
+
+void
+PreviewImageOverlay::setImageAndCreate(const QByteArray &data, const QString &type)
+{
+        imageData_ = data;
+        image_.loadFromData(imageData_);
+        imagePath_ = "clipboard." + type;
+
+        init();
+}
+
+void
+PreviewImageOverlay::setImageAndCreate(const QString &path)
+{
+        QFile file{path};
+
+        if (!file.open(QIODevice::ReadOnly)) {
+                qDebug() << "Failed to read image from:" << path;
+                close();
+                return;
+        }
+
+        imageData_ = file.readAll();
+        image_.loadFromData(imageData_);
+        imagePath_ = path;
+
+        init();
 }

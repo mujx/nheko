@@ -17,9 +17,9 @@
 
 #include <QAbstractTextDocumentLayout>
 #include <QApplication>
+#include <QBuffer>
 #include <QClipboard>
 #include <QDebug>
-#include <QFile>
 #include <QFileDialog>
 #include <QImageReader>
 #include <QMimeData>
@@ -30,13 +30,13 @@
 
 #include "Config.h"
 #include "TextInputWidget.h"
-#include "dialogs/PreviewImageOverlay.h"
 
 static constexpr size_t INPUT_HISTORY_SIZE = 127;
 
 FilteredTextEdit::FilteredTextEdit(QWidget *parent)
   : QTextEdit{parent}
   , history_index_{0}
+  , previewDialog_{parent}
 {
         connect(document()->documentLayout(),
                 &QAbstractTextDocumentLayout::documentSizeChanged,
@@ -54,6 +54,12 @@ FilteredTextEdit::FilteredTextEdit(QWidget *parent)
         typingTimer_->setSingleShot(true);
 
         connect(typingTimer_, &QTimer::timeout, this, &FilteredTextEdit::stopTyping);
+        connect(&previewDialog_,
+                &dialogs::PreviewImageOverlay::confirmImageUpload,
+                this,
+                &FilteredTextEdit::receiveImage);
+
+        previewDialog_.hide();
 }
 
 void
@@ -116,23 +122,35 @@ void
 FilteredTextEdit::insertFromMimeData(const QMimeData *source)
 {
         if (source->hasImage()) {
-                QPixmap const img = qvariant_cast<QPixmap>(source->imageData());
-                previewDialog_    = new dialogs::PreviewImageOverlay{img, this};
-                connect(previewDialog_,
-                        &dialogs::PreviewImageOverlay::confirmImageUpload,
-                        this,
-                        &FilteredTextEdit::receiveImage);
-                previewDialog_->show();
+                const QImage image = qvariant_cast<QImage>(source->imageData());
+
+                const auto formats = source->formats();
+                const auto idx     = formats.indexOf(
+                  QRegularExpression{"image/\\w+", QRegularExpression::CaseInsensitiveOption});
+
+                // Defaulting to PNG format.
+                QString type = "png";
+                if (idx != -1) {
+                        type = formats.at(idx).split('/')[1];
+                }
+
+                // Encode raw pixel data of image.
+                QByteArray data;
+                QBuffer buffer(&data);
+                buffer.open(QIODevice::ReadWrite);
+                if (!image.save(&buffer, type.toLocal8Bit().data())) {
+                        qWarning() << "Failed to encode image into" << type;
+                        return;
+                }
+
+                previewDialog_.setImageAndCreate(data, type);
+                previewDialog_.show();
         } else if (source->hasFormat("x-special/gnome-copied-files") &&
                    QImageReader{source->text()}.canRead()) {
                 // Special case for X11 users. See "Notes for X11 Users" in source.
                 // Source: http://doc.qt.io/qt-5/qclipboard.html
-                previewDialog_ = new dialogs::PreviewImageOverlay{source->text(), this};
-                connect(previewDialog_,
-                        &dialogs::PreviewImageOverlay::confirmImageUpload,
-                        this,
-                        &FilteredTextEdit::receiveImage);
-                previewDialog_->show();
+                previewDialog_.setImageAndCreate(source->text());
+                previewDialog_.show();
         } else {
                 QTextEdit::insertFromMimeData(source);
         }
@@ -209,27 +227,10 @@ FilteredTextEdit::textChanged()
 }
 
 void
-FilteredTextEdit::receiveImage(const QPixmap &img, const QString &img_name)
+FilteredTextEdit::receiveImage(const QByteArray &img, const QString &img_name)
 {
-        // Save image into temporary path to be loaded later.
-        QString img_path = QDir::tempPath() + '/' + img_name;
-        QSharedPointer<QFile> file{new QFile{img_path, this}};
-
-        if (!file->open(QIODevice::WriteOnly)) {
-                qDebug() << "Failed to open temporary image file:" << file->errorString();
-                previewDialog_->close();
-                return;
-        }
-        if (!img.save(file->fileName(), "PNG")) {
-                qDebug() << "Failed to save image data to:" << file->fileName();
-                previewDialog_->close();
-                return;
-        }
-        file->close();
-
-        emit image(file);
-
-        previewDialog_->close();
+        QSharedPointer<QBuffer> buffer{new QBuffer{const_cast<QByteArray *>(&img), this}};
+        emit image(buffer, img_name);
 }
 
 TextInputWidget::TextInputWidget(QWidget *parent)
@@ -354,11 +355,11 @@ TextInputWidget::openFileSelection()
 
         QSharedPointer<QFile> file{new QFile{fileName, this}};
         if (format == "image")
-                emit uploadImage(file);
+                emit uploadImage(file, fileName);
         else if (format == "audio")
-                emit uploadAudio(file);
+                emit uploadAudio(file, fileName);
         else
-                emit uploadFile(file);
+                emit uploadFile(file, fileName);
 
         showUploadSpinner();
 }
