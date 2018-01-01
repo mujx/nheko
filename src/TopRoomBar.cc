@@ -30,11 +30,10 @@
 
 TopRoomBar::TopRoomBar(QWidget *parent)
   : QWidget(parent)
-  , buttonSize_{ 32 }
+  , buttonSize_{32}
 {
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        setMinimumSize(QSize(0, 65));
-        setStyleSheet("background-color: #fff; color: #171919;");
+        setFixedHeight(65);
 
         topLayout_ = new QHBoxLayout();
         topLayout_->setSpacing(10);

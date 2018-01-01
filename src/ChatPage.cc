@@ -72,8 +72,8 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         topLayout_->addWidget(splitter);
 
         // SideBar
-        sideBar_ = new QWidget(this);
-        sideBar_->setMinimumSize(QSize(ui::sidebar::NormalSize, 0));
+        sideBar_ = new QFrame(this);
+        sideBar_->setMinimumSize(QSize(ui::sidebar::NormalSize, parent->height()));
         sideBarLayout_ = new QVBoxLayout(sideBar_);
         sideBarLayout_->setSpacing(0);
         sideBarLayout_->setMargin(0);
@@ -93,40 +93,33 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
 
         sideBarTopWidget_ = new QWidget(sideBar_);
         sideBarTopWidget_->setStyleSheet("background-color: #d6dde3; color: #ebebeb;");
+        sidebarActions_ = new SideBarActions(this);
+        connect(
+          sidebarActions_, &SideBarActions::showSettings, this, &ChatPage::showUserSettingsPage);
 
-        sideBarTopLayout_->addWidget(sideBarTopWidget_);
+        user_info_widget_ = new UserInfoWidget(sideBar_);
+        room_list_        = new RoomList(client, sideBar_);
 
-        sideBarTopWidgetLayout_ = new QVBoxLayout(sideBarTopWidget_);
-        sideBarTopWidgetLayout_->setSpacing(0);
-        sideBarTopWidgetLayout_->setMargin(0);
+        sideBarLayout_->addWidget(user_info_widget_);
+        sideBarLayout_->addWidget(room_list_);
+        sideBarLayout_->addWidget(sidebarActions_);
 
         // Content
-        content_       = new QWidget(this);
+        content_       = new QFrame(this);
         contentLayout_ = new QVBoxLayout(content_);
         contentLayout_->setSpacing(0);
         contentLayout_->setMargin(0);
 
-        topBarLayout_ = new QHBoxLayout();
-        topBarLayout_->setSpacing(0);
-        mainContentLayout_ = new QVBoxLayout();
-        mainContentLayout_->setSpacing(0);
-        mainContentLayout_->setMargin(0);
+        top_bar_      = new TopRoomBar(this);
+        view_manager_ = new TimelineViewManager(client, this);
 
-        contentLayout_->addLayout(topBarLayout_);
-        contentLayout_->addLayout(mainContentLayout_);
+        contentLayout_->addWidget(top_bar_);
+        contentLayout_->addWidget(view_manager_);
 
         // Splitter
         splitter->addWidget(sideBar_);
         splitter->addWidget(content_);
-
-        room_list_ = new RoomList(client, sideBar_);
-        sideBarMainLayout_->addWidget(room_list_);
-
-        top_bar_ = new TopRoomBar(this);
-        topBarLayout_->addWidget(top_bar_);
-
-        view_manager_ = new TimelineViewManager(client, this);
-        mainContentLayout_->addWidget(view_manager_);
+        splitter->setSizes({ui::sidebar::NormalSize, parent->width() - ui::sidebar::NormalSize});
 
         text_input_    = new TextInputWidget(this);
         typingDisplay_ = new TypingDisplay(this);
@@ -135,6 +128,8 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
 
         user_info_widget_ = new UserInfoWidget(sideBarTopWidget_);
         sideBarTopWidgetLayout_->addWidget(user_info_widget_);
+        typingRefresher_ = new QTimer(this);
+        typingRefresher_->setInterval(TYPING_REFRESH_TIMEOUT);
 
         connect(user_info_widget_, SIGNAL(logout()), client_.data(), SLOT(logout()));
         connect(client_.data(), SIGNAL(loggedOut()), this, SLOT(logout()));
@@ -150,6 +145,7 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
 
                 typingDisplay_->setUsers(users);
         });
+        connect(room_list_, &RoomList::roomChanged, text_input_, &TextInputWidget::stopTyping);
 
         connect(room_list_, &RoomList::roomChanged, this, &ChatPage::changeTopRoomInfo);
         connect(room_list_, &RoomList::roomChanged, text_input_, &TextInputWidget::focusLineEdit);
@@ -170,6 +166,20 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                                 room_list_->updateUnreadMessageCount(roomid, count);
                 });
 
+        connect(text_input_, &TextInputWidget::startedTyping, this, [=]() {
+                typingRefresher_->start();
+                client_->sendTypingNotification(current_room_);
+        });
+
+        connect(text_input_, &TextInputWidget::stoppedTyping, this, [=]() {
+                typingRefresher_->stop();
+                client_->removeTypingNotification(current_room_);
+        });
+
+        connect(typingRefresher_, &QTimer::timeout, this, [=]() {
+                client_->sendTypingNotification(current_room_);
+        });
+
         connect(view_manager_,
                 &TimelineViewManager::updateRoomsLastMessage,
                 room_list_,
@@ -183,12 +193,12 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
         connect(text_input_,
                 SIGNAL(sendTextMessage(const QString &)),
                 view_manager_,
-                SLOT(sendTextMessage(const QString &)));
+                SLOT(queueTextMessage(const QString &)));
 
         connect(text_input_,
                 SIGNAL(sendEmoteMessage(const QString &)),
                 view_manager_,
-                SLOT(sendEmoteMessage(const QString &)));
+                SLOT(queueEmoteMessage(const QString &)));
 
         connect(text_input_,
                 &TextInputWidget::sendJoinRoomRequest,
@@ -205,7 +215,7 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client, QWidget *parent)
                 this,
                 [=](QString roomid, QString filename, QString url) {
                         text_input_->hideUploadSpinner();
-                        view_manager_->sendImageMessage(roomid, filename, url);
+                        view_manager_->queueImageMessage(roomid, filename, url);
                 });
 
         connect(client_.data(),
@@ -604,6 +614,7 @@ ChatPage::showQuickSwitcher()
                 connect(quickSwitcher_.data(), &QuickSwitcher::closing, this, [=]() {
                         if (!this->quickSwitcherModal_.isNull())
                                 this->quickSwitcherModal_->fadeOut();
+                        this->text_input_->setFocus(Qt::FocusReason::PopupFocusReason);
                 });
         }
 
@@ -617,8 +628,12 @@ ChatPage::showQuickSwitcher()
 
         QMap<QString, QString> rooms;
 
-        for (auto it = state_manager_.constBegin(); it != state_manager_.constEnd(); ++it)
-                rooms.insert(it.value().getName(), it.key());
+        for (auto it = state_manager_.constBegin(); it != state_manager_.constEnd(); ++it) {
+                QString deambiguator = it.value().canonical_alias.content().alias();
+                if (deambiguator == "")
+                        deambiguator = it.key();
+                rooms.insert(it.value().getName() + " (" + deambiguator + ")", it.key());
+        }
 
         quickSwitcher_->setRoomList(rooms);
         quickSwitcherModal_->fadeIn();
@@ -662,13 +677,20 @@ ChatPage::updateTypingUsers(const QString &roomid, const QList<QString> &user_id
 {
         QStringList users;
 
-        for (const auto uid : user_ids)
+        QSettings settings;
+        QString user_id = settings.value("auth/user_id").toString();
+
+        for (const auto uid : user_ids) {
+                if (uid == user_id)
+                        continue;
                 users.append(TimelineViewManager::displayName(uid));
+        }
 
         users.sort();
 
-        if (current_room_ == roomid)
+        if (current_room_ == roomid) {
                 typingDisplay_->setUsers(users);
+        }
 
         typingUsers_.insert(roomid, users);
 }

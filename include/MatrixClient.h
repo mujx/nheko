@@ -19,6 +19,7 @@
 
 #include <QNetworkAccessManager>
 #include <QUrl>
+#include <QFileInfo>
 
 #include "MessageEvent.h"
 
@@ -40,8 +41,10 @@ public:
         void initialSync() noexcept;
         void sync() noexcept;
         void sendRoomMessage(matrix::events::MessageEventType ty,
+                             int txnId,
                              const QString &roomid,
                              const QString &msg,
+                             const QFileInfo &fileinfo,
                              const QString &url = "") noexcept;
         void login(const QString &username, const QString &password) noexcept;
         void registerUser(const QString &username,
@@ -59,10 +62,12 @@ public:
         void uploadImage(const QString &roomid, const QString &filename);
         void joinRoom(const QString &roomIdOrAlias);
         void leaveRoom(const QString &roomId);
+        void sendTypingNotification(const QString &roomid, int timeoutInMillis = 20000);
+        void removeTypingNotification(const QString &roomid);
 
         QUrl getHomeServer() { return server_; };
         int transactionId() { return txn_id_; };
-        void incrementTransactionId() { txn_id_ += 1; };
+        int incrementTransactionId() { return ++txn_id_; };
 
         void reset() noexcept;
 
@@ -109,6 +114,7 @@ signals:
         void syncFailed(const QString &msg);
         void joinFailed(const QString &msg);
         void messageSent(const QString &event_id, const QString &roomid, const int txn_id);
+        void messageSendFailed(const QString &roomid, const int txn_id);
         void emoteSent(const QString &event_id, const QString &roomid, const int txn_id);
         void messagesRetrieved(const QString &room_id, const RoomMessages &msgs);
         void joinedRoom(const QString &room_id);

@@ -38,9 +38,9 @@
 
 MatrixClient::MatrixClient(QString server, QObject *parent)
   : QNetworkAccessManager(parent)
-  , clientApiUrl_{ "/_matrix/client/r0" }
-  , mediaApiUrl_{ "/_matrix/media/r0" }
-  , server_{ "https://" + server }
+  , clientApiUrl_{"/_matrix/client/r0"}
+  , mediaApiUrl_{"/_matrix/media/r0"}
+  , server_{"https://" + server}
 {
         QSettings settings;
         txn_id_ = settings.value("client/transaction_id", 1).toInt();
@@ -69,7 +69,7 @@ MatrixClient::login(const QString &username, const QString &password) noexcept
 {
         QUrl endpoint(server_);
         endpoint.setPath(clientApiUrl_ + "/login");
-
+        
         QNetworkRequest request(endpoint);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -119,7 +119,6 @@ MatrixClient::login(const QString &username, const QString &password) noexcept
                 }
         });
 }
-
 void
 MatrixClient::logout() noexcept
 {
@@ -260,9 +259,11 @@ MatrixClient::sync() noexcept
 }
 
 void
-MatrixClient::sendRoomMessage(matrix::events::MessageEventType ty,
+MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
+                              int txnId,
                               const QString &roomid,
                               const QString &msg,
+                              const QFileInfo &fileinfo,
                               const QString &url) noexcept
 {
         QUrlQuery query;
@@ -939,4 +940,54 @@ MatrixClient::leaveRoom(const QString &roomId)
 
                 emit leftRoom(roomId);
         });
+}
+
+void
+MatrixClient::sendTypingNotification(const QString &roomid, int timeoutInMillis)
+{
+        QSettings settings;
+        QString user_id = settings.value("auth/user_id").toString();
+
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + QString("/rooms/%1/typing/%2").arg(roomid).arg(user_id));
+
+        endpoint.setQuery(query);
+
+        QString msgType("");
+        QJsonObject body;
+
+        body = {{"typing", true}, {"timeout", timeoutInMillis}};
+
+        QNetworkRequest request(QString(endpoint.toEncoded()));
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+        put(request, QJsonDocument(body).toJson(QJsonDocument::Compact));
+}
+
+void
+MatrixClient::removeTypingNotification(const QString &roomid)
+{
+        QSettings settings;
+        QString user_id = settings.value("auth/user_id").toString();
+
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + QString("/rooms/%1/typing/%2").arg(roomid).arg(user_id));
+
+        endpoint.setQuery(query);
+
+        QString msgType("");
+        QJsonObject body;
+
+        body = {{"typing", false}};
+
+        QNetworkRequest request(QString(endpoint.toEncoded()));
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+        put(request, QJsonDocument(body).toJson(QJsonDocument::Compact));
 }

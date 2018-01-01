@@ -33,12 +33,8 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QWidget(parent)
   , client_(client)
 {
-        setStyleSheet("QWidget { border: none; }");
-
-        QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        setSizePolicy(sizePolicy);
+        setStyleSheet(
+          "border: 1px solid #ccc; border-right: 0px solid #000; border-left: 0px solid #000;");
 
         topLayout_ = new QVBoxLayout(this);
         topLayout_->setSpacing(0);
@@ -51,7 +47,7 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
         scrollArea_->setWidgetResizable(true);
         scrollArea_->setAlignment(Qt::AlignLeading | Qt::AlignTop | Qt::AlignVCenter);
 
-        scrollAreaContents_ = new QWidget();
+        scrollAreaContents_ = new QWidget(this);
 
         contentsLayout_ = new QVBoxLayout(scrollAreaContents_);
         contentsLayout_->setSpacing(0);

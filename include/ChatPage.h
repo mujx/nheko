@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <QFrame>
 #include <QHBoxLayout>
 #include <QMap>
 #include <QPixmap>
@@ -47,8 +48,9 @@ class UserInfoWidget;
 class JoinedRoom;
 class LeftRoom;
 
-constexpr int CONSENSUS_TIMEOUT    = 1000;
-constexpr int SHOW_CONTENT_TIMEOUT = 3000;
+constexpr int CONSENSUS_TIMEOUT      = 1000;
+constexpr int SHOW_CONTENT_TIMEOUT   = 3000;
+constexpr int TYPING_REFRESH_TIMEOUT = 10000;
 
 class ChatPage : public QWidget
 {
@@ -69,6 +71,7 @@ signals:
         void unreadMessages(int count);
         void showNotification(const QString &msg);
         void showLoginPage(const QString &msg);
+        void showUserSettingsPage();
 
 private slots:
         void showUnreadMessageNotification(int count);
@@ -119,10 +122,8 @@ private:
         QWidget *sideBarTopWidget_;
         QVBoxLayout *sideBarTopWidgetLayout_;
 
-        QWidget *content_;
+        QFrame *content_;
         QVBoxLayout *contentLayout_;
-        QHBoxLayout *topBarLayout_;
-        QVBoxLayout *mainContentLayout_;
 
         CommunitiesList *communitiesList_;
         RoomList *room_list_;
@@ -153,6 +154,7 @@ private:
 
         // Keeps track of the users currently typing on each room.
         QMap<QString, QList<QString>> typingUsers_;
+        QTimer *typingRefresher_;
 
         QSharedPointer<QuickSwitcher> quickSwitcher_;
         QSharedPointer<OverlayModal> quickSwitcherModal_;

@@ -31,10 +31,15 @@ TimelineViewManager::TimelineViewManager(QSharedPointer<MatrixClient> client, QW
   : QStackedWidget(parent)
   , client_(client)
 {
-        setStyleSheet("QWidget { background: #fff; color: #e8e8e8; border: none;}");
+        setStyleSheet("border: none;");
 
         connect(
           client_.data(), &MatrixClient::messageSent, this, &TimelineViewManager::messageSent);
+
+        connect(client_.data(),
+                &MatrixClient::messageSendFailed,
+                this,
+                &TimelineViewManager::messageSendFailed);
 }
 
 TimelineViewManager::~TimelineViewManager()
@@ -53,30 +58,34 @@ TimelineViewManager::messageSent(const QString &event_id, const QString &roomid,
 }
 
 void
-TimelineViewManager::sendTextMessage(const QString &msg)
+TimelineViewManager::messageSendFailed(const QString &roomid, int txn_id)
+{
+        auto view = views_[roomid];
+        view->handleFailedMessage(txn_id);
+}
+
+void
+TimelineViewManager::queueTextMessage(const QString &msg)
 {
         auto room_id = active_room_;
         auto view    = views_[room_id];
 
-        view->addUserMessage(matrix::events::MessageEventType::Text, msg, client_->transactionId());
-        client_->sendRoomMessage(matrix::events::MessageEventType::Text, room_id, msg);
+        view->addUserMessage(matrix::events::MessageEventType::Text, msg);
 }
 
 void
-TimelineViewManager::sendEmoteMessage(const QString &msg)
+TimelineViewManager::queueEmoteMessage(const QString &msg)
 {
         auto room_id = active_room_;
         auto view    = views_[room_id];
 
-        view->addUserMessage(
-          matrix::events::MessageEventType::Emote, msg, client_->transactionId());
-        client_->sendRoomMessage(matrix::events::MessageEventType::Emote, room_id, msg);
+        view->addUserMessage(matrix::events::MessageEventType::Emote, msg);
 }
 
 void
-TimelineViewManager::sendImageMessage(const QString &roomid,
-                                      const QString &filename,
-                                      const QString &url)
+TimelineViewManager::queueImageMessage(const QString &roomid,
+                                       const QString &filename,
+                                       const QString &url)
 {
         if (!views_.contains(roomid)) {
                 qDebug() << "Cannot send m.image message to a non-managed view";
@@ -85,9 +94,7 @@ TimelineViewManager::sendImageMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage(url, filename, client_->transactionId());
-        client_->sendRoomMessage(
-          matrix::events::MessageEventType::Image, roomid, QFileInfo(filename).fileName(), url);
+        view->addUserMessage(url, filename);
 }
 
 void
@@ -196,7 +203,7 @@ QString
 TimelineViewManager::chooseRandomColor()
 {
         std::random_device random_device;
-        std::mt19937 engine{ random_device() };
+        std::mt19937 engine{random_device()};
         std::uniform_real_distribution<float> dist(0, 1);
 
         float hue        = dist(engine);

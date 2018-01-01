@@ -5,12 +5,9 @@
 #include "Theme.h"
 
 SideBarActions::SideBarActions(QWidget *parent)
-  : QWidget{ parent }
+  : QWidget{parent}
 {
         setFixedHeight(conf::sidebarActions::height);
-
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-        setSizePolicy(sizePolicy);
 
         layout_ = new QHBoxLayout(this);
         layout_->setMargin(0);
@@ -45,6 +42,8 @@ SideBarActions::SideBarActions(QWidget *parent)
         layout_->addWidget(createRoomBtn_);
         layout_->addWidget(joinRoomBtn_);
         layout_->addWidget(settingsBtn_);
+
+        connect(settingsBtn_, &QPushButton::clicked, this, &SideBarActions::showSettings);
 }
 
 SideBarActions::~SideBarActions() {}

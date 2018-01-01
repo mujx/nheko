@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "null",
+            "includePath": [],
+            "defines": [],
+            "browse": {
+                "path": [],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 3
+}

@@ -31,36 +31,36 @@
 #include "RegisterPage.h"
 #include "SnackBar.h"
 #include "TrayIcon.h"
+#include "UserSettingsPage.h"
 #include "WelcomePage.h"
 
 MainWindow *MainWindow::instance_ = nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
-  , progressModal_{ nullptr }
-  , spinner_{ nullptr }
+  , progressModal_{nullptr}
+  , spinner_{nullptr}
 {
-        QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-        setSizePolicy(sizePolicy);
         setWindowTitle("nheko");
         setObjectName("MainWindow");
         setStyleSheet("QWidget#MainWindow {background-color: #fff}");
 
         restoreWindowSize();
-        setMinimumSize(QSize(conf::window::minWidth, conf::window::minHeight));
 
         QFont font("Open Sans");
         font.setPixelSize(conf::fontSize);
         font.setStyleStrategy(QFont::PreferAntialias);
         setFont(font);
 
-        client_   = QSharedPointer<MatrixClient>(new MatrixClient("matrix.org"));
-        trayIcon_ = new TrayIcon(":/logos/nheko-32.png", this);
+        client_       = QSharedPointer<MatrixClient>(new MatrixClient("matrix.org"));
+        userSettings_ = QSharedPointer<UserSettings>(new UserSettings);
+        trayIcon_     = new TrayIcon(":/logos/nheko-32.png", this);
 
-        welcome_page_  = new WelcomePage(this);
-        login_page_    = new LoginPage(client_, this);
-        register_page_ = new RegisterPage(client_, this);
-        chat_page_     = new ChatPage(client_, this);
+        welcome_page_     = new WelcomePage(this);
+        login_page_       = new LoginPage(client_, this);
+        register_page_    = new RegisterPage(client_, this);
+        chat_page_        = new ChatPage(client_, this);
+        userSettingsPage_ = new UserSettingsPage(userSettings_, this);
 
         // Initialize sliding widget manager.
         pageStack_ = new QStackedWidget(this);
@@ -68,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent)
         pageStack_->addWidget(login_page_);
         pageStack_->addWidget(register_page_);
         pageStack_->addWidget(chat_page_);
+        pageStack_->addWidget(userSettingsPage_);
 
         setCentralWidget(pageStack_);
 
@@ -86,12 +87,21 @@ MainWindow::MainWindow(QWidget *parent)
                 showLoginPage();
         });
 
+        connect(userSettingsPage_, &UserSettingsPage::moveBack, this, [=]() {
+                pageStack_->setCurrentWidget(chat_page_);
+        });
+
+        connect(
+          userSettingsPage_, SIGNAL(trayOptionChanged(bool)), trayIcon_, SLOT(setVisible(bool)));
+
         connect(trayIcon_,
                 SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
                 this,
                 SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
         connect(chat_page_, SIGNAL(contentLoaded()), this, SLOT(removeOverlayProgressBar()));
+        connect(
+          chat_page_, &ChatPage::showUserSettingsPage, this, &MainWindow::showUserSettingsPage);
 
         connect(client_.data(),
                 SIGNAL(loginSuccess(QString, QString, QString)),
@@ -101,7 +111,14 @@ MainWindow::MainWindow(QWidget *parent)
         QShortcut *quitShortcut = new QShortcut(QKeySequence::Quit, this);
         connect(quitShortcut, &QShortcut::activated, this, QApplication::quit);
 
+        QShortcut *quickSwitchShortcut = new QShortcut(QKeySequence("Ctrl+K"), this);
+        connect(quickSwitchShortcut, &QShortcut::activated, this, [=]() {
+                chat_page_->showQuickSwitcher();
+        });
+
         QSettings settings;
+
+        trayIcon_->setVisible(userSettings_->isTrayEnabled());
 
         if (hasActiveUser()) {
                 QString token       = settings.value("auth/access_token").toString();
@@ -235,9 +252,15 @@ MainWindow::showRegisterPage()
 }
 
 void
+MainWindow::showUserSettingsPage()
+{
+        pageStack_->setCurrentWidget(userSettingsPage_);
+}
+
+void
 MainWindow::closeEvent(QCloseEvent *event)
 {
-        if (isVisible()) {
+        if (isVisible() && userSettings_->isTrayEnabled()) {
                 event->ignore();
                 hide();
         }

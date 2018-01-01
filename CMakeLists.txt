@@ -1,9 +1,24 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(nheko C CXX)
-
 option(BUILD_TESTS "Build all tests" OFF)
 option(APPVEYOR_BUILD "Build on appveyor" OFF)
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+# Include Qt basic functions
+include(QtCommon)
+
+project(nheko LANGUAGES C CXX VERSION 0.1.0)
+
+# Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
+fix_project_version()
+
+# Set additional project information
+set(COMPANY "Nheko")
+set(COPYRIGHT "Copyright (c) 2017 Mujx")
+set(IDENTIFIER "com.mujx.nheko")
+
+add_project_meta(META_FILES_TO_INCLUDE)
 
 #
 # LMDB
@@ -156,6 +171,7 @@ set(SRC_FILES
     src/RoomMessages.cc
     src/RoomState.cc
     src/SideBarActions.cc
+    src/UserSettingsPage.cc
     src/Splitter.cc
     src/Sync.cc
     src/TextInputWidget.cc
@@ -184,6 +200,7 @@ set(SRC_FILES
     src/ui/RippleOverlay.cc
     src/ui/OverlayWidget.cc
     src/ui/TextField.cc
+    src/ui/ToggleButton.cc
     src/ui/Theme.cc
     src/ui/ThemeManager.cc
 )
@@ -245,6 +262,7 @@ qt5_wrap_cpp(MOC_HEADERS
     include/RoomInfoListItem.h
     include/RoomList.h
     include/SideBarActions.h
+    include/UserSettingsPage.h
     include/Splitter.h
     include/TextInputWidget.h
     include/TimelineItem.h
@@ -268,6 +286,7 @@ qt5_wrap_cpp(MOC_HEADERS
     include/ui/Ripple.h
     include/ui/RippleOverlay.h
     include/ui/TextField.h
+    include/ui/ToggleButton.h
     include/ui/Theme.h
     include/ui/ThemeManager.h
 )
@@ -298,14 +317,6 @@ qt5_add_resources(QRC resources/res.qrc)
 add_library(matrix_events ${MATRIX_EVENTS} src/Deserializable.cc)
 target_link_libraries(matrix_events Qt5::Core)
 
-#
-# Bundle icons.
-#
-if (APPLE)
-    set(ICON_FILE resources/nheko.icns)
-    set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-endif()
-
 if (BUILD_TESTS)
     enable_testing()
 
@@ -332,15 +343,15 @@ else()
     set (NHEKO_LIBS matrix_events Qt5::Widgets Qt5::Network Qt5::Concurrent ${LMDB_LIBRARY})
 endif()
 
-set (NHEKO_DEPS ${OS_BUNDLE} ${SRC_FILES} ${UI_HEADERS} ${MOC_HEADERS} ${QRC} ${LANG_QRC} ${QM_SRC})
+set (NHEKO_DEPS ${SRC_FILES} ${UI_HEADERS} ${MOC_HEADERS} ${QRC} ${LANG_QRC} ${QM_SRC} ${META_FILES_TO_INCLUDE})
 
 if(APPLE)
-    add_executable (nheko ${NHEKO_DEPS})
+    add_executable (nheko ${OS_BUNDLE} ${NHEKO_DEPS})
     target_link_libraries (nheko ${NHEKO_LIBS} Qt5::MacExtras)
 elseif(WIN32)
-    add_executable (nheko ${ICON_FILE} ${NHEKO_DEPS})
+    add_executable (nheko ${OS_BUNDLE} ${ICON_FILE} ${NHEKO_DEPS})
     target_link_libraries (nheko ${NTDLIB} ${NHEKO_LIBS} Qt5::WinMain)
 else()
-    add_executable (nheko ${NHEKO_DEPS})
+    add_executable (nheko ${OS_BUNDLE} ${NHEKO_DEPS})
     target_link_libraries (nheko ${NHEKO_LIBS})
 endif()
