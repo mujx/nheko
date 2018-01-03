@@ -122,27 +122,19 @@ void
 FilteredTextEdit::insertFromMimeData(const QMimeData *source)
 {
         if (source->hasImage()) {
-                const QImage image = qvariant_cast<QImage>(source->imageData());
-
                 const auto formats = source->formats();
                 const auto idx     = formats.indexOf(
                   QRegularExpression{"image/\\w+", QRegularExpression::CaseInsensitiveOption});
 
-                // Defaulting to PNG format.
+                // Note: in the future we may want to look into what the best choice is from the
+                // formats list. For now we will default to PNG format.
                 QString type = "png";
                 if (idx != -1) {
                         type = formats.at(idx).split('/')[1];
                 }
 
                 // Encode raw pixel data of image.
-                QByteArray data;
-                QBuffer buffer(&data);
-                buffer.open(QIODevice::ReadWrite);
-                if (!image.save(&buffer, type.toLocal8Bit().data())) {
-                        qWarning() << "Failed to encode image into" << type;
-                        return;
-                }
-
+                QByteArray data = source->data("image/" + type);
                 previewDialog_.setImageAndCreate(data, type);
                 previewDialog_.show();
         } else if (source->hasFormat("x-special/gnome-copied-files") &&
@@ -227,9 +219,10 @@ FilteredTextEdit::textChanged()
 }
 
 void
-FilteredTextEdit::receiveImage(const QByteArray &img, const QString &img_name)
+FilteredTextEdit::receiveImage(const QByteArray img, const QString &img_name)
 {
-        QSharedPointer<QBuffer> buffer{new QBuffer{const_cast<QByteArray *>(&img), this}};
+        QSharedPointer<QBuffer> buffer{new QBuffer{this}};
+        buffer->setData(img);
         emit image(buffer, img_name);
 }
 

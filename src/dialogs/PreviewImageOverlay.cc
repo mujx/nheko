@@ -19,6 +19,7 @@
 #include <QBuffer>
 #include <QDebug>
 #include <QFile>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
@@ -28,9 +29,12 @@
 
 using namespace dialogs;
 
+static constexpr const char *DEFAULT = "Upload image?";
+static constexpr const char *ERROR   = "Failed to load image type '%1'. Continue upload?";
+
 PreviewImageOverlay::PreviewImageOverlay(QWidget *parent)
   : QWidget{parent}
-  , titleLabel_{tr("Upload image?"), this}
+  , titleLabel_{tr(DEFAULT), this}
   , imageLabel_{this}
   , imageName_{tr("clipboard"), this}
   , upload_{tr("Upload"), this}
@@ -61,7 +65,7 @@ PreviewImageOverlay::init()
         auto center   = window->frameGeometry().center();
         auto img_size = image_.size();
 
-        imageName_.setText(imagePath_);
+        imageName_.setText(QFileInfo{imagePath_}.fileName());
 
         setAutoFillBackground(true);
         setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -93,11 +97,16 @@ PreviewImageOverlay::init()
 }
 
 void
-PreviewImageOverlay::setImageAndCreate(const QByteArray &data, const QString &type)
+PreviewImageOverlay::setImageAndCreate(const QByteArray data, const QString &type)
 {
-        imageData_ = data;
-        image_.loadFromData(imageData_);
-        imagePath_ = "clipboard." + type;
+        imageData_  = data;
+        imagePath_  = "clipboard." + type;
+        auto loaded = image_.loadFromData(imageData_);
+        if (!loaded) {
+                titleLabel_.setText(QString{tr(ERROR)}.arg(type));
+        } else {
+                titleLabel_.setText(tr(DEFAULT));
+        }
 
         init();
 }
@@ -106,16 +115,28 @@ void
 PreviewImageOverlay::setImageAndCreate(const QString &path)
 {
         QFile file{path};
+        imagePath_ = path;
 
         if (!file.open(QIODevice::ReadOnly)) {
-                qDebug() << "Failed to read image from:" << path;
+                qWarning() << "Failed to open image from:" << path;
+                qWarning() << "Reason:" << file.errorString();
                 close();
                 return;
         }
 
-        imageData_ = file.readAll();
-        image_.loadFromData(imageData_);
-        imagePath_ = path;
+        if ((imageData_ = file.readAll()).isEmpty()) {
+                qWarning() << "Failed to read image:" << file.errorString();
+                close();
+                return;
+        }
+
+        auto loaded = image_.loadFromData(imageData_);
+        if (!loaded) {
+                auto t = QFileInfo{path}.suffix();
+                titleLabel_.setText(QString{tr(ERROR)}.arg(t));
+        } else {
+                titleLabel_.setText(tr(DEFAULT));
+        }
 
         init();
 }

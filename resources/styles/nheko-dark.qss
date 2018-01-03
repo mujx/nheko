@@ -86,12 +86,12 @@ dialogs--CreateRoom,
 dialogs--InviteUsers,
 dialogs--ReadReceipts,
 dialogs--JoinRoom,
-dialogs--PreviewImageOverlay,
-QListWidget {
+dialogs--PreviewImageOverlay {
     background-color: #383c4a;
     color: #caccd1;
 }
 
+QListWidget,
 WelcomePage,
 LoginPage,
 RegisterPage {

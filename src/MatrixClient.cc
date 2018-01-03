@@ -724,7 +724,7 @@ MatrixClient::uploadFile(const QString &roomid,
 {
         auto reply = makeUploadRequest(data);
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
                 reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -764,7 +764,7 @@ MatrixClient::uploadAudio(const QString &roomid,
 {
         auto reply = makeUploadRequest(data);
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
                 reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -1027,8 +1027,8 @@ MatrixClient::makeUploadRequest(QSharedPointer<QIODevice> iodev)
         endpoint.setPath(mediaApiUrl_ + "/upload");
         endpoint.setQuery(query);
 
-        if (!iodev->open(QIODevice::ReadWrite)) {
-                qDebug() << "Error while reading buffer" << iodev.data();
+        if (!iodev->open(QIODevice::ReadOnly)) {
+                qDebug() << "Error while reading buffer" << iodev->errorString();
                 return nullptr;
         }
 
@@ -1039,7 +1039,7 @@ MatrixClient::makeUploadRequest(QSharedPointer<QIODevice> iodev)
         request.setHeader(QNetworkRequest::ContentLengthHeader, iodev->size());
         request.setHeader(QNetworkRequest::ContentTypeHeader, mime.name());
 
-        auto reply = post(request, iodev->readAll());
+        auto reply = post(request, iodev.data());
 
         return reply;
 }

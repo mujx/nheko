@@ -69,7 +69,7 @@ private:
         dialogs::PreviewImageOverlay previewDialog_;
 
         void textChanged();
-        void receiveImage(const QByteArray &img, const QString &img_name);
+        void receiveImage(const QByteArray img, const QString &img_name);
         void afterCompletion(int);
 };
 

@@ -34,11 +34,11 @@ class PreviewImageOverlay : public QWidget
 public:
         PreviewImageOverlay(QWidget *parent = nullptr);
 
-        void setImageAndCreate(const QByteArray &data, const QString &type);
+        void setImageAndCreate(const QByteArray data, const QString &type);
         void setImageAndCreate(const QString &path);
 
 signals:
-        void confirmImageUpload(const QByteArray &data, const QString &img_name);
+        void confirmImageUpload(const QByteArray data, const QString &img_name);
 
 private:
         void init();

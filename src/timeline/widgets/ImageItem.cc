@@ -66,7 +66,7 @@ ImageItem::ImageItem(QSharedPointer<MatrixClient> client,
                      QWidget *parent)
   : QWidget(parent)
   , url_{url}
-  , text_{QFileInfo{filename}.fileName()}
+  , text_{filename}
   , client_{client}
 {
         setMouseTracking(true);
@@ -84,14 +84,16 @@ ImageItem::ImageItem(QSharedPointer<MatrixClient> client,
         url_                 = QString("%1/_matrix/media/r0/download/%2")
                  .arg(client_.data()->getHomeServer().toString(), media_params);
 
-        if (!data.isNull()) {
-                data->reset();
-                QPixmap p;
+        auto null  = data.isNull();
+        auto reset = data->reset();
+        QPixmap p;
+
+        if (!null && reset) {
                 p.loadFromData(data->readAll());
-                setImage(p);
         } else {
-                setImage(QPixmap(filename));
+                p.load(filename);
         }
+        setImage(p);
 }
 
 void
