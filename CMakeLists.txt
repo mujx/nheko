@@ -146,6 +146,7 @@ set(SRC_FILES
     src/dialogs/JoinRoom.cc
     src/dialogs/LeaveRoom.cc
     src/dialogs/Logout.cc
+    src/dialogs/ReadReceipts.cc
 
     # Emoji
     src/emoji/Category.cc
@@ -209,6 +210,7 @@ set(SRC_FILES
     src/TopRoomBar.cc
     src/TrayIcon.cc
     src/TypingDisplay.cc
+    src/Utils.cc
     src/UserInfoWidget.cc
     src/UserSettingsPage.cc
     src/WelcomePage.cc
@@ -229,6 +231,7 @@ qt5_wrap_cpp(MOC_HEADERS
     include/dialogs/JoinRoom.h
     include/dialogs/LeaveRoom.h
     include/dialogs/Logout.h
+    include/dialogs/ReadReceipts.h
 
     # Emoji
     include/emoji/Category.h

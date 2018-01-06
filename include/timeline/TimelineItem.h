@@ -28,6 +28,7 @@
 #include "AvatarProvider.h"
 #include "RoomInfoListItem.h"
 #include "TimelineViewManager.h"
+#include "Utils.h"
 
 class ImageItem;
 class AudioItem;
@@ -82,11 +83,13 @@ public:
         void setUserAvatar(const QImage &pixmap);
         DescInfo descriptionMessage() const { return descriptionMsg_; }
         QString eventId() const { return event_id_; }
+        void setEventId(const QString &event_id) { event_id_ = event_id; }
 
         ~TimelineItem();
 
 protected:
         void paintEvent(QPaintEvent *event) override;
+        void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
         void init();
@@ -106,7 +109,6 @@ private:
         void generateBody(const QString &body);
         void generateBody(const QString &userid, const QString &body);
         void generateTimestamp(const QDateTime &time);
-        QString descriptiveTime(const QDateTime &then);
 
         void setupAvatarLayout(const QString &userName);
         void setupSimpleLayout();
@@ -115,6 +117,9 @@ private:
         QString event_id_;
 
         DescInfo descriptionMsg_;
+
+        QMenu *receiptsMenu_;
+        QAction *showReadReceipts_;
 
         QHBoxLayout *topLayout_;
         QVBoxLayout *sideLayout_; // Avatar or Timestamp
@@ -141,8 +146,11 @@ TimelineItem::setupLocalWidgetLayout(Widget *widget,
         auto displayName = TimelineViewManager::displayName(userid);
         auto timestamp   = QDateTime::currentDateTime();
 
-        descriptionMsg_ = {
-          "You", userid, QString(" %1").arg(msgDescription), descriptiveTime(timestamp), timestamp};
+        descriptionMsg_ = {"You",
+                           userid,
+                           QString(" %1").arg(msgDescription),
+                           utils::descriptiveTime(timestamp),
+                           timestamp};
 
         generateTimestamp(timestamp);
 
@@ -156,7 +164,7 @@ TimelineItem::setupLocalWidgetLayout(Widget *widget,
                 setupAvatarLayout(displayName);
                 mainLayout_->addLayout(headerLayout_);
 
-                AvatarProvider::resolve(userid, this);
+                AvatarProvider::resolve(userid, [=](const QImage &img) { setUserAvatar(img); });
         } else {
                 setupSimpleLayout();
         }
@@ -183,7 +191,7 @@ TimelineItem::setupWidgetLayout(Widget *widget,
         descriptionMsg_ = {sender == settings.value("auth/user_id") ? "You" : displayName,
                            sender,
                            msgDescription,
-                           descriptiveTime(timestamp),
+                           utils::descriptiveTime(timestamp),
                            timestamp};
 
         generateTimestamp(timestamp);
@@ -199,7 +207,7 @@ TimelineItem::setupWidgetLayout(Widget *widget,
 
                 mainLayout_->addLayout(headerLayout_);
 
-                AvatarProvider::resolve(sender, this);
+                AvatarProvider::resolve(sender, [=](const QImage &img) { setUserAvatar(img); });
         } else {
                 setupSimpleLayout();
         }

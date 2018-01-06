@@ -290,12 +290,4 @@ MainWindow::hasActiveUser()
                settings.contains("auth/user_id");
 }
 
-MainWindow *
-MainWindow::instance()
-{
-        return instance_;
-}
-
-MainWindow::~MainWindow()
-{
-}
+MainWindow::~MainWindow() {}

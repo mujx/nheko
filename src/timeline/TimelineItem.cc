@@ -15,10 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QContextMenuEvent>
 #include <QFontDatabase>
+#include <QMenu>
 #include <QTextEdit>
 
 #include "Avatar.h"
+#include "ChatPage.h"
 #include "Config.h"
 
 #include "timeline/TimelineItem.h"
@@ -38,6 +41,14 @@ TimelineItem::init()
         font_.setPixelSize(conf::fontSize);
 
         QFontMetrics fm(font_);
+
+        receiptsMenu_     = new QMenu(this);
+        showReadReceipts_ = new QAction("Read receipts", this);
+        receiptsMenu_->addAction(showReadReceipts_);
+        connect(showReadReceipts_, &QAction::triggered, this, [=]() {
+                if (!event_id_.isEmpty())
+                        ChatPage::instance()->showReadReceipts(event_id_);
+        });
 
         topLayout_  = new QHBoxLayout(this);
         sideLayout_ = new QVBoxLayout;
@@ -73,9 +84,10 @@ TimelineItem::TimelineItem(mtx::events::MessageType ty,
 
         if (ty == mtx::events::MessageType::Emote) {
                 body            = QString("* %1 %2").arg(displayName).arg(body);
-                descriptionMsg_ = {"", userid, body, descriptiveTime(timestamp), timestamp};
+                descriptionMsg_ = {"", userid, body, utils::descriptiveTime(timestamp), timestamp};
         } else {
-                descriptionMsg_ = {"You: ", userid, body, descriptiveTime(timestamp), timestamp};
+                descriptionMsg_ = {
+                  "You: ", userid, body, utils::descriptiveTime(timestamp), timestamp};
         }
 
         body = body.toHtmlEscaped();
@@ -88,7 +100,7 @@ TimelineItem::TimelineItem(mtx::events::MessageType ty,
                 setupAvatarLayout(displayName);
                 mainLayout_->addLayout(headerLayout_);
 
-                AvatarProvider::resolve(userid, this);
+                AvatarProvider::resolve(userid, [=](const QImage &img) { setUserAvatar(img); });
         } else {
                 generateBody(body);
                 setupSimpleLayout();
@@ -196,7 +208,7 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Notice
         descriptionMsg_ = {TimelineViewManager::displayName(sender),
                            sender,
                            " sent a notification",
-                           descriptiveTime(timestamp),
+                           utils::descriptiveTime(timestamp),
                            timestamp};
 
         generateTimestamp(timestamp);
@@ -213,7 +225,7 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Notice
 
                 mainLayout_->addLayout(headerLayout_);
 
-                AvatarProvider::resolve(sender, this);
+                AvatarProvider::resolve(sender, [=](const QImage &img) { setUserAvatar(img); });
         } else {
                 generateBody(body);
                 setupSimpleLayout();
@@ -240,7 +252,7 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Emote>
         auto displayName = TimelineViewManager::displayName(sender);
         auto emoteMsg    = QString("* %1 %2").arg(displayName).arg(body);
 
-        descriptionMsg_ = {"", sender, emoteMsg, descriptiveTime(timestamp), timestamp};
+        descriptionMsg_ = {"", sender, emoteMsg, utils::descriptiveTime(timestamp), timestamp};
 
         generateTimestamp(timestamp);
         emoteMsg = emoteMsg.toHtmlEscaped();
@@ -252,7 +264,7 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Emote>
                 setupAvatarLayout(displayName);
                 mainLayout_->addLayout(headerLayout_);
 
-                AvatarProvider::resolve(sender, this);
+                AvatarProvider::resolve(sender, [=](const QImage &img) { setUserAvatar(img); });
         } else {
                 generateBody(emoteMsg);
                 setupSimpleLayout();
@@ -282,7 +294,7 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Text> 
         descriptionMsg_ = {sender == settings.value("auth/user_id") ? "You" : displayName,
                            sender,
                            QString(": %1").arg(body),
-                           descriptiveTime(timestamp),
+                           utils::descriptiveTime(timestamp),
                            timestamp};
 
         generateTimestamp(timestamp);
@@ -297,7 +309,7 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Text> 
 
                 mainLayout_->addLayout(headerLayout_);
 
-                AvatarProvider::resolve(sender, this);
+                AvatarProvider::resolve(sender, [=](const QImage &img) { setUserAvatar(img); });
         } else {
                 generateBody(body);
                 setupSimpleLayout();
@@ -452,24 +464,14 @@ TimelineItem::setUserAvatar(const QImage &avatar)
         userAvatar_->setImage(avatar);
 }
 
-QString
-TimelineItem::descriptiveTime(const QDateTime &then)
-{
-        auto now = QDateTime::currentDateTime();
-
-        auto days = then.daysTo(now);
-
-        if (days == 0)
-                return then.toString("HH:mm");
-        else if (days < 2)
-                return QString("Yesterday");
-        else if (days < 365)
-                return then.toString("dd/MM");
-
-        return then.toString("dd/MM/yy");
-}
-
 TimelineItem::~TimelineItem() {}
+
+void
+TimelineItem::contextMenuEvent(QContextMenuEvent *event)
+{
+        if (receiptsMenu_)
+                receiptsMenu_->exec(event->globalPos());
+}
 
 void
 TimelineItem::paintEvent(QPaintEvent *)
