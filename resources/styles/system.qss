@@ -1,0 +1,110 @@
+OverlayWidget,
+OverlayWidget > * {
+    background-color: palette(window);
+}
+
+#mainContent,
+#mainContent > * {
+    background-color: palette(window);
+}
+
+TimelineView,
+TimelineView > *,
+TimelineItem,
+TimelineItem > * {
+    background-color: palette(window);
+}
+
+FlatButton {
+    qproperty-foregroundColor: palette(text);
+}
+
+FileItem {
+    qproperty-textColor: palette(text);
+    qproperty-backgroundColor: palette(base);
+    qproperty-iconColor: palette(window);
+}
+
+AudioItem {
+    qproperty-textColor: palette(text);
+    qproperty-backgroundColor: palette(base);
+    qproperty-iconColor: palette(window);
+}
+
+RaisedButton {
+    qproperty-foregroundColor: palette(light);
+}
+
+TextField {
+    qproperty-backgroundColor: palette(window);
+}
+
+WelcomePage,
+LoginPage,
+RegisterPage {
+    background-color: palette(window);
+}
+
+RoomInfoListItem {
+    qproperty-highlightedBackgroundColor: palette(highlight);
+    qproperty-hoverBackgroundColor: palette(mid);
+    qproperty-backgroundColor: palette(window);
+
+    qproperty-titleColor: palette(text);
+    qproperty-subtitleColor: palette(text);
+
+    qproperty-highlightedTitleColor: palette(light);
+    qproperty-highlightedSubtitleColor: palette(light);
+
+    qproperty-btnColor: palette(light);
+    qproperty-btnTextColor: palette(text);
+}
+
+CommunitiesListItem {
+    qproperty-highlightedBackgroundColor: palette(highlight);
+    qproperty-hoverBackgroundColor: palette(mid);
+    qproperty-backgroundColor: palette(window);
+}
+
+LoadingIndicator {
+    qproperty-color: palette(highlight);
+}
+
+#ChatPageLoadSpinner {
+    qproperty-color: palette(light);
+}
+
+UserInfoWidget,
+UserInfoWidget > * {
+    background-color: palette(window);
+}
+
+emoji--Category,
+emoji--Category > * {
+    background-color: palette(window);
+}
+
+emoji--Panel,
+emoji--Panel > * {
+    background-color: palette(window);
+}
+
+QTextEdit,
+QLineEdit {
+    background-color: palette(window);
+}
+
+ScrollBar {
+    qproperty-handleColor: palette(text);
+    qproperty-backgroundColor: palette(window);
+}
+
+FloatingButton {
+    qproperty-backgroundColor: palette(window);
+    qproperty-foregroundColor: palette(text);
+}
+
+QListWidget {
+    background-color: palette(window);
+    color: palette(text);
+}

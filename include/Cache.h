@@ -19,6 +19,7 @@
 
 #include <QDir>
 #include <lmdb++.h>
+#include <mtx/responses.hpp>
 
 class RoomState;
 
@@ -33,11 +34,22 @@ public:
         QString nextBatchToken() const;
         QMap<QString, RoomState> states();
 
+        using Invites = std::map<std::string, mtx::responses::InvitedRoom>;
+        Invites invites();
+        void setInvites(const Invites &invites);
+
         void deleteData();
         void unmount() { isMounted_ = false; };
 
         void removeRoom(const QString &roomid);
+        void removeInvite(const QString &roomid);
         void setup();
+
+        bool isFormatValid();
+        void setCurrentFormat();
+
+        QByteArray image(const QString &url) const;
+        void saveImage(const QString &url, const QByteArray &data);
 
 private:
         void setNextBatchToken(lmdb::txn &txn, const QString &token);
@@ -46,6 +58,8 @@ private:
         lmdb::env env_;
         lmdb::dbi stateDb_;
         lmdb::dbi roomDb_;
+        lmdb::dbi invitesDb_;
+        lmdb::dbi imagesDb_;
 
         bool isMounted_;
 

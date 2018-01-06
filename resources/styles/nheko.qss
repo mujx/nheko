@@ -1,0 +1,143 @@
+QLabel {
+    color: #333;
+}
+
+#chatPage,
+#chatPage > * {
+    background-color: white;
+}
+
+TimelineView,
+TimelineView > * {
+    background-color: white;
+}
+
+RoomList,
+RoomList > * {
+    background-color: white;
+}
+
+CommunitiesList,
+CommunitiesList > * {
+    background-color: white;
+}
+
+FlatButton {
+    qproperty-foregroundColor: #333;
+}
+
+FileItem {
+    qproperty-textColor: #333;
+    qproperty-backgroundColor: #f2f2f2;
+    qproperty-iconColor: white;
+}
+
+AudioItem {
+    qproperty-textColor: #333;
+    qproperty-backgroundColor: #f2f2f2;
+    qproperty-iconColor: white;
+}
+
+RaisedButton {
+    qproperty-foregroundColor: white;
+}
+
+RoomInfoListItem {
+    qproperty-highlightedBackgroundColor: #38A3D8;
+    qproperty-hoverBackgroundColor: rgba(200, 200, 200, 128);
+    qproperty-backgroundColor: white;
+
+    qproperty-titleColor: #333;
+    qproperty-subtitleColor: #5d6565;
+
+    qproperty-highlightedTitleColor: white;
+    qproperty-highlightedSubtitleColor: #f4f4f5;
+
+    qproperty-btnColor: #ccc;
+    qproperty-btnTextColor: #333;
+}
+
+CommunitiesListItem {
+    qproperty-highlightedBackgroundColor: #38A3D8;
+    qproperty-hoverBackgroundColor: rgba(200, 200, 200, 128);
+    qproperty-backgroundColor: white;
+}
+
+#ChatPageLoadSpinner {
+    qproperty-color: #acc7dc;
+}
+
+#FileUploadSpinner {
+    qproperty-color: #333;
+}
+
+UserInfoWidget, UserInfoWidget > * {
+    background-color: #d6dde3;
+    color: #ebebeb;
+}
+
+UserSettingsPage {
+    background-color: white;
+}
+
+Avatar {
+    qproperty-textColor: black;
+    qproperty-backgroundColor: #eee;
+}
+
+#displayNameLabel {
+    color: #171919;
+}
+
+#userIdLabel {
+    color: #555459;
+}
+
+dialogs--Logout,
+dialogs--LeaveRoom,
+dialogs--CreateRoom,
+dialogs--InviteUsers,
+dialogs--JoinRoom {
+    background-color: white;
+    color: #333;
+}
+
+QListWidget {
+    background-color: white;
+    color: #333;
+}
+
+WelcomePage,
+LoginPage,
+RegisterPage {
+    background-color: white;
+    color: #333;
+}
+
+emoji--Panel,
+emoji--Panel > * {
+    background-color: #eee;
+    color: #333;
+}
+
+emoji--Category,
+emoji--Category > * {
+    background-color: white;
+    color: #ccc;
+}
+
+FloatingButton {
+    qproperty-backgroundColor: #efefef;
+    qproperty-foregroundColor: black;
+}
+
+TextField {
+    qproperty-backgroundColor: white;
+    qproperty-inkColor: #333;
+    qproperty-labelColor: #333;
+}
+
+ScrollBar {
+    qproperty-handleColor: #ccc;
+    qproperty-backgroundColor: #efefef;
+}

@@ -26,16 +26,15 @@
 #include <QSharedPointer>
 #include <QVBoxLayout>
 
+#include "dialogs/InviteUsers.h"
+#include "dialogs/LeaveRoom.h"
+
 class Avatar;
 class FlatButton;
 class Label;
-class LeaveRoomDialog;
 class Menu;
 class OverlayModal;
 class RoomSettings;
-
-static const QString URL_HTML = "<a href=\"\\1\" style=\"color: #333333\">\\1</a>";
-static const QRegExp URL_REGEX("((?:https?|ftp)://\\S+)");
 
 class TopRoomBar : public QWidget
 {
@@ -55,6 +54,7 @@ public:
 
 signals:
         void leaveRoom();
+        void inviteUsers(QStringList users);
 
 protected:
         void paintEvent(QPaintEvent *event) override;
@@ -75,11 +75,15 @@ private:
         QMenu *menu_;
         QAction *toggleNotifications_;
         QAction *leaveRoom_;
+        QAction *inviteUsers_;
 
         FlatButton *settingsBtn_;
 
         QSharedPointer<OverlayModal> leaveRoomModal_;
-        QSharedPointer<LeaveRoomDialog> leaveRoomDialog_;
+        QSharedPointer<dialogs::LeaveRoom> leaveRoomDialog_;
+
+        QSharedPointer<OverlayModal> inviteUsersModal_;
+        QSharedPointer<dialogs::InviteUsers> inviteUsersDialog_;
 
         Avatar *avatar_;
 

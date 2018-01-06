@@ -20,6 +20,8 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QImageReader>
+#include <QMimeDatabase>
+#include <QMimeType>
 #include <QPainter>
 #include <QStyleOption>
 
@@ -133,6 +135,9 @@ FilteredTextEdit::minimumSizeHint() const
 void
 FilteredTextEdit::submit()
 {
+        if (toPlainText().trimmed().isEmpty())
+                return;
+
         if (true_history_.size() == INPUT_HISTORY_SIZE)
                 true_history_.pop_back();
         true_history_.push_front(toPlainText());
@@ -173,7 +178,6 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         setFixedHeight(conf::textInput::height);
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         setCursor(Qt::ArrowCursor);
-        setStyleSheet("background-color: #fff;");
 
         topLayout_ = new QHBoxLayout();
         topLayout_->setSpacing(0);
@@ -189,6 +193,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         spinner_ = new LoadingIndicator(this);
         spinner_->setFixedHeight(32);
         spinner_->setFixedWidth(32);
+        spinner_->setObjectName("FileUploadSpinner");
         spinner_->hide();
 
         QFont font;
@@ -199,7 +204,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         input_->setFont(font);
         input_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         input_->setPlaceholderText(tr("Write a message..."));
-        input_->setStyleSheet("color: #333333; border: none; padding-top: 5px; margin: 0 5px");
+        input_->setStyleSheet("border: none; padding-top: 5px;");
 
         sendMessageBtn_ = new FlatButton(this);
 
@@ -208,7 +213,7 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         sendMessageBtn_->setIcon(send_message_icon);
         sendMessageBtn_->setIconSize(QSize(24, 24));
 
-        emojiBtn_ = new EmojiPickButton(this);
+        emojiBtn_ = new emoji::PickButton(this);
 
         QIcon emoji_icon;
         emoji_icon.addFile(":/icons/icons/ui/smile.png");
@@ -273,30 +278,24 @@ TextInputWidget::command(QString command, QString args)
 void
 TextInputWidget::openFileSelection()
 {
-        QStringList supportedFiles;
-        supportedFiles << "jpeg"
-                       << "gif"
-                       << "png"
-                       << "bmp"
-                       << "tiff"
-                       << "webp";
-
-        auto fileName = QFileDialog::getOpenFileName(
-          this,
-          tr("Select an image"),
-          "",
-          tr("Image Files (*.bmp *.gif *.jpg *.jpeg *.png *.tiff *.webp)"));
+        const auto fileName =
+          QFileDialog::getOpenFileName(this, tr("Select a file"), "", tr("All Files (*)"));
 
         if (fileName.isEmpty())
                 return;
 
-        auto imageFormat = QString(QImageReader::imageFormat(fileName));
-        if (!supportedFiles.contains(imageFormat)) {
-                qDebug() << "Unsupported image format for" << fileName;
-                return;
-        }
+        QMimeDatabase db;
+        QMimeType mime = db.mimeTypeForFile(fileName, QMimeDatabase::MatchContent);
 
-        emit uploadImage(fileName);
+        const auto format = mime.name().split("/")[0];
+
+        if (format == "image")
+                emit uploadImage(fileName);
+        else if (format == "audio")
+                emit uploadAudio(fileName);
+        else
+                emit uploadFile(fileName);
+
         showUploadSpinner();
 }
 
@@ -331,4 +330,13 @@ void
 TextInputWidget::focusInEvent(QFocusEvent *event)
 {
         input_->setFocus(event->reason());
+}
+
+void
+TextInputWidget::paintEvent(QPaintEvent *)
+{
+        QStyleOption opt;
+        opt.init(this);
+        QPainter p(this);
+        style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

@@ -15,11 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QBuffer>
 #include <QDebug>
 #include <QObject>
+#include <QTimer>
 
-#include "JoinRoomDialog.h"
-#include "LeaveRoomDialog.h"
+#include "Cache.h"
 #include "MainWindow.h"
 #include "MatrixClient.h"
 #include "OverlayModal.h"
@@ -27,15 +28,16 @@
 #include "RoomList.h"
 #include "RoomSettings.h"
 #include "RoomState.h"
-#include "Sync.h"
+#include "UserSettingsPage.h"
 
-RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
+RoomList::RoomList(QSharedPointer<MatrixClient> client,
+                   QSharedPointer<UserSettings> userSettings,
+                   QWidget *parent)
   : QWidget(parent)
   , client_(client)
+  , userSettings_{userSettings}
 {
-        setStyleSheet(
-          "border: 1px solid #ccc; border-right: 0px solid #000; border-left: 0px solid #000;");
-
+        setStyleSheet("border: none;");
         topLayout_ = new QVBoxLayout(this);
         topLayout_->setSpacing(0);
         topLayout_->setMargin(0);
@@ -58,9 +60,17 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client, QWidget *parent)
         topLayout_->addWidget(scrollArea_);
 
         connect(client_.data(),
-                SIGNAL(roomAvatarRetrieved(const QString &, const QPixmap &)),
+                &MatrixClient::roomAvatarRetrieved,
                 this,
-                SLOT(updateRoomAvatar(const QString &, const QPixmap &)));
+                [=](const QString &room_id,
+                    const QPixmap &img,
+                    const QString &url,
+                    const QByteArray &data) {
+                        if (!cache_.isNull())
+                                cache_->saveImage(url, data);
+
+                        updateRoomAvatar(room_id, img);
+                });
 }
 
 RoomList::~RoomList()
@@ -74,21 +84,43 @@ RoomList::clear()
 }
 
 void
-RoomList::addRoom(const QSharedPointer<RoomSettings> &settings,
+RoomList::addRoom(const QMap<QString, QSharedPointer<RoomSettings>> &settings,
                   const RoomState &state,
                   const QString &room_id)
 {
-        RoomInfoListItem *room_item = new RoomInfoListItem(settings, state, room_id, scrollArea_);
+        RoomInfoListItem *room_item =
+          new RoomInfoListItem(settings[room_id], state, room_id, scrollArea_);
         connect(room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
         connect(room_item, &RoomInfoListItem::leaveRoom, this, &RoomList::openLeaveRoomDialog);
 
         rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
 
-        client_->fetchRoomAvatar(room_id, state.getAvatar());
+        if (!state.getAvatar().toString().isEmpty())
+                updateAvatar(room_id, state.getAvatar().toString());
 
-        contentsLayout_->insertWidget(0, room_item);
+        int pos = contentsLayout_->count() - 1;
+        contentsLayout_->insertWidget(pos, room_item);
+}
 
-        setFilterRooms(filterRooms_);
+void
+RoomList::updateAvatar(const QString &room_id, const QString &url)
+{
+        if (url.isEmpty())
+                return;
+
+        QByteArray savedImgData;
+
+        if (!cache_.isNull())
+                savedImgData = cache_->image(url);
+
+        if (savedImgData.isEmpty()) {
+                client_->fetchRoomAvatar(room_id, url);
+        } else {
+                QPixmap img;
+                img.loadFromData(savedImgData);
+
+                updateRoomAvatar(room_id, img);
+        }
 }
 
 void
@@ -142,23 +174,10 @@ RoomList::setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &set
         }
 
         for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
-                auto room_id = it.key();
-                auto state   = it.value();
+                const auto room_id = it.key();
+                const auto state   = it.value();
 
-                if (!state.getAvatar().toString().isEmpty())
-                        client_->fetchRoomAvatar(room_id, state.getAvatar());
-
-                RoomInfoListItem *room_item =
-                  new RoomInfoListItem(settings[room_id], state, room_id, scrollArea_);
-                connect(
-                  room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
-                connect(
-                  room_item, &RoomInfoListItem::leaveRoom, this, &RoomList::openLeaveRoomDialog);
-
-                rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
-
-                int pos = contentsLayout_->count() - 1;
-                contentsLayout_->insertWidget(pos, room_item);
+                addRoom(settings, state, room_id);
         }
 
         if (rooms_.isEmpty())
@@ -176,10 +195,10 @@ void
 RoomList::openLeaveRoomDialog(const QString &room_id)
 {
         if (leaveRoomDialog_.isNull()) {
-                leaveRoomDialog_ = QSharedPointer<LeaveRoomDialog>(new LeaveRoomDialog(this));
+                leaveRoomDialog_ = QSharedPointer<dialogs::LeaveRoom>(new dialogs::LeaveRoom(this));
 
                 connect(leaveRoomDialog_.data(),
-                        &LeaveRoomDialog::closing,
+                        &dialogs::LeaveRoom::closing,
                         this,
                         [=](bool leaving) { closeLeaveRoomDialog(leaving, room_id); });
         }
@@ -195,15 +214,18 @@ RoomList::openLeaveRoomDialog(const QString &room_id)
 }
 
 void
-RoomList::sync(const QMap<QString, RoomState> &states)
+RoomList::sync(const QMap<QString, RoomState> &states,
+               QMap<QString, QSharedPointer<RoomSettings>> &settings)
+
 {
         for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
                 auto room_id = it.key();
                 auto state   = it.value();
 
                 if (!rooms_.contains(room_id)) {
-                        addRoom(
-                          QSharedPointer<RoomSettings>(new RoomSettings(room_id)), state, room_id);
+                        settings.insert(room_id,
+                                        QSharedPointer<RoomSettings>(new RoomSettings(room_id)));
+                        addRoom(settings, state, room_id);
                 }
 
                 auto room = rooms_[room_id];
@@ -212,10 +234,22 @@ RoomList::sync(const QMap<QString, RoomState> &states)
                 auto new_avatar     = state.getAvatar();
 
                 if (current_avatar != new_avatar && !new_avatar.toString().isEmpty())
-                        client_->fetchRoomAvatar(room_id, new_avatar);
+                        updateAvatar(room_id, new_avatar.toString());
 
                 room->setState(state);
         }
+}
+
+void
+RoomList::clearRoomMessageCount(const QString &room_id)
+{
+        if (!rooms_.contains(room_id))
+                return;
+
+        auto room = rooms_[room_id];
+        room->clearUnreadMessageCount();
+
+        calculateUnreadMessageCount();
 }
 
 void
@@ -228,9 +262,7 @@ RoomList::highlightSelectedRoom(const QString &room_id)
                 return;
         }
 
-        // TODO: Send a read receipt for the last event.
-        auto room = rooms_[room_id];
-        room->clearUnreadMessageCount();
+        clearRoomMessageCount(room_id);
 
         calculateUnreadMessageCount();
 
@@ -256,6 +288,9 @@ RoomList::updateRoomAvatar(const QString &roomid, const QPixmap &img)
         }
 
         rooms_.value(roomid)->setAvatar(img.toImage());
+
+        // Used to inform other widgets for the new image data.
+        emit roomAvatarChanged(roomid, img);
 }
 
 void
@@ -267,6 +302,61 @@ RoomList::updateRoomDescription(const QString &roomid, const DescInfo &info)
         }
 
         rooms_.value(roomid)->setDescriptionMessage(info);
+
+        if (underMouse()) {
+                // When the user hover out of the roomlist a sort will be triggered.
+                isSortPending_ = true;
+                return;
+        }
+
+        isSortPending_ = false;
+
+        emit sortRoomsByLastMessage();
+}
+
+void
+RoomList::sortRoomsByLastMessage()
+{
+        if (!userSettings_->isOrderingEnabled())
+                return;
+
+        isSortPending_ = false;
+
+        std::multimap<uint64_t, RoomInfoListItem *, std::greater<uint64_t>> times;
+
+        for (int ii = 0; ii < contentsLayout_->count(); ++ii) {
+                auto room = qobject_cast<RoomInfoListItem *>(contentsLayout_->itemAt(ii)->widget());
+
+                if (!room)
+                        continue;
+
+                // Not a room message.
+                if (room->lastMessageInfo().userid.isEmpty())
+                        times.emplace(0, room);
+                else
+                        times.emplace(room->lastMessageInfo().datetime.toMSecsSinceEpoch(), room);
+        }
+
+        for (auto it = times.cbegin(); it != times.cend(); ++it) {
+                const auto roomWidget   = it->second;
+                const auto currentIndex = contentsLayout_->indexOf(roomWidget);
+                const auto newIndex     = std::distance(times.cbegin(), it);
+
+                if (currentIndex == newIndex)
+                        continue;
+
+                contentsLayout_->removeWidget(roomWidget);
+                contentsLayout_->insertWidget(newIndex, roomWidget);
+        }
+}
+
+void
+RoomList::leaveEvent(QEvent *event)
+{
+        if (isSortPending_)
+                QTimer::singleShot(700, this, &RoomList::sortRoomsByLastMessage);
+
+        QWidget::leaveEvent(event);
 }
 
 void
@@ -330,8 +420,43 @@ RoomList::setFilterRooms(bool filterRooms)
 }
 
 void
+RoomList::paintEvent(QPaintEvent *)
+{
+        QStyleOption opt;
+        opt.init(this);
+        QPainter p(this);
+        style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+void
+RoomList::syncInvites(const std::map<std::string, mtx::responses::InvitedRoom> &rooms)
+{
+        for (auto it = rooms.cbegin(); it != rooms.cend(); ++it) {
+                const auto room_id = QString::fromStdString(it->first);
+
+                if (!rooms_.contains(room_id))
+                        addInvitedRoom(room_id, it->second);
+        }
+}
+
+void
 RoomList::setRoomFilter(QList<QString> room_ids)
 {
         roomFilter_ = room_ids;
         setFilterRooms(true);
+}
+
+void
+RoomList::addInvitedRoom(const QString &room_id, const mtx::responses::InvitedRoom &room)
+{
+        auto room_item = new RoomInfoListItem(room_id, room, scrollArea_);
+        connect(room_item, &RoomInfoListItem::acceptInvite, this, &RoomList::acceptInvite);
+        connect(room_item, &RoomInfoListItem::declineInvite, this, &RoomList::declineInvite);
+
+        rooms_.insert(room_id, QSharedPointer<RoomInfoListItem>(room_item));
+
+        updateAvatar(room_id, QString::fromStdString(room.avatar()));
+
+        int pos = contentsLayout_->count() - 1;
+        contentsLayout_->insertWidget(pos, room_item);
 }

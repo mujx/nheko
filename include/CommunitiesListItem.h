@@ -13,6 +13,11 @@
 class CommunitiesListItem : public QWidget
 {
         Q_OBJECT
+        Q_PROPERTY(QColor highlightedBackgroundColor READ highlightedBackgroundColor WRITE
+                     setHighlightedBackgroundColor)
+        Q_PROPERTY(
+          QColor hoverBackgroundColor READ hoverBackgroundColor WRITE setHoverBackgroundColor)
+        Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
 
 public:
         CommunitiesListItem(QSharedPointer<Community> community,
@@ -25,6 +30,18 @@ public:
 
         inline bool isPressed() const;
         inline void setAvatar(const QImage &avatar_image);
+
+        QColor highlightedBackgroundColor() const { return highlightedBackgroundColor_; }
+        QColor hoverBackgroundColor() const { return hoverBackgroundColor_; }
+        QColor backgroundColor() const { return backgroundColor_; }
+
+        void setHighlightedBackgroundColor(QColor &color) { highlightedBackgroundColor_ = color; }
+        void setHoverBackgroundColor(QColor &color) { hoverBackgroundColor_ = color; }
+        void setBackgroundColor(QColor &color) { backgroundColor_ = color; }
+
+        QColor highlightedBackgroundColor_;
+        QColor hoverBackgroundColor_;
+        QColor backgroundColor_;
 
 signals:
         void clicked(const QString &community_id);

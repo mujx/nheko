@@ -15,7 +15,7 @@ TextField::TextField(QWidget *parent)
 
         state_machine_    = new TextFieldStateMachine(this);
         label_            = 0;
-        label_font_size_  = 13;
+        label_font_size_  = 15;
         show_label_       = false;
         background_color_ = QColor("white");
 
@@ -25,7 +25,7 @@ TextField::TextField(QWidget *parent)
         setTextMargins(0, 4, 0, 6);
 
         QFont font("Open Sans");
-        font.setPixelSize(12);
+        font.setPixelSize(14);
         setFont(font);
 
         state_machine_->start();
@@ -129,6 +129,7 @@ void
 TextField::setLabelColor(const QColor &color)
 {
         label_color_ = color;
+        update();
 }
 
 QColor
@@ -145,6 +146,7 @@ void
 TextField::setInkColor(const QColor &color)
 {
         ink_color_ = color;
+        update();
 }
 
 QColor
@@ -161,6 +163,7 @@ void
 TextField::setUnderlineColor(const QColor &color)
 {
         underline_color_ = color;
+        update();
 }
 
 QColor
@@ -199,8 +202,6 @@ TextField::paintEvent(QPaintEvent *event)
 
         if (text().isEmpty()) {
                 painter.setOpacity(1 - state_machine_->progress());
-                // painter.fillRect(rect(),
-                // parentWidget()->palette().color(backgroundRole()));
                 painter.fillRect(rect(), backgroundColor());
         }
 
@@ -347,8 +348,8 @@ TextFieldLabel::TextFieldLabel(TextField *parent)
         scale_ = 1;
         color_ = parent->labelColor();
 
-        QFontDatabase db;
-        QFont font(db.font("Open Sans", "Medium", parent->labelFontSize()));
+        QFont font("Open Sans SemiBold");
+        font.setPixelSize(parent->labelFontSize());
         font.setLetterSpacing(QFont::PercentageSpacing, 102);
         setFont(font);
 }

@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
 
-option(BUILD_TESTS "Build all tests" OFF)
 option(APPVEYOR_BUILD "Build on appveyor" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -57,6 +56,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5Multimedia REQUIRED)
 
 if (APPLE)
     find_package(Qt5MacExtras REQUIRED)
@@ -117,7 +117,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
         -Wall \
         -Wextra \
-        -march=native \
         -Werror \
         -pipe \
         -pedantic \
@@ -140,52 +139,31 @@ endif()
 # Declare source and header files.
 #
 set(SRC_FILES
-    src/AvatarProvider.cc
-    src/Cache.cc
-    src/ChatPage.cc
-    src/CommunitiesListItem.cc
-    src/CommunitiesList.cc
-    src/Community.cc
-    src/Deserializable.cc
-    src/EmojiCategory.cc
-    src/EmojiItemDelegate.cc
-    src/EmojiPanel.cc
-    src/EmojiPickButton.cc
-    src/EmojiProvider.cc
-    src/ImageItem.cc
-    src/ImageOverlayDialog.cc
-    src/InputValidator.cc
-    src/JoinRoomDialog.cc
-    src/LeaveRoomDialog.cc
-    src/Login.cc
-    src/LoginPage.cc
-    src/LogoutDialog.cc
-    src/MainWindow.cc
-    src/MatrixClient.cc
-    src/Profile.cc
-    src/QuickSwitcher.cc
-    src/Register.cc
-    src/RegisterPage.cc
-    src/RoomInfoListItem.cc
-    src/RoomList.cc
-    src/RoomMessages.cc
-    src/RoomState.cc
-    src/SideBarActions.cc
-    src/UserSettingsPage.cc
-    src/Splitter.cc
-    src/Sync.cc
-    src/TextInputWidget.cc
-    src/TimelineItem.cc
-    src/TimelineView.cc
-    src/TimelineViewManager.cc
-    src/TopRoomBar.cc
-    src/TrayIcon.cc
-    src/TypingDisplay.cc
-    src/UserInfoWidget.cc
-    src/Versions.cc
-    src/WelcomePage.cc
-    src/main.cc
+    # Dialogs
+    src/dialogs/CreateRoom.cc
+    src/dialogs/ImageOverlay.cc
+    src/dialogs/InviteUsers.cc
+    src/dialogs/JoinRoom.cc
+    src/dialogs/LeaveRoom.cc
+    src/dialogs/Logout.cc
 
+    # Emoji
+    src/emoji/Category.cc
+    src/emoji/ItemDelegate.cc
+    src/emoji/Panel.cc
+    src/emoji/PickButton.cc
+    src/emoji/Provider.cc
+
+    # Timeline
+    src/timeline/TimelineViewManager.cc
+    src/timeline/TimelineItem.cc
+    src/timeline/TimelineView.cc
+    src/timeline/widgets/AudioItem.cc
+    src/timeline/widgets/FileItem.cc
+    src/timeline/widgets/ImageItem.cc
+    src/timeline/widgets/VideoItem.cc
+
+    # UI components
     src/ui/Avatar.cc
     src/ui/Badge.cc
     src/ui/LoadingIndicator.cc
@@ -203,82 +181,77 @@ set(SRC_FILES
     src/ui/ToggleButton.cc
     src/ui/Theme.cc
     src/ui/ThemeManager.cc
-)
 
-set(MATRIX_EVENTS
-    src/events/Event.cc
-
-    src/events/AliasesEventContent.cc
-    src/events/AvatarEventContent.cc
-    src/events/CanonicalAliasEventContent.cc
-    src/events/CreateEventContent.cc
-    src/events/HistoryVisibilityEventContent.cc
-    src/events/JoinRulesEventContent.cc
-    src/events/MemberEventContent.cc
-    src/events/MessageEventContent.cc
-    src/events/NameEventContent.cc
-    src/events/PowerLevelsEventContent.cc
-    src/events/TopicEventContent.cc
-
-    src/events/messages/Audio.cc
-    src/events/messages/Emote.cc
-    src/events/messages/File.cc
-    src/events/messages/Image.cc
-    src/events/messages/Location.cc
-    src/events/messages/Notice.cc
-    src/events/messages/Text.cc
-    src/events/messages/Video.cc
+    src/AvatarProvider.cc
+    src/Cache.cc
+    src/ChatPage.cc
+    src/CommunitiesListItem.cc
+    src/CommunitiesList.cc
+    src/Community.cc
+    src/Deserializable.cc
+    src/InviteeItem.cc
+    src/InputValidator.cc
+    src/Login.cc
+    src/LoginPage.cc
+    src/MainWindow.cc
+    src/MatrixClient.cc
+    src/QuickSwitcher.cc
+    src/Register.cc
+    src/RegisterPage.cc
+    src/RoomInfoListItem.cc
+    src/RoomList.cc
+    src/RoomMessages.cc
+    src/RoomState.cc
+    src/RunGuard.cc
+    src/SideBarActions.cc
+    src/Splitter.cc
+    src/TextInputWidget.cc
+    src/TopRoomBar.cc
+    src/TrayIcon.cc
+    src/TypingDisplay.cc
+    src/UserInfoWidget.cc
+    src/UserSettingsPage.cc
+    src/WelcomePage.cc
+    src/main.cc
 )
 
 include_directories(include)
 include_directories(include/ui)
-include_directories(include/events)
-include_directories(include/events/messages)
 
 include_directories(libs/lmdbxx)
 include_directories(${LMDB_INCLUDE_DIR})
 
 qt5_wrap_cpp(MOC_HEADERS
-    include/AvatarProvider.h
-    include/ChatPage.h
-    include/CommunitiesListItem.h
-    include/CommunitiesList.h
-    include/Community.h
-    include/EmojiCategory.h
-    include/EmojiItemDelegate.h
-    include/EmojiPanel.h
-    include/EmojiPickButton.h
-    include/ui/FloatingButton.h
-    include/ImageItem.h
-    include/ImageOverlayDialog.h
-    include/JoinRoomDialog.h
-    include/LeaveRoomDialog.h
-    include/LoginPage.h
-    include/LogoutDialog.h
-    include/MainWindow.h
-    include/MatrixClient.h
-    include/QuickSwitcher.h
-    include/RegisterPage.h
-    include/RoomInfoListItem.h
-    include/RoomList.h
-    include/SideBarActions.h
-    include/UserSettingsPage.h
-    include/Splitter.h
-    include/TextInputWidget.h
-    include/TimelineItem.h
-    include/TimelineView.h
-    include/TimelineViewManager.h
-    include/TopRoomBar.h
-    include/TrayIcon.h
-    include/TypingDisplay.h
-    include/UserInfoWidget.h
-    include/WelcomePage.h
+    # Dialogs
+    include/dialogs/CreateRoom.h
+    include/dialogs/ImageOverlay.h
+    include/dialogs/InviteUsers.h
+    include/dialogs/JoinRoom.h
+    include/dialogs/LeaveRoom.h
+    include/dialogs/Logout.h
 
+    # Emoji
+    include/emoji/Category.h
+    include/emoji/ItemDelegate.h
+    include/emoji/Panel.h
+    include/emoji/PickButton.h
+
+    # Timeline
+    include/timeline/TimelineItem.h
+    include/timeline/TimelineView.h
+    include/timeline/TimelineViewManager.h
+    include/timeline/widgets/AudioItem.h
+    include/timeline/widgets/FileItem.h
+    include/timeline/widgets/ImageItem.h
+    include/timeline/widgets/VideoItem.h
+
+    # UI components
     include/ui/Avatar.h
     include/ui/Badge.h
     include/ui/LoadingIndicator.h
     include/ui/FlatButton.h
     include/ui/Label.h
+    include/ui/FloatingButton.h
     include/ui/OverlayWidget.h
     include/ui/ScrollBar.h
     include/ui/SnackBar.h
@@ -289,6 +262,29 @@ qt5_wrap_cpp(MOC_HEADERS
     include/ui/ToggleButton.h
     include/ui/Theme.h
     include/ui/ThemeManager.h
+
+    include/AvatarProvider.h
+    include/ChatPage.h
+    include/CommunitiesListItem.h
+    include/CommunitiesList.h
+    include/Community.h
+    include/LoginPage.h
+    include/MainWindow.h
+    include/InviteeItem.h
+    include/MatrixClient.h
+    include/QuickSwitcher.h
+    include/RegisterPage.h
+    include/RoomInfoListItem.h
+    include/RoomList.h
+    include/SideBarActions.h
+    include/Splitter.h
+    include/TextInputWidget.h
+    include/TopRoomBar.h
+    include/TrayIcon.h
+    include/TypingDisplay.h
+    include/UserInfoWidget.h
+    include/UserSettingsPage.h
+    include/WelcomePage.h
 )
 
 #
@@ -301,57 +297,40 @@ add_custom_target(LANG_QRC ALL DEPENDS ${QM_SRC})
 
 # Generate a qrc file for the translations
 set(_qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
-file(WRITE ${_qrc} "<RCC> <qresource prefix=\"/translations\">")
-foreach(_lang ${QM_SRC})
-    get_filename_component(_filename ${_lang} NAME)
-    file(APPEND ${_qrc} "<file>${_filename}</file>")
-endforeach(_lang)
-file(APPEND ${_qrc} "</qresource> </RCC>")
+
+if(NOT EXISTS ${_qrc})
+    file(WRITE ${_qrc} "<RCC> <qresource prefix=\"/translations\">")
+    foreach(_lang ${QM_SRC})
+        get_filename_component(_filename ${_lang} NAME)
+        file(APPEND ${_qrc} "<file>${_filename}</file>")
+    endforeach(_lang)
+    file(APPEND ${_qrc} "</qresource> </RCC>")
+endif()
 
 qt5_add_resources(LANG_QRC ${_qrc})
 qt5_add_resources(QRC resources/res.qrc)
 
-#
-# Matrix events library.
-#
-add_library(matrix_events ${MATRIX_EVENTS} src/Deserializable.cc)
-target_link_libraries(matrix_events Qt5::Core)
+add_subdirectory(libs/matrix-structs)
+include_directories(${matrix_structs_SOURCE_DIR}/include)
+include_directories(${matrix_structs_SOURCE_DIR}/deps)
 
-if (BUILD_TESTS)
-    enable_testing()
-
-    find_package(GTest REQUIRED)
-    include_directories(${GTEST_INCLUDE_DIRS})
-
-    add_executable(events_test tests/events.cc)
-    target_link_libraries(events_test matrix_events ${GTEST_BOTH_LIBRARIES})
-
-    add_executable(event_collection_test tests/event_collection.cc)
-    target_link_libraries(event_collection_test matrix_events ${GTEST_BOTH_LIBRARIES})
-
-    add_executable(message_events tests/message_events.cc)
-    target_link_libraries(message_events matrix_events ${GTEST_BOTH_LIBRARIES})
-
-    add_test(MatrixEvents events_test)
-    add_test(MatrixEventCollection event_collection_test)
-    add_test(MatrixMessageEvents message_events)
-endif()
+set(COMMON_LIBS matrix_structs Qt5::Widgets Qt5::Network Qt5::Concurrent)
 
 if(APPVEYOR_BUILD)
-    set (NHEKO_LIBS matrix_events Qt5::Widgets Qt5::Network Qt5::Concurrent lmdb)
+    set(NHEKO_LIBS ${COMMON_LIBS} lmdb)
 else()
-    set (NHEKO_LIBS matrix_events Qt5::Widgets Qt5::Network Qt5::Concurrent ${LMDB_LIBRARY})
+    set(NHEKO_LIBS ${COMMON_LIBS} ${LMDB_LIBRARY})
 endif()
 
 set (NHEKO_DEPS ${SRC_FILES} ${UI_HEADERS} ${MOC_HEADERS} ${QRC} ${LANG_QRC} ${QM_SRC} ${META_FILES_TO_INCLUDE})
 
 if(APPLE)
     add_executable (nheko ${OS_BUNDLE} ${NHEKO_DEPS})
-    target_link_libraries (nheko ${NHEKO_LIBS} Qt5::MacExtras)
+    target_link_libraries (nheko ${NHEKO_LIBS} Qt5::MacExtras Qt5::Multimedia)
 elseif(WIN32)
     add_executable (nheko ${OS_BUNDLE} ${ICON_FILE} ${NHEKO_DEPS})
-    target_link_libraries (nheko ${NTDLIB} ${NHEKO_LIBS} Qt5::WinMain)
+    target_link_libraries (nheko ${NTDLIB} ${NHEKO_LIBS} Qt5::WinMain Qt5::Multimedia)
 else()
     add_executable (nheko ${OS_BUNDLE} ${NHEKO_DEPS})
-    target_link_libraries (nheko ${NHEKO_LIBS})
+    target_link_libraries (nheko ${NHEKO_LIBS} Qt5::Multimedia)
 endif()

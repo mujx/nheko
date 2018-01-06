@@ -21,7 +21,6 @@
 #include <QLayout>
 #include <QSharedPointer>
 
-class Avatar;
 class FlatButton;
 class MatrixClient;
 class RaisedButton;
@@ -34,6 +33,9 @@ class RegisterPage : public QWidget
 public:
         RegisterPage(QSharedPointer<MatrixClient> client, QWidget *parent = 0);
         ~RegisterPage();
+
+protected:
+        void paintEvent(QPaintEvent *event) override;
 
 signals:
         void backButtonClicked();
@@ -52,7 +54,7 @@ private:
         QHBoxLayout *logo_layout_;
         QHBoxLayout *button_layout_;
 
-        Avatar *logo_;
+        QLabel *logo_;
         QLabel *error_label_;
 
         FlatButton *back_button_;

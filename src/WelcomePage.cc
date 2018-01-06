@@ -17,6 +17,7 @@
 
 #include <QLabel>
 #include <QLayout>
+#include <QStyleOption>
 
 #include "Config.h"
 #include "RaisedButton.h"
@@ -30,8 +31,8 @@ WelcomePage::WelcomePage(QWidget *parent)
         auto topLayout_ = new QVBoxLayout(this);
         topLayout_->setSpacing(20);
 
-        QFont headingFont("Open Sans", 22);
-        QFont subTitleFont("Open Sans", 21);
+        QFont headingFont("Open Sans", 20);
+        QFont subTitleFont("Open Sans", 19);
 
         QIcon icon;
         icon.addFile(":/logos/splash.png");
@@ -82,4 +83,13 @@ WelcomePage::WelcomePage(QWidget *parent)
 
         connect(registerBtn_, &QPushButton::clicked, this, &WelcomePage::userRegister);
         connect(loginBtn_, &QPushButton::clicked, this, &WelcomePage::userLogin);
+}
+
+void
+WelcomePage::paintEvent(QPaintEvent *)
+{
+        QStyleOption opt;
+        opt.init(this);
+        QPainter p(this);
+        style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

@@ -21,6 +21,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMimeDatabase>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QPixmap>
@@ -29,12 +30,7 @@
 
 #include "Login.h"
 #include "MatrixClient.h"
-#include "MessageEvent.h"
-#include "Profile.h"
 #include "Register.h"
-#include "RoomMessages.h"
-#include "Sync.h"
-#include "Versions.h"
 
 MatrixClient::MatrixClient(QString server, QObject *parent)
   : QNetworkAccessManager(parent)
@@ -98,22 +94,19 @@ MatrixClient::login(const QString &username, const QString &password) noexcept
                         return;
                 }
 
-                auto data = reply->readAll();
-                auto json = QJsonDocument::fromJson(data);
-
-                LoginResponse response;
-
                 try {
-                        response.deserialize(json);
+                        mtx::responses::Login login =
+                          nlohmann::json::parse(reply->readAll().data());
 
                         auto hostname = server_.host();
 
                         if (server_.port() > 0)
                                 hostname = QString("%1:%2").arg(server_.host()).arg(server_.port());
 
-                        emit loginSuccess(
-                          response.getUserId(), hostname, response.getAccessToken());
-                } catch (DeserializationException &e) {
+                        emit loginSuccess(QString::fromStdString(login.user_id.toString()),
+                                          hostname,
+                                          QString::fromStdString(login.access_token));
+                } catch (std::exception &e) {
                         qWarning() << "Malformed JSON response" << e.what();
                         emit loginError(tr("Malformed response. Possibly not a Matrix server"));
                 }
@@ -240,20 +233,11 @@ MatrixClient::sync() noexcept
                         return;
                 }
 
-                auto data = reply->readAll();
-
-                if (data.isEmpty())
-                        return;
-
-                auto json = QJsonDocument::fromJson(data);
-
-                SyncResponse response;
-
                 try {
-                        response.deserialize(json);
+                        mtx::responses::Sync response = nlohmann::json::parse(reply->readAll());
                         emit syncCompleted(response);
-                } catch (DeserializationException &e) {
-                        qWarning() << "Sync malformed response" << e.what();
+                } catch (std::exception &e) {
+                        qWarning() << "Sync malformed response: " << e.what();
                 }
         });
 }
@@ -271,21 +255,33 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
 
         QUrl endpoint(server_);
         endpoint.setPath(clientApiUrl_ +
-                         QString("/rooms/%1/send/m.room.message/%2").arg(roomid).arg(txn_id_));
+                         QString("/rooms/%1/send/m.room.message/%2").arg(roomid).arg(txnId));
         endpoint.setQuery(query);
 
         QString msgType("");
+
+        QMimeDatabase db;
+        QMimeType mime =
+          db.mimeTypeForFile(fileinfo.absoluteFilePath(), QMimeDatabase::MatchContent);
+
         QJsonObject body;
+        QJsonObject info = {{"size", fileinfo.size()}, {"mimetype", mime.name()}};
 
         switch (ty) {
-        case matrix::events::MessageEventType::Text:
-                body = { { "msgtype", "m.text" }, { "body", msg } };
+        case mtx::events::MessageType::Text:
+                body = {{"msgtype", "m.text"}, {"body", msg}};
                 break;
-        case matrix::events::MessageEventType::Emote:
-                body = { { "msgtype", "m.emote" }, { "body", msg } };
+        case mtx::events::MessageType::Emote:
+                body = {{"msgtype", "m.emote"}, {"body", msg}};
                 break;
-        case matrix::events::MessageEventType::Image:
-                body = { { "msgtype", "m.image" }, { "body", msg }, { "url", url } };
+        case mtx::events::MessageType::Image:
+                body = {{"msgtype", "m.image"}, {"body", msg}, {"url", url}, {"info", info}};
+                break;
+        case mtx::events::MessageType::File:
+                body = {{"msgtype", "m.file"}, {"body", msg}, {"url", url}, {"info", info}};
+                break;
+        case mtx::events::MessageType::Audio:
+                body = {{"msgtype", "m.audio"}, {"body", msg}, {"url", url}, {"info", info}};
                 break;
         default:
                 qDebug() << "SendRoomMessage: Unknown message type for" << msg;
@@ -304,14 +300,16 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
                 if (status == 0 || status >= 400) {
-                        qWarning() << reply->errorString();
+                        emit messageSendFailed(roomid, txnId);
                         return;
                 }
 
                 auto data = reply->readAll();
 
-                if (data.isEmpty())
+                if (data.isEmpty()) {
+                        emit messageSendFailed(roomid, txnId);
                         return;
+                }
 
                 auto json = QJsonDocument::fromJson(data);
 
@@ -358,23 +356,14 @@ MatrixClient::initialSync() noexcept
                         return;
                 }
 
-                auto data = reply->readAll();
-
-                if (data.isEmpty())
-                        return;
-
-                auto json = QJsonDocument::fromJson(data);
-
-                SyncResponse response;
-
                 try {
-                        response.deserialize(json);
-                } catch (DeserializationException &e) {
+                        mtx::responses::Sync response = nlohmann::json::parse(reply->readAll());
+                        emit initialSyncCompleted(response);
+                } catch (std::exception &e) {
                         qWarning() << "Sync malformed response" << e.what();
                         return;
                 }
 
-                emit initialSyncCompleted(response);
         });
 }
 
@@ -404,18 +393,12 @@ MatrixClient::versions() noexcept
                         return;
                 }
 
-                auto data = reply->readAll();
-                auto json = QJsonDocument::fromJson(data);
-
-                VersionsResponse response;
-
                 try {
-                        response.deserialize(json);
-                        if (!response.isVersionSupported(0, 2, 0))
-                                emit versionError("Server does not support required API version.");
-                        else
-                                emit versionSuccess();
-                } catch (DeserializationException &e) {
+                        mtx::responses::Versions versions =
+                          nlohmann::json::parse(reply->readAll().data());
+
+                        emit versionSuccess();
+                } catch (std::exception &e) {
                         emit versionError("Malformed response. Possibly not a Matrix server");
                 }
         });
@@ -449,16 +432,13 @@ MatrixClient::getOwnProfile() noexcept
                         return;
                 }
 
-                auto data = reply->readAll();
-                auto json = QJsonDocument::fromJson(data);
-
-                ProfileResponse response;
-
                 try {
-                        response.deserialize(json);
-                        emit getOwnProfileResponse(response.getAvatarUrl(),
-                                                   response.getDisplayName());
-                } catch (DeserializationException &e) {
+                        mtx::responses::Profile profile =
+                          nlohmann::json::parse(reply->readAll().data());
+
+                        emit getOwnProfileResponse(QUrl(QString::fromStdString(profile.avatar_url)),
+                                                   QString::fromStdString(profile.display_name));
+                } catch (std::exception &e) {
                         qWarning() << "Profile:" << e.what();
                 }
         });
@@ -526,7 +506,7 @@ MatrixClient::fetchRoomAvatar(const QString &roomid, const QUrl &avatar_url)
         QNetworkRequest avatar_request(endpoint);
 
         QNetworkReply *reply = get(avatar_request);
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, avatar_url]() {
                 reply->deleteLater();
 
                 int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -544,7 +524,7 @@ MatrixClient::fetchRoomAvatar(const QString &roomid, const QUrl &avatar_url)
                 QPixmap pixmap;
                 pixmap.loadFromData(img);
 
-                emit roomAvatarRetrieved(roomid, pixmap);
+                emit roomAvatarRetrieved(roomid, pixmap, avatar_url.toString(), img);
         });
 }
 
@@ -731,6 +711,32 @@ MatrixClient::downloadImage(const QString &event_id, const QUrl &url)
 }
 
 void
+MatrixClient::downloadFile(const QString &event_id, const QUrl &url)
+{
+        QNetworkRequest fileRequest(url);
+
+        auto reply = get(fileRequest);
+        connect(reply, &QNetworkReply::finished, this, [this, reply, event_id]() {
+                reply->deleteLater();
+
+                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+                if (status == 0 || status >= 400) {
+                        // TODO: Handle error
+                        qWarning() << reply->errorString();
+                        return;
+                }
+
+                auto data = reply->readAll();
+
+                if (data.size() == 0)
+                        return;
+
+                emit fileDownloaded(event_id, data);
+        });
+}
+
+void
 MatrixClient::fetchOwnAvatar(const QUrl &avatar_url)
 {
         QList<QString> url_parts = avatar_url.toString().split("mxc://");
@@ -802,44 +808,26 @@ MatrixClient::messages(const QString &roomid, const QString &from_token, int lim
                         return;
                 }
 
-                auto data = reply->readAll();
-
-                RoomMessages msgs;
-
                 try {
-                        msgs.deserialize(QJsonDocument::fromJson(data));
-                } catch (const DeserializationException &e) {
+                        mtx::responses::Messages messages =
+                          nlohmann::json::parse(reply->readAll().data());
+
+                        emit messagesRetrieved(roomid, messages);
+                } catch (std::exception &e) {
                         qWarning() << "Room messages from" << roomid << e.what();
                         return;
                 }
-
-                emit messagesRetrieved(roomid, msgs);
         });
 }
 
 void
 MatrixClient::uploadImage(const QString &roomid, const QString &filename)
 {
-        QUrlQuery query;
-        query.addQueryItem("access_token", token_);
+        auto reply = makeUploadRequest(filename);
 
-        QUrl endpoint(server_);
-        endpoint.setPath(mediaApiUrl_ + "/upload");
-        endpoint.setQuery(query);
-
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadWrite)) {
-                qDebug() << "Error while reading" << filename;
+        if (reply == nullptr)
                 return;
-        }
 
-        auto imgFormat = QString(QImageReader::imageFormat(filename));
-
-        QNetworkRequest request(QString(endpoint.toEncoded()));
-        request.setHeader(QNetworkRequest::ContentLengthHeader, file.size());
-        request.setHeader(QNetworkRequest::ContentTypeHeader, QString("image/%1").arg(imgFormat));
-
-        auto reply = post(request, file.readAll());
         connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename]() {
                 reply->deleteLater();
 
@@ -870,6 +858,82 @@ MatrixClient::uploadImage(const QString &roomid, const QString &filename)
                 }
 
                 emit imageUploaded(roomid, filename, object.value("content_uri").toString());
+        });
+}
+
+void
+MatrixClient::uploadFile(const QString &roomid, const QString &filename)
+{
+        auto reply = makeUploadRequest(filename);
+
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename]() {
+                reply->deleteLater();
+
+                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+                if (status == 0 || status >= 400) {
+                        emit syncFailed(reply->errorString());
+                        return;
+                }
+
+                auto data = reply->readAll();
+
+                if (data.isEmpty())
+                        return;
+
+                auto json = QJsonDocument::fromJson(data);
+
+                if (!json.isObject()) {
+                        qDebug() << "Media upload: Response is not a json object.";
+                        return;
+                }
+
+                QJsonObject object = json.object();
+                if (!object.contains("content_uri")) {
+                        qDebug() << "Media upload: Missing content_uri key";
+                        qDebug() << object;
+                        return;
+                }
+
+                emit fileUploaded(roomid, filename, object.value("content_uri").toString());
+        });
+}
+
+void
+MatrixClient::uploadAudio(const QString &roomid, const QString &filename)
+{
+        auto reply = makeUploadRequest(filename);
+
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename]() {
+                reply->deleteLater();
+
+                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+                if (status == 0 || status >= 400) {
+                        emit syncFailed(reply->errorString());
+                        return;
+                }
+
+                auto data = reply->readAll();
+
+                if (data.isEmpty())
+                        return;
+
+                auto json = QJsonDocument::fromJson(data);
+
+                if (!json.isObject()) {
+                        qDebug() << "Media upload: Response is not a json object.";
+                        return;
+                }
+
+                QJsonObject object = json.object();
+                if (!object.contains("content_uri")) {
+                        qDebug() << "Media upload: Missing content_uri key";
+                        qDebug() << object;
+                        return;
+                }
+
+                emit audioUploaded(roomid, filename, object.value("content_uri").toString());
         });
 }
 
@@ -943,6 +1007,79 @@ MatrixClient::leaveRoom(const QString &roomId)
 }
 
 void
+MatrixClient::inviteUser(const QString &roomId, const QString &user)
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + QString("/rooms/%1/invite").arg(roomId));
+        endpoint.setQuery(query);
+
+        QNetworkRequest request(endpoint);
+        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader, "application/json");
+
+        QJsonObject body{{"user_id", user}};
+        auto reply = post(request, QJsonDocument(body).toJson(QJsonDocument::Compact));
+
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomId, user]() {
+                reply->deleteLater();
+
+                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+                if (status == 0 || status >= 400) {
+                        // TODO: Handle failure.
+                        qWarning() << reply->errorString();
+                        return;
+                }
+
+                emit invitedUser(roomId, user);
+        });
+}
+
+void
+MatrixClient::createRoom(const mtx::requests::CreateRoom &create_room_request)
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ + QString("/createRoom"));
+        endpoint.setQuery(query);
+
+        QNetworkRequest request(endpoint);
+        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader, "application/json");
+
+        nlohmann::json body = create_room_request;
+        auto reply          = post(request, QString::fromStdString(body.dump()).toUtf8());
+
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+                reply->deleteLater();
+
+                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+                if (status == 0 || status >= 400) {
+                        auto data     = reply->readAll();
+                        auto response = QJsonDocument::fromJson(data);
+                        auto json     = response.object();
+
+                        if (json.contains("error"))
+                                emit roomCreationFailed(json["error"].toString());
+                        else
+                                qDebug() << reply->errorString();
+
+                        return;
+                }
+
+                auto data     = reply->readAll();
+                auto response = QJsonDocument::fromJson(data);
+                auto room_id  = response.object()["room_id"].toString();
+
+                emit roomCreated(room_id);
+        });
+}
+
+void
 MatrixClient::sendTypingNotification(const QString &roomid, int timeoutInMillis)
 {
         QSettings settings;
@@ -990,4 +1127,60 @@ MatrixClient::removeTypingNotification(const QString &roomid)
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
         put(request, QJsonDocument(body).toJson(QJsonDocument::Compact));
+}
+
+void
+MatrixClient::readEvent(const QString &room_id, const QString &event_id)
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(clientApiUrl_ +
+                         QString("/rooms/%1/receipt/m.read/%2").arg(room_id).arg(event_id));
+        endpoint.setQuery(query);
+
+        QNetworkRequest request(QString(endpoint.toEncoded()));
+        request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader, "application/json");
+
+        auto reply = post(request, "{}");
+
+        connect(reply, &QNetworkReply::finished, this, [reply]() {
+                reply->deleteLater();
+
+                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+                if (status == 0 || status >= 400) {
+                        qWarning() << reply->errorString();
+                        return;
+                }
+        });
+}
+
+QNetworkReply *
+MatrixClient::makeUploadRequest(const QString &filename)
+{
+        QUrlQuery query;
+        query.addQueryItem("access_token", token_);
+
+        QUrl endpoint(server_);
+        endpoint.setPath(mediaApiUrl_ + "/upload");
+        endpoint.setQuery(query);
+
+        QFile file(filename);
+        if (!file.open(QIODevice::ReadWrite)) {
+                qDebug() << "Error while reading" << filename;
+                return nullptr;
+        }
+
+        QMimeDatabase db;
+        QMimeType mime = db.mimeTypeForFile(filename, QMimeDatabase::MatchContent);
+
+        QNetworkRequest request(QString(endpoint.toEncoded()));
+        request.setHeader(QNetworkRequest::ContentLengthHeader, file.size());
+        request.setHeader(QNetworkRequest::ContentTypeHeader, mime.name());
+
+        auto reply = post(request, file.readAll());
+
+        return reply;
 }

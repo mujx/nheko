@@ -36,15 +36,28 @@ public:
 
         void save();
         void load();
-        void setTheme(QString theme) { theme_ = theme; }
-        void setTray(bool state) { isTrayEnabled_ = state; }
+        void applyTheme();
+        void setTheme(QString theme);
+        void setTray(bool state)
+        {
+                isTrayEnabled_ = state;
+                save();
+        };
 
-        QString theme() const { return !theme_.isEmpty() ? theme_ : "default"; }
+        void setRoomOrdering(bool state)
+        {
+                isOrderingEnabled_ = state;
+                save();
+        };
+
+        QString theme() const { return !theme_.isEmpty() ? theme_ : "light"; }
         bool isTrayEnabled() const { return isTrayEnabled_; }
+        bool isOrderingEnabled() const { return isOrderingEnabled_; }
 
 private:
         QString theme_;
         bool isTrayEnabled_;
+        bool isOrderingEnabled_;
 };
 
 class HorizontalLine : public QFrame
@@ -65,12 +78,15 @@ public:
 protected:
         void showEvent(QShowEvent *event) override;
         void resizeEvent(QResizeEvent *event) override;
+        void paintEvent(QPaintEvent *event) override;
 
 signals:
         void moveBack();
         void trayOptionChanged(bool value);
 
 private:
+        void restoreThemeCombo() const;
+
         // Layouts
         QVBoxLayout *topLayout_;
         QVBoxLayout *mainLayout_;
@@ -80,6 +96,8 @@ private:
         QSharedPointer<UserSettings> settings_;
 
         Toggle *trayToggle_;
+        Toggle *roomOrderToggle_;
+
         QComboBox *themeCombo_;
 
         int sideMargin_ = 0;

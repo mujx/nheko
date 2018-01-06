@@ -24,14 +24,19 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-class JoinRoomDialog;
+#include <mtx.hpp>
+
+#include "dialogs/LeaveRoom.h"
+
 class LeaveRoomDialog;
 class MatrixClient;
+class Cache;
 class OverlayModal;
 class RoomInfoListItem;
 class RoomSettings;
 class RoomState;
 class Sync;
+class UserSettings;
 struct DescInfo;
 
 class RoomList : public QWidget
@@ -39,18 +44,25 @@ class RoomList : public QWidget
         Q_OBJECT
 
 public:
-        RoomList(QSharedPointer<MatrixClient> client, QWidget *parent = 0);
+        RoomList(QSharedPointer<MatrixClient> client,
+                 QSharedPointer<UserSettings> userSettings,
+                 QWidget *parent = 0);
         ~RoomList();
 
+        void setCache(QSharedPointer<Cache> cache) { cache_ = cache; }
         void setInitialRooms(const QMap<QString, QSharedPointer<RoomSettings>> &settings,
                              const QMap<QString, RoomState> &states);
-        void sync(const QMap<QString, RoomState> &states);
+        void sync(const QMap<QString, RoomState> &states,
+                  QMap<QString, QSharedPointer<RoomSettings>> &settings);
+        void syncInvites(const std::map<std::string, mtx::responses::InvitedRoom> &rooms);
 
         void clear();
+        void updateAvatar(const QString &room_id, const QString &url);
 
-        void addRoom(const QSharedPointer<RoomSettings> &settings,
+        void addRoom(const QMap<QString, QSharedPointer<RoomSettings>> &settings,
                      const RoomState &state,
                      const QString &room_id);
+        void addInvitedRoom(const QString &room_id, const mtx::responses::InvitedRoom &room);
         void removeRoom(const QString &room_id, bool reset);
         void setFilterRooms(bool filterRooms);
         void setRoomFilter(QList<QString> room_ids);
@@ -58,6 +70,9 @@ public:
 signals:
         void roomChanged(const QString &room_id);
         void totalUnreadMessageCountUpdated(int count);
+        void acceptInvite(const QString &room_id);
+        void declineInvite(const QString &room_id);
+        void roomAvatarChanged(const QString &room_id, const QPixmap &img);
 
 public slots:
         void updateRoomAvatar(const QString &roomid, const QPixmap &img);
@@ -67,6 +82,14 @@ public slots:
         void closeJoinRoomDialog(bool isJoining, QString roomAlias);
         void openLeaveRoomDialog(const QString &room_id);
         void closeLeaveRoomDialog(bool leaving, const QString &room_id);
+        void clearRoomMessageCount(const QString &room_id);
+
+protected:
+        void paintEvent(QPaintEvent *event) override;
+        void leaveEvent(QEvent *event) override;
+
+private slots:
+        void sortRoomsByLastMessage();
 
 private:
         void calculateUnreadMessageCount();
@@ -79,10 +102,9 @@ private:
         QPushButton *joinRoomButton_;
 
         OverlayModal *joinRoomModal_;
-        JoinRoomDialog *joinRoomDialog_;
 
         QSharedPointer<OverlayModal> leaveRoomModal_;
-        QSharedPointer<LeaveRoomDialog> leaveRoomDialog_;
+        QSharedPointer<dialogs::LeaveRoom> leaveRoomDialog_;
 
         QMap<QString, QSharedPointer<RoomInfoListItem>> rooms_;
         QString selectedRoom_;
@@ -91,4 +113,8 @@ private:
         QList<QString> roomFilter_ = QList<QString>(); // which rooms to include in the room list
 
         QSharedPointer<MatrixClient> client_;
+        QSharedPointer<Cache> cache_;
+        QSharedPointer<UserSettings> userSettings_;
+
+        bool isSortPending_ = false;
 };

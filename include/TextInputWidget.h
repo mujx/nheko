@@ -24,12 +24,10 @@
 #include <QTextEdit>
 #include <QWidget>
 
-#include "EmojiPickButton.h"
 #include "FlatButton.h"
-#include "Image.h"
 #include "LoadingIndicator.h"
 
-namespace msgs = matrix::events::messages;
+#include "emoji/PickButton.h"
 
 class FilteredTextEdit : public QTextEdit
 {
@@ -76,7 +74,7 @@ public:
 public slots:
         void openFileSelection();
         void hideUploadSpinner();
-        void focusLineEdit() { input_->setFocus(); };
+        void focusLineEdit() { input_->setFocus(); }
 
 private slots:
         void addSelectedEmoji(const QString &emoji);
@@ -84,14 +82,19 @@ private slots:
 signals:
         void sendTextMessage(QString msg);
         void sendEmoteMessage(QString msg);
+
         void uploadImage(QString filename);
+        void uploadFile(QString filename);
+        void uploadAudio(QString filename);
+
         void sendJoinRoomRequest(const QString &room);
 
         void startedTyping();
         void stoppedTyping();
 
 protected:
-        void focusInEvent(QFocusEvent *event);
+        void focusInEvent(QFocusEvent *event) override;
+        void paintEvent(QPaintEvent *) override;
 
 private:
         void showUploadSpinner();
@@ -104,5 +107,5 @@ private:
 
         FlatButton *sendFileBtn_;
         FlatButton *sendMessageBtn_;
-        EmojiPickButton *emojiBtn_;
+        emoji::PickButton *emojiBtn_;
 };

@@ -2,6 +2,8 @@
 
 set -e
 
+TAG=`git tag -l --points-at HEAD`
+
 # Add Qt binaries to path
 PATH=/usr/local/opt/qt/bin/:${PATH}
 

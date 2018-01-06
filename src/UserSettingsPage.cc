@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QApplication>
 #include <QComboBox>
 #include <QDebug>
 #include <QLabel>
@@ -32,8 +33,42 @@ void
 UserSettings::load()
 {
         QSettings settings;
-        isTrayEnabled_ = settings.value("user/window/tray", true).toBool();
-        theme_         = settings.value("user/theme", "default").toString();
+        isTrayEnabled_     = settings.value("user/window/tray", true).toBool();
+        isOrderingEnabled_ = settings.value("user/room_ordering", true).toBool();
+        theme_             = settings.value("user/theme", "light").toString();
+
+        applyTheme();
+}
+
+void
+UserSettings::setTheme(QString theme)
+{
+        theme_ = theme;
+        save();
+        applyTheme();
+}
+
+void
+UserSettings::applyTheme()
+{
+        QFile stylefile;
+        QPalette pal;
+
+        if (theme() == "light") {
+                stylefile.setFileName(":/styles/styles/nheko.qss");
+                pal.setColor(QPalette::Link, QColor("#333"));
+        } else if (theme() == "dark") {
+                stylefile.setFileName(":/styles/styles/nheko-dark.qss");
+                pal.setColor(QPalette::Link, QColor("#d7d9dc"));
+        } else {
+                stylefile.setFileName(":/styles/styles/system.qss");
+        }
+
+        stylefile.open(QFile::ReadOnly);
+        QString stylesheet = QString(stylefile.readAll());
+
+        QApplication::setPalette(pal);
+        qobject_cast<QApplication *>(QApplication::instance())->setStyleSheet(stylesheet);
 }
 
 void
@@ -46,6 +81,7 @@ UserSettings::save()
         settings.setValue("tray", isTrayEnabled_);
         settings.endGroup();
 
+        settings.setValue("room_ordering", isOrderingEnabled_);
         settings.setValue("theme", theme());
         settings.endGroup();
 }
@@ -72,7 +108,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         backBtn_->setIconSize(QSize(24, 24));
 
         auto heading_ = new QLabel(tr("User Settings"));
-        heading_->setFont(QFont("Open Sans Bold", 22));
+        heading_->setStyleSheet("font-weight: bold; font-size: 22px;");
 
         topBarLayout_ = new QHBoxLayout;
         topBarLayout_->setSpacing(0);
@@ -87,25 +123,36 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         trayToggle_    = new Toggle(this);
         trayToggle_->setActiveColor(QColor("#38A3D8"));
         trayToggle_->setInactiveColor(QColor("gray"));
-        trayLabel->setFont(QFont("Open Sans", 15));
+        trayLabel->setStyleSheet("font-size: 15px;");
 
         trayOptionLayout_->addWidget(trayLabel);
         trayOptionLayout_->addWidget(trayToggle_, 0, Qt::AlignBottom | Qt::AlignRight);
+
+        auto orderRoomLayout = new QHBoxLayout;
+        orderRoomLayout->setContentsMargins(0, OptionMargin, 0, OptionMargin);
+        auto orderLabel  = new QLabel(tr("Re-order rooms based on activity"), this);
+        roomOrderToggle_ = new Toggle(this);
+        roomOrderToggle_->setActiveColor(QColor("#38A3D8"));
+        roomOrderToggle_->setInactiveColor(QColor("gray"));
+        orderLabel->setStyleSheet("font-size: 15px;");
+
+        orderRoomLayout->addWidget(orderLabel);
+        orderRoomLayout->addWidget(roomOrderToggle_, 0, Qt::AlignBottom | Qt::AlignRight);
 
         auto themeOptionLayout_ = new QHBoxLayout;
         themeOptionLayout_->setContentsMargins(0, OptionMargin, 0, OptionMargin);
         auto themeLabel_ = new QLabel(tr("App theme"), this);
         themeCombo_      = new QComboBox(this);
-        themeCombo_->addItem("Default");
+        themeCombo_->addItem("Light");
+        themeCombo_->addItem("Dark");
         themeCombo_->addItem("System");
-        themeLabel_->setFont(QFont("Open Sans", 15));
+        themeLabel_->setStyleSheet("font-size: 15px;");
 
         themeOptionLayout_->addWidget(themeLabel_);
         themeOptionLayout_->addWidget(themeCombo_, 0, Qt::AlignBottom | Qt::AlignRight);
 
         auto general_ = new QLabel(tr("GENERAL"), this);
-        general_->setFont(QFont("Open Sans Bold", 17));
-        general_->setStyleSheet("color: #5d6565");
+        general_->setStyleSheet("font-size: 17px");
 
         mainLayout_ = new QVBoxLayout;
         mainLayout_->setSpacing(7);
@@ -114,6 +161,8 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         mainLayout_->addWidget(general_, 1, Qt::AlignLeft | Qt::AlignVCenter);
         mainLayout_->addWidget(new HorizontalLine(this));
         mainLayout_->addLayout(trayOptionLayout_);
+        mainLayout_->addWidget(new HorizontalLine(this));
+        mainLayout_->addLayout(orderRoomLayout);
         mainLayout_->addWidget(new HorizontalLine(this));
         mainLayout_->addLayout(themeOptionLayout_);
         mainLayout_->addWidget(new HorizontalLine(this));
@@ -131,6 +180,10 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
                 emit trayOptionChanged(!isDisabled);
         });
 
+        connect(roomOrderToggle_, &Toggle::toggled, this, [=](bool isDisabled) {
+                settings_->setRoomOrdering(!isDisabled);
+        });
+
         connect(backBtn_, &QPushButton::clicked, this, [=]() {
                 settings_->save();
                 emit moveBack();
@@ -140,8 +193,9 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
 void
 UserSettingsPage::showEvent(QShowEvent *)
 {
-        themeCombo_->setCurrentIndex((settings_->theme() == "default" ? 0 : 1));
-        trayToggle_->setState(!settings_->isTrayEnabled()); // Treats true as "off"
+        restoreThemeCombo();
+        trayToggle_->setState(!settings_->isTrayEnabled());          // Treats true as "off"
+        roomOrderToggle_->setState(!settings_->isOrderingEnabled()); // Treats true as "off"
 }
 
 void
@@ -152,4 +206,24 @@ UserSettingsPage::resizeEvent(QResizeEvent *event)
           sideMargin_, LayoutTopMargin, sideMargin_, LayoutBottomMargin);
 
         QWidget::resizeEvent(event);
+}
+
+void
+UserSettingsPage::paintEvent(QPaintEvent *)
+{
+        QStyleOption opt;
+        opt.init(this);
+        QPainter p(this);
+        style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+void
+UserSettingsPage::restoreThemeCombo() const
+{
+        if (settings_->theme() == "light")
+                themeCombo_->setCurrentIndex(0);
+        else if (settings_->theme() == "dark")
+                themeCombo_->setCurrentIndex(1);
+        else
+                themeCombo_->setCurrentIndex(2);
 }

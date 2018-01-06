@@ -13,31 +13,31 @@
         "name": "Debug",
         "projects": [
           {
-            "buildDirectory": "/home/max/Program/nheko/build",
-            "name": "nheko",
-            "sourceDirectory": "/home/max/Program/nheko",
+            "buildDirectory": "/home/max/Program/nheko/build/libs/matrix-structs",
+            "name": "matrix_structs",
+            "sourceDirectory": "/home/max/Program/nheko/libs/matrix-structs",
             "targets": [
               {
                 "artifacts": [
-                  "/home/max/Program/nheko/build/nheko"
+                  "/home/max/Program/nheko/build/libs/matrix-structs/libmatrix_structs.a"
                 ],
-                "buildDirectory": "/home/max/Program/nheko/build",
+                "buildDirectory": "/home/max/Program/nheko/build/libs/matrix-structs",
                 "crossReferences": {
                   "backtrace": [
                     {
-                      "line": 355,
-                      "name": "add_executable",
-                      "path": "/home/max/Program/nheko/CMakeLists.txt"
+                      "line": 95,
+                      "name": "add_library",
+                      "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
                     },
                     {
-                      "path": "/home/max/Program/nheko/CMakeLists.txt"
+                      "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
                     }
                   ],
                   "relatedStatements": [
                     {
                       "backtrace": [
                         {
-                          "line": 233,
+                          "line": 218,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -50,7 +50,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 234,
+                          "line": 219,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -63,7 +63,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 235,
+                          "line": 221,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -76,7 +76,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 236,
+                          "line": 222,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -89,12 +89,12 @@
                     {
                       "backtrace": [
                         {
-                          "line": 238,
+                          "line": 58,
                           "name": "include_directories",
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                          "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
                         },
                         {
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                          "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
                         }
                       ],
                       "type": "target_include_directories"
@@ -102,106 +102,27 @@
                     {
                       "backtrace": [
                         {
-                          "line": 239,
+                          "line": 59,
                           "name": "include_directories",
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                          "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
                         },
                         {
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                          "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
                         }
                       ],
                       "type": "target_include_directories"
-                    },
-                    {
-                      "backtrace": [
-                        {
-                          "line": 356,
-                          "name": "target_link_libraries",
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        },
-                        {
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        }
-                      ],
-                      "type": "target_link_libraries"
-                    },
-                    {
-                      "backtrace": [
-                        {
-                          "line": 356,
-                          "name": "target_link_libraries",
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        },
-                        {
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        }
-                      ],
-                      "type": "target_link_libraries"
-                    },
-                    {
-                      "backtrace": [
-                        {
-                          "line": 356,
-                          "name": "target_link_libraries",
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        },
-                        {
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        }
-                      ],
-                      "type": "target_link_libraries"
-                    },
-                    {
-                      "backtrace": [
-                        {
-                          "line": 356,
-                          "name": "target_link_libraries",
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        },
-                        {
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        }
-                      ],
-                      "type": "target_link_libraries"
-                    },
-                    {
-                      "backtrace": [
-                        {
-                          "line": 356,
-                          "name": "target_link_libraries",
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        },
-                        {
-                          "path": "/home/max/Program/nheko/CMakeLists.txt"
-                        }
-                      ],
-                      "type": "target_link_libraries"
                     }
                   ]
                 },
                 "fileGroups": [
                   {
-                    "isGenerated": false,
-                    "sources": [
-                      "resources/res.qrc",
-                      "build/translations.qrc"
-                    ]
-                  },
-                  {
-                    "compileFlags": "         -Wall         -Wextra         -march=native         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g   -fPIC -std=gnu++11",
-                    "defines": [
-                      "QT_CONCURRENT_LIB",
-                      "QT_CORE_LIB",
-                      "QT_GUI_LIB",
-                      "QT_NETWORK_LIB",
-                      "QT_WIDGETS_LIB"
-                    ],
+                    "compileFlags": "         -Wall         -Wextra         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always         -std=c++1z         -Wall         -Wextra         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g   -std=gnu++11",
                     "includePath": [
                       {
-                        "path": "/home/max/Program/nheko/build"
+                        "path": "/home/max/Program/nheko/build/libs/matrix-structs"
                       },
                       {
-                        "path": "/home/max/Program/nheko"
+                        "path": "/home/max/Program/nheko/libs/matrix-structs"
                       },
                       {
                         "path": "/home/max/Program/nheko/include"
@@ -210,304 +131,233 @@
                         "path": "/home/max/Program/nheko/include/ui"
                       },
                       {
-                        "path": "/home/max/Program/nheko/include/events"
-                      },
-                      {
-                        "path": "/home/max/Program/nheko/include/events/messages"
-                      },
-                      {
                         "path": "/home/max/Program/nheko/libs/lmdbxx"
                       },
                       {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5"
+                        "path": "/home/max/Program/nheko/libs/matrix-structs/deps"
                       },
                       {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtCore"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/lib64/qt5/./mkspecs/linux-g++"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtWidgets"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtGui"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtNetwork"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtConcurrent"
+                        "path": "/home/max/Program/nheko/libs/matrix-structs/include"
                       }
                     ],
                     "isGenerated": false,
                     "language": "CXX",
                     "sources": [
-                      "src/AvatarProvider.cc",
-                      "src/Cache.cc",
-                      "src/ChatPage.cc",
-                      "src/CommunitiesListItem.cc",
-                      "src/CommunitiesList.cc",
-                      "src/Community.cc",
-                      "src/Deserializable.cc",
-                      "src/EmojiCategory.cc",
-                      "src/EmojiItemDelegate.cc",
-                      "src/EmojiPanel.cc",
-                      "src/EmojiPickButton.cc",
-                      "src/EmojiProvider.cc",
-                      "src/ImageItem.cc",
-                      "src/ImageOverlayDialog.cc",
-                      "src/InputValidator.cc",
-                      "src/JoinRoomDialog.cc",
-                      "src/LeaveRoomDialog.cc",
-                      "src/Login.cc",
-                      "src/LoginPage.cc",
-                      "src/LogoutDialog.cc",
-                      "src/MainWindow.cc",
-                      "src/MatrixClient.cc",
-                      "src/Profile.cc",
-                      "src/QuickSwitcher.cc",
-                      "src/Register.cc",
-                      "src/RegisterPage.cc",
-                      "src/RoomInfoListItem.cc",
-                      "src/RoomList.cc",
-                      "src/RoomMessages.cc",
-                      "src/RoomState.cc",
-                      "src/SideBarActions.cc",
-                      "src/UserSettingsPage.cc",
-                      "src/Splitter.cc",
-                      "src/Sync.cc",
-                      "src/TextInputWidget.cc",
-                      "src/TimelineItem.cc",
-                      "src/TimelineView.cc",
-                      "src/TimelineViewManager.cc",
-                      "src/TopRoomBar.cc",
-                      "src/TrayIcon.cc",
-                      "src/TypingDisplay.cc",
-                      "src/UserInfoWidget.cc",
-                      "src/Versions.cc",
-                      "src/WelcomePage.cc",
-                      "src/main.cc",
-                      "src/ui/Avatar.cc",
-                      "src/ui/Badge.cc",
-                      "src/ui/LoadingIndicator.cc",
-                      "src/ui/FlatButton.cc",
-                      "src/ui/FloatingButton.cc",
-                      "src/ui/Label.cc",
-                      "src/ui/OverlayModal.cc",
-                      "src/ui/ScrollBar.cc",
-                      "src/ui/SnackBar.cc",
-                      "src/ui/RaisedButton.cc",
-                      "src/ui/Ripple.cc",
-                      "src/ui/RippleOverlay.cc",
-                      "src/ui/OverlayWidget.cc",
-                      "src/ui/TextField.cc",
-                      "src/ui/ToggleButton.cc",
-                      "src/ui/Theme.cc",
-                      "src/ui/ThemeManager.cc"
-                    ]
-                  },
-                  {
-                    "isGenerated": true,
-                    "sources": [
-                      "build/nheko_de.qm",
-                      "build/nheko_el.qm",
-                      "build/nheko_en.qm",
-                      "build/nheko_nl.qm",
-                      "build/include/moc_AvatarProvider.cpp.rule",
-                      "build/include/moc_ChatPage.cpp.rule",
-                      "build/include/moc_CommunitiesListItem.cpp.rule",
-                      "build/include/moc_CommunitiesList.cpp.rule",
-                      "build/include/moc_Community.cpp.rule",
-                      "build/include/moc_EmojiCategory.cpp.rule",
-                      "build/include/moc_EmojiItemDelegate.cpp.rule",
-                      "build/include/moc_EmojiPanel.cpp.rule",
-                      "build/include/moc_EmojiPickButton.cpp.rule",
-                      "build/include/ui/moc_FloatingButton.cpp.rule",
-                      "build/include/moc_ImageItem.cpp.rule",
-                      "build/include/moc_ImageOverlayDialog.cpp.rule",
-                      "build/include/moc_JoinRoomDialog.cpp.rule",
-                      "build/include/moc_LeaveRoomDialog.cpp.rule",
-                      "build/include/moc_LoginPage.cpp.rule",
-                      "build/include/moc_LogoutDialog.cpp.rule",
-                      "build/include/moc_MainWindow.cpp.rule",
-                      "build/include/moc_MatrixClient.cpp.rule",
-                      "build/include/moc_QuickSwitcher.cpp.rule",
-                      "build/include/moc_RegisterPage.cpp.rule",
-                      "build/include/moc_RoomInfoListItem.cpp.rule",
-                      "build/include/moc_RoomList.cpp.rule",
-                      "build/include/moc_SideBarActions.cpp.rule",
-                      "build/include/moc_UserSettingsPage.cpp.rule",
-                      "build/include/moc_Splitter.cpp.rule",
-                      "build/include/moc_TextInputWidget.cpp.rule",
-                      "build/include/moc_TimelineItem.cpp.rule",
-                      "build/include/moc_TimelineView.cpp.rule",
-                      "build/include/moc_TimelineViewManager.cpp.rule",
-                      "build/include/moc_TopRoomBar.cpp.rule",
-                      "build/include/moc_TrayIcon.cpp.rule",
-                      "build/include/moc_TypingDisplay.cpp.rule",
-                      "build/include/moc_UserInfoWidget.cpp.rule",
-                      "build/include/moc_WelcomePage.cpp.rule",
-                      "build/include/ui/moc_Avatar.cpp.rule",
-                      "build/include/ui/moc_Badge.cpp.rule",
-                      "build/include/ui/moc_LoadingIndicator.cpp.rule",
-                      "build/include/ui/moc_FlatButton.cpp.rule",
-                      "build/include/ui/moc_Label.cpp.rule",
-                      "build/include/ui/moc_OverlayWidget.cpp.rule",
-                      "build/include/ui/moc_ScrollBar.cpp.rule",
-                      "build/include/ui/moc_SnackBar.cpp.rule",
-                      "build/include/ui/moc_RaisedButton.cpp.rule",
-                      "build/include/ui/moc_Ripple.cpp.rule",
-                      "build/include/ui/moc_RippleOverlay.cpp.rule",
-                      "build/include/ui/moc_TextField.cpp.rule",
-                      "build/include/ui/moc_ToggleButton.cpp.rule",
-                      "build/include/ui/moc_Theme.cpp.rule",
-                      "build/include/ui/moc_ThemeManager.cpp.rule",
-                      "build/nheko_de.qm.rule",
-                      "build/nheko_el.qm.rule",
-                      "build/nheko_en.qm.rule",
-                      "build/nheko_nl.qm.rule"
-                    ]
-                  },
-                  {
-                    "compileFlags": "         -Wall         -Wextra         -march=native         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g   -fPIC -std=gnu++11",
-                    "defines": [
-                      "QT_CONCURRENT_LIB",
-                      "QT_CORE_LIB",
-                      "QT_GUI_LIB",
-                      "QT_NETWORK_LIB",
-                      "QT_WIDGETS_LIB"
-                    ],
-                    "includePath": [
-                      {
-                        "path": "/home/max/Program/nheko/build"
-                      },
-                      {
-                        "path": "/home/max/Program/nheko"
-                      },
-                      {
-                        "path": "/home/max/Program/nheko/include"
-                      },
-                      {
-                        "path": "/home/max/Program/nheko/include/ui"
-                      },
-                      {
-                        "path": "/home/max/Program/nheko/include/events"
-                      },
-                      {
-                        "path": "/home/max/Program/nheko/include/events/messages"
-                      },
-                      {
-                        "path": "/home/max/Program/nheko/libs/lmdbxx"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtCore"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/lib64/qt5/./mkspecs/linux-g++"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtWidgets"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtGui"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtNetwork"
-                      },
-                      {
-                        "isSystem": true,
-                        "path": "/usr/include/qt5/QtConcurrent"
-                      }
-                    ],
-                    "isGenerated": true,
-                    "language": "CXX",
-                    "sources": [
-                      "build/include/moc_AvatarProvider.cpp",
-                      "build/include/moc_ChatPage.cpp",
-                      "build/include/moc_CommunitiesListItem.cpp",
-                      "build/include/moc_CommunitiesList.cpp",
-                      "build/include/moc_Community.cpp",
-                      "build/include/moc_EmojiCategory.cpp",
-                      "build/include/moc_EmojiItemDelegate.cpp",
-                      "build/include/moc_EmojiPanel.cpp",
-                      "build/include/moc_EmojiPickButton.cpp",
-                      "build/include/ui/moc_FloatingButton.cpp",
-                      "build/include/moc_ImageItem.cpp",
-                      "build/include/moc_ImageOverlayDialog.cpp",
-                      "build/include/moc_JoinRoomDialog.cpp",
-                      "build/include/moc_LeaveRoomDialog.cpp",
-                      "build/include/moc_LoginPage.cpp",
-                      "build/include/moc_LogoutDialog.cpp",
-                      "build/include/moc_MainWindow.cpp",
-                      "build/include/moc_MatrixClient.cpp",
-                      "build/include/moc_QuickSwitcher.cpp",
-                      "build/include/moc_RegisterPage.cpp",
-                      "build/include/moc_RoomInfoListItem.cpp",
-                      "build/include/moc_RoomList.cpp",
-                      "build/include/moc_SideBarActions.cpp",
-                      "build/include/moc_UserSettingsPage.cpp",
-                      "build/include/moc_Splitter.cpp",
-                      "build/include/moc_TextInputWidget.cpp",
-                      "build/include/moc_TimelineItem.cpp",
-                      "build/include/moc_TimelineView.cpp",
-                      "build/include/moc_TimelineViewManager.cpp",
-                      "build/include/moc_TopRoomBar.cpp",
-                      "build/include/moc_TrayIcon.cpp",
-                      "build/include/moc_TypingDisplay.cpp",
-                      "build/include/moc_UserInfoWidget.cpp",
-                      "build/include/moc_WelcomePage.cpp",
-                      "build/include/ui/moc_Avatar.cpp",
-                      "build/include/ui/moc_Badge.cpp",
-                      "build/include/ui/moc_LoadingIndicator.cpp",
-                      "build/include/ui/moc_FlatButton.cpp",
-                      "build/include/ui/moc_Label.cpp",
-                      "build/include/ui/moc_OverlayWidget.cpp",
-                      "build/include/ui/moc_ScrollBar.cpp",
-                      "build/include/ui/moc_SnackBar.cpp",
-                      "build/include/ui/moc_RaisedButton.cpp",
-                      "build/include/ui/moc_Ripple.cpp",
-                      "build/include/ui/moc_RippleOverlay.cpp",
-                      "build/include/ui/moc_TextField.cpp",
-                      "build/include/ui/moc_ToggleButton.cpp",
-                      "build/include/ui/moc_Theme.cpp",
-                      "build/include/ui/moc_ThemeManager.cpp",
-                      "build/qrc_res.cpp",
-                      "build/qrc_translations.cpp"
+                      "src/events.cpp",
+                      "src/requests.cpp",
+                      "src/events/aliases.cpp",
+                      "src/events/avatar.cpp",
+                      "src/events/canonical_alias.cpp",
+                      "src/events/common.cpp",
+                      "src/events/create.cpp",
+                      "src/events/guest_access.cpp",
+                      "src/events/history_visibility.cpp",
+                      "src/events/join_rules.cpp",
+                      "src/events/member.cpp",
+                      "src/events/name.cpp",
+                      "src/events/pinned_events.cpp",
+                      "src/events/power_levels.cpp",
+                      "src/events/redaction.cpp",
+                      "src/events/topic.cpp",
+                      "src/events/messages/audio.cpp",
+                      "src/events/messages/emote.cpp",
+                      "src/events/messages/file.cpp",
+                      "src/events/messages/image.cpp",
+                      "src/events/messages/notice.cpp",
+                      "src/events/messages/text.cpp",
+                      "src/events/messages/video.cpp",
+                      "src/responses/common.cpp",
+                      "src/responses/login.cpp",
+                      "src/responses/messages.cpp",
+                      "src/responses/profile.cpp",
+                      "src/responses/sync.cpp",
+                      "src/responses/version.cpp"
                     ]
                   }
                 ],
-                "fullName": "nheko",
-                "linkFlags": "-rdynamic",
-                "linkLanguageFlags": "-Wall         -Wextra         -march=native         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g",
-                "linkLibraries": "libmatrix_events.a /usr/lib64/libQt5Widgets.so.5.9.2 /usr/lib64/libQt5Network.so.5.9.2 /usr/lib64/libQt5Concurrent.so.5.9.2 -llmdb /usr/lib64/libQt5Gui.so.5.9.2 /usr/lib64/libQt5Core.so.5.9.2",
+                "fullName": "libmatrix_structs.a",
                 "linkerLanguage": "CXX",
-                "name": "nheko",
-                "sourceDirectory": "/home/max/Program/nheko",
-                "type": "EXECUTABLE"
+                "name": "matrix_structs",
+                "sourceDirectory": "/home/max/Program/nheko/libs/matrix-structs",
+                "type": "STATIC_LIBRARY"
+              }
+            ]
+          },
+          {
+            "buildDirectory": "/home/max/Program/nheko/build",
+            "name": "nheko",
+            "sourceDirectory": "/home/max/Program/nheko",
+            "targets": [
+              {
+                "artifacts": [
+                  "/home/max/Program/nheko/build/libs/matrix-structs/libmatrix_structs.a"
+                ],
+                "buildDirectory": "/home/max/Program/nheko/build/libs/matrix-structs",
+                "crossReferences": {
+                  "backtrace": [
+                    {
+                      "line": 95,
+                      "name": "add_library",
+                      "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
+                    },
+                    {
+                      "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
+                    }
+                  ],
+                  "relatedStatements": [
+                    {
+                      "backtrace": [
+                        {
+                          "line": 218,
+                          "name": "include_directories",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_include_directories"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 219,
+                          "name": "include_directories",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_include_directories"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 221,
+                          "name": "include_directories",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_include_directories"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 222,
+                          "name": "include_directories",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_include_directories"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 58,
+                          "name": "include_directories",
+                          "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_include_directories"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 59,
+                          "name": "include_directories",
+                          "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/libs/matrix-structs/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_include_directories"
+                    }
+                  ]
+                },
+                "fileGroups": [
+                  {
+                    "compileFlags": "         -Wall         -Wextra         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always         -std=c++1z         -Wall         -Wextra         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g   -std=gnu++11",
+                    "includePath": [
+                      {
+                        "path": "/home/max/Program/nheko/build/libs/matrix-structs"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/matrix-structs"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/include"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/include/ui"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/lmdbxx"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/matrix-structs/deps"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/matrix-structs/include"
+                      }
+                    ],
+                    "isGenerated": false,
+                    "language": "CXX",
+                    "sources": [
+                      "src/events.cpp",
+                      "src/requests.cpp",
+                      "src/events/aliases.cpp",
+                      "src/events/avatar.cpp",
+                      "src/events/canonical_alias.cpp",
+                      "src/events/common.cpp",
+                      "src/events/create.cpp",
+                      "src/events/guest_access.cpp",
+                      "src/events/history_visibility.cpp",
+                      "src/events/join_rules.cpp",
+                      "src/events/member.cpp",
+                      "src/events/name.cpp",
+                      "src/events/pinned_events.cpp",
+                      "src/events/power_levels.cpp",
+                      "src/events/redaction.cpp",
+                      "src/events/topic.cpp",
+                      "src/events/messages/audio.cpp",
+                      "src/events/messages/emote.cpp",
+                      "src/events/messages/file.cpp",
+                      "src/events/messages/image.cpp",
+                      "src/events/messages/notice.cpp",
+                      "src/events/messages/text.cpp",
+                      "src/events/messages/video.cpp",
+                      "src/responses/common.cpp",
+                      "src/responses/login.cpp",
+                      "src/responses/messages.cpp",
+                      "src/responses/profile.cpp",
+                      "src/responses/sync.cpp",
+                      "src/responses/version.cpp"
+                    ]
+                  }
+                ],
+                "fullName": "libmatrix_structs.a",
+                "linkerLanguage": "CXX",
+                "name": "matrix_structs",
+                "sourceDirectory": "/home/max/Program/nheko/libs/matrix-structs",
+                "type": "STATIC_LIBRARY"
               },
               {
                 "buildDirectory": "/home/max/Program/nheko/build",
                 "crossReferences": {
                   "backtrace": [
                     {
-                      "line": 300,
+                      "line": 305,
                       "name": "add_custom_target",
                       "path": "/home/max/Program/nheko/CMakeLists.txt"
                     },
@@ -519,7 +369,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 233,
+                          "line": 218,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -532,7 +382,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 234,
+                          "line": 219,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -545,7 +395,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 235,
+                          "line": 221,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -558,7 +408,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 236,
+                          "line": 222,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -571,7 +421,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 238,
+                          "line": 323,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -584,7 +434,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 239,
+                          "line": 324,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -616,14 +466,14 @@
               },
               {
                 "artifacts": [
-                  "/home/max/Program/nheko/build/libmatrix_events.a"
+                  "/home/max/Program/nheko/build/nheko"
                 ],
                 "buildDirectory": "/home/max/Program/nheko/build",
                 "crossReferences": {
                   "backtrace": [
                     {
-                      "line": 317,
-                      "name": "add_library",
+                      "line": 343,
+                      "name": "add_executable",
                       "path": "/home/max/Program/nheko/CMakeLists.txt"
                     },
                     {
@@ -634,7 +484,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 233,
+                          "line": 218,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -647,7 +497,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 234,
+                          "line": 219,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -660,7 +510,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 235,
+                          "line": 221,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -673,7 +523,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 236,
+                          "line": 222,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -686,7 +536,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 238,
+                          "line": 323,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -699,7 +549,7 @@
                     {
                       "backtrace": [
                         {
-                          "line": 239,
+                          "line": 324,
                           "name": "include_directories",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -712,7 +562,72 @@
                     {
                       "backtrace": [
                         {
-                          "line": 318,
+                          "line": 344,
+                          "name": "target_link_libraries",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 344,
+                          "name": "target_link_libraries",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 344,
+                          "name": "target_link_libraries",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 344,
+                          "name": "target_link_libraries",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 344,
+                          "name": "target_link_libraries",
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/home/max/Program/nheko/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 344,
                           "name": "target_link_libraries",
                           "path": "/home/max/Program/nheko/CMakeLists.txt"
                         },
@@ -726,9 +641,97 @@
                 },
                 "fileGroups": [
                   {
-                    "compileFlags": "         -Wall         -Wextra         -march=native         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g   -fPIC -std=gnu++11",
+                    "isGenerated": false,
+                    "sources": [
+                      "resources/res.qrc",
+                      "build/translations.qrc"
+                    ]
+                  },
+                  {
+                    "isGenerated": true,
+                    "sources": [
+                      "build/nheko_de.qm",
+                      "build/nheko_el.qm",
+                      "build/nheko_en.qm",
+                      "build/nheko_nl.qm",
+                      "build/include/dialogs/moc_CreateRoom.cpp.rule",
+                      "build/include/dialogs/moc_ImageOverlay.cpp.rule",
+                      "build/include/dialogs/moc_InviteUsers.cpp.rule",
+                      "build/include/dialogs/moc_JoinRoom.cpp.rule",
+                      "build/include/dialogs/moc_LeaveRoom.cpp.rule",
+                      "build/include/dialogs/moc_Logout.cpp.rule",
+                      "build/include/emoji/moc_Category.cpp.rule",
+                      "build/include/emoji/moc_ItemDelegate.cpp.rule",
+                      "build/include/emoji/moc_Panel.cpp.rule",
+                      "build/include/emoji/moc_PickButton.cpp.rule",
+                      "build/include/timeline/moc_TimelineItem.cpp.rule",
+                      "build/include/timeline/moc_TimelineView.cpp.rule",
+                      "build/include/timeline/moc_TimelineViewManager.cpp.rule",
+                      "build/include/timeline/widgets/moc_AudioItem.cpp.rule",
+                      "build/include/timeline/widgets/moc_FileItem.cpp.rule",
+                      "build/include/timeline/widgets/moc_ImageItem.cpp.rule",
+                      "build/include/timeline/widgets/moc_VideoItem.cpp.rule",
+                      "build/include/ui/moc_Avatar.cpp.rule",
+                      "build/include/ui/moc_Badge.cpp.rule",
+                      "build/include/ui/moc_LoadingIndicator.cpp.rule",
+                      "build/include/ui/moc_FlatButton.cpp.rule",
+                      "build/include/ui/moc_Label.cpp.rule",
+                      "build/include/ui/moc_FloatingButton.cpp.rule",
+                      "build/include/ui/moc_OverlayWidget.cpp.rule",
+                      "build/include/ui/moc_ScrollBar.cpp.rule",
+                      "build/include/ui/moc_SnackBar.cpp.rule",
+                      "build/include/ui/moc_RaisedButton.cpp.rule",
+                      "build/include/ui/moc_Ripple.cpp.rule",
+                      "build/include/ui/moc_RippleOverlay.cpp.rule",
+                      "build/include/ui/moc_TextField.cpp.rule",
+                      "build/include/ui/moc_ToggleButton.cpp.rule",
+                      "build/include/ui/moc_Theme.cpp.rule",
+                      "build/include/ui/moc_ThemeManager.cpp.rule",
+                      "build/include/moc_AvatarProvider.cpp.rule",
+                      "build/include/moc_ChatPage.cpp.rule",
+                      "build/include/moc_CommunitiesListItem.cpp.rule",
+                      "build/include/moc_CommunitiesList.cpp.rule",
+                      "build/include/moc_Community.cpp.rule",
+                      "build/include/moc_EmojiCategory.cpp.rule",
+                      "build/include/moc_EmojiItemDelegate.cpp.rule",
+                      "build/include/moc_EmojiPanel.cpp.rule",
+                      "build/include/moc_EmojiPickButton.cpp.rule",
+                      "build/include/moc_ImageItem.cpp.rule",
+                      "build/include/moc_ImageOverlayDialog.cpp.rule",
+                      "build/include/moc_JoinRoomDialog.cpp.rule",
+                      "build/include/moc_LeaveRoomDialog.cpp.rule",
+                      "build/include/moc_LoginPage.cpp.rule",
+                      "build/include/moc_MainWindow.cpp.rule",
+                      "build/include/moc_InviteeItem.cpp.rule",
+                      "build/include/moc_MatrixClient.cpp.rule",
+                      "build/include/moc_QuickSwitcher.cpp.rule",
+                      "build/include/moc_RegisterPage.cpp.rule",
+                      "build/include/moc_RoomInfoListItem.cpp.rule",
+                      "build/include/moc_RoomList.cpp.rule",
+                      "build/include/moc_SideBarActions.cpp.rule",
+                      "build/include/moc_Splitter.cpp.rule",
+                      "build/include/moc_TextInputWidget.cpp.rule",
+                      "build/include/moc_TopRoomBar.cpp.rule",
+                      "build/include/moc_TrayIcon.cpp.rule",
+                      "build/include/moc_TypingDisplay.cpp.rule",
+                      "build/include/moc_UserInfoWidget.cpp.rule",
+                      "build/include/moc_UserSettingsPage.cpp.rule",
+                      "build/include/moc_WelcomePage.cpp.rule",
+                      "build/nheko_de.qm.rule",
+                      "build/nheko_el.qm.rule",
+                      "build/nheko_en.qm.rule",
+                      "build/nheko_nl.qm.rule"
+                    ]
+                  },
+                  {
+                    "compileFlags": "         -Wall         -Wextra         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g   -fPIC -std=gnu++11",
                     "defines": [
-                      "QT_CORE_LIB"
+                      "QT_CONCURRENT_LIB",
+                      "QT_CORE_LIB",
+                      "QT_GUI_LIB",
+                      "QT_MULTIMEDIA_LIB",
+                      "QT_NETWORK_LIB",
+                      "QT_WIDGETS_LIB"
                     ],
                     "includePath": [
                       {
@@ -744,17 +747,25 @@
                         "path": "/home/max/Program/nheko/include/ui"
                       },
                       {
-                        "path": "/home/max/Program/nheko/include/events"
-                      },
-                      {
-                        "path": "/home/max/Program/nheko/include/events/messages"
-                      },
-                      {
                         "path": "/home/max/Program/nheko/libs/lmdbxx"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/matrix-structs/include"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/matrix-structs/deps"
                       },
                       {
                         "isSystem": true,
                         "path": "/usr/include/qt5"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtWidgets"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtGui"
                       },
                       {
                         "isSystem": true,
@@ -763,47 +774,242 @@
                       {
                         "isSystem": true,
                         "path": "/usr/lib64/qt5/./mkspecs/linux-g++"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtNetwork"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtConcurrent"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtMultimedia"
                       }
                     ],
                     "isGenerated": false,
                     "language": "CXX",
                     "sources": [
-                      "src/events/Event.cc",
-                      "src/events/AliasesEventContent.cc",
-                      "src/events/AvatarEventContent.cc",
-                      "src/events/CanonicalAliasEventContent.cc",
-                      "src/events/CreateEventContent.cc",
-                      "src/events/HistoryVisibilityEventContent.cc",
-                      "src/events/JoinRulesEventContent.cc",
-                      "src/events/MemberEventContent.cc",
-                      "src/events/MessageEventContent.cc",
-                      "src/events/NameEventContent.cc",
-                      "src/events/PowerLevelsEventContent.cc",
-                      "src/events/TopicEventContent.cc",
-                      "src/events/messages/Audio.cc",
-                      "src/events/messages/Emote.cc",
-                      "src/events/messages/File.cc",
-                      "src/events/messages/Image.cc",
-                      "src/events/messages/Location.cc",
-                      "src/events/messages/Notice.cc",
-                      "src/events/messages/Text.cc",
-                      "src/events/messages/Video.cc",
-                      "src/Deserializable.cc"
+                      "src/dialogs/CreateRoom.cc",
+                      "src/dialogs/ImageOverlay.cc",
+                      "src/dialogs/InviteUsers.cc",
+                      "src/dialogs/JoinRoom.cc",
+                      "src/dialogs/LeaveRoom.cc",
+                      "src/dialogs/Logout.cc",
+                      "src/emoji/Category.cc",
+                      "src/emoji/ItemDelegate.cc",
+                      "src/emoji/Panel.cc",
+                      "src/emoji/PickButton.cc",
+                      "src/emoji/Provider.cc",
+                      "src/timeline/TimelineViewManager.cc",
+                      "src/timeline/TimelineItem.cc",
+                      "src/timeline/TimelineView.cc",
+                      "src/timeline/widgets/AudioItem.cc",
+                      "src/timeline/widgets/FileItem.cc",
+                      "src/timeline/widgets/ImageItem.cc",
+                      "src/timeline/widgets/VideoItem.cc",
+                      "src/ui/Avatar.cc",
+                      "src/ui/Badge.cc",
+                      "src/ui/LoadingIndicator.cc",
+                      "src/ui/FlatButton.cc",
+                      "src/ui/FloatingButton.cc",
+                      "src/ui/Label.cc",
+                      "src/ui/OverlayModal.cc",
+                      "src/ui/ScrollBar.cc",
+                      "src/ui/SnackBar.cc",
+                      "src/ui/RaisedButton.cc",
+                      "src/ui/Ripple.cc",
+                      "src/ui/RippleOverlay.cc",
+                      "src/ui/OverlayWidget.cc",
+                      "src/ui/TextField.cc",
+                      "src/ui/ToggleButton.cc",
+                      "src/ui/Theme.cc",
+                      "src/ui/ThemeManager.cc",
+                      "src/AvatarProvider.cc",
+                      "src/Cache.cc",
+                      "src/ChatPage.cc",
+                      "src/CommunitiesListItem.cc",
+                      "src/CommunitiesList.cc",
+                      "src/Community.cc",
+                      "src/Deserializable.cc",
+                      "src/InviteeItem.cc",
+                      "src/InputValidator.cc",
+                      "src/Login.cc",
+                      "src/LoginPage.cc",
+                      "src/MainWindow.cc",
+                      "src/MatrixClient.cc",
+                      "src/QuickSwitcher.cc",
+                      "src/Register.cc",
+                      "src/RegisterPage.cc",
+                      "src/RoomInfoListItem.cc",
+                      "src/RoomList.cc",
+                      "src/RoomMessages.cc",
+                      "src/RoomState.cc",
+                      "src/RunGuard.cc",
+                      "src/SideBarActions.cc",
+                      "src/Splitter.cc",
+                      "src/TextInputWidget.cc",
+                      "src/TopRoomBar.cc",
+                      "src/TrayIcon.cc",
+                      "src/TypingDisplay.cc",
+                      "src/UserInfoWidget.cc",
+                      "src/UserSettingsPage.cc",
+                      "src/WelcomePage.cc",
+                      "src/main.cc"
+                    ]
+                  },
+                  {
+                    "compileFlags": "         -Wall         -Wextra         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g   -fPIC -std=gnu++11",
+                    "defines": [
+                      "QT_CONCURRENT_LIB",
+                      "QT_CORE_LIB",
+                      "QT_GUI_LIB",
+                      "QT_MULTIMEDIA_LIB",
+                      "QT_NETWORK_LIB",
+                      "QT_WIDGETS_LIB"
+                    ],
+                    "includePath": [
+                      {
+                        "path": "/home/max/Program/nheko/build"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/include"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/include/ui"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/lmdbxx"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/matrix-structs/include"
+                      },
+                      {
+                        "path": "/home/max/Program/nheko/libs/matrix-structs/deps"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtWidgets"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtGui"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtCore"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/lib64/qt5/./mkspecs/linux-g++"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtNetwork"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtConcurrent"
+                      },
+                      {
+                        "isSystem": true,
+                        "path": "/usr/include/qt5/QtMultimedia"
+                      }
+                    ],
+                    "isGenerated": true,
+                    "language": "CXX",
+                    "sources": [
+                      "build/include/dialogs/moc_CreateRoom.cpp",
+                      "build/include/dialogs/moc_ImageOverlay.cpp",
+                      "build/include/dialogs/moc_InviteUsers.cpp",
+                      "build/include/dialogs/moc_JoinRoom.cpp",
+                      "build/include/dialogs/moc_LeaveRoom.cpp",
+                      "build/include/dialogs/moc_Logout.cpp",
+                      "build/include/emoji/moc_Category.cpp",
+                      "build/include/emoji/moc_ItemDelegate.cpp",
+                      "build/include/emoji/moc_Panel.cpp",
+                      "build/include/emoji/moc_PickButton.cpp",
+                      "build/include/timeline/moc_TimelineItem.cpp",
+                      "build/include/timeline/moc_TimelineView.cpp",
+                      "build/include/timeline/moc_TimelineViewManager.cpp",
+                      "build/include/timeline/widgets/moc_AudioItem.cpp",
+                      "build/include/timeline/widgets/moc_FileItem.cpp",
+                      "build/include/timeline/widgets/moc_ImageItem.cpp",
+                      "build/include/timeline/widgets/moc_VideoItem.cpp",
+                      "build/include/ui/moc_Avatar.cpp",
+                      "build/include/ui/moc_Badge.cpp",
+                      "build/include/ui/moc_LoadingIndicator.cpp",
+                      "build/include/ui/moc_FlatButton.cpp",
+                      "build/include/ui/moc_Label.cpp",
+                      "build/include/ui/moc_FloatingButton.cpp",
+                      "build/include/ui/moc_OverlayWidget.cpp",
+                      "build/include/ui/moc_ScrollBar.cpp",
+                      "build/include/ui/moc_SnackBar.cpp",
+                      "build/include/ui/moc_RaisedButton.cpp",
+                      "build/include/ui/moc_Ripple.cpp",
+                      "build/include/ui/moc_RippleOverlay.cpp",
+                      "build/include/ui/moc_TextField.cpp",
+                      "build/include/ui/moc_ToggleButton.cpp",
+                      "build/include/ui/moc_Theme.cpp",
+                      "build/include/ui/moc_ThemeManager.cpp",
+                      "build/include/moc_AvatarProvider.cpp",
+                      "build/include/moc_ChatPage.cpp",
+                      "build/include/moc_CommunitiesListItem.cpp",
+                      "build/include/moc_CommunitiesList.cpp",
+                      "build/include/moc_Community.cpp",
+                      "build/include/moc_EmojiCategory.cpp",
+                      "build/include/moc_EmojiItemDelegate.cpp",
+                      "build/include/moc_EmojiPanel.cpp",
+                      "build/include/moc_EmojiPickButton.cpp",
+                      "build/include/moc_ImageItem.cpp",
+                      "build/include/moc_ImageOverlayDialog.cpp",
+                      "build/include/moc_JoinRoomDialog.cpp",
+                      "build/include/moc_LeaveRoomDialog.cpp",
+                      "build/include/moc_LoginPage.cpp",
+                      "build/include/moc_MainWindow.cpp",
+                      "build/include/moc_InviteeItem.cpp",
+                      "build/include/moc_MatrixClient.cpp",
+                      "build/include/moc_QuickSwitcher.cpp",
+                      "build/include/moc_RegisterPage.cpp",
+                      "build/include/moc_RoomInfoListItem.cpp",
+                      "build/include/moc_RoomList.cpp",
+                      "build/include/moc_SideBarActions.cpp",
+                      "build/include/moc_Splitter.cpp",
+                      "build/include/moc_TextInputWidget.cpp",
+                      "build/include/moc_TopRoomBar.cpp",
+                      "build/include/moc_TrayIcon.cpp",
+                      "build/include/moc_TypingDisplay.cpp",
+                      "build/include/moc_UserInfoWidget.cpp",
+                      "build/include/moc_UserSettingsPage.cpp",
+                      "build/include/moc_WelcomePage.cpp",
+                      "build/qrc_res.cpp",
+                      "build/qrc_translations.cpp"
                     ]
                   }
                 ],
-                "fullName": "libmatrix_events.a",
+                "fullName": "nheko",
+                "linkFlags": "-rdynamic",
+                "linkLanguageFlags": "-Wall         -Wextra         -Werror         -pipe         -pedantic         -Wunreachable-code -fdiagnostics-color=always -g",
+                "linkLibraries": "libs/matrix-structs/libmatrix_structs.a /usr/lib64/libQt5Widgets.so.5.9.2 /usr/lib64/libQt5Concurrent.so.5.9.2 -llmdb /usr/lib64/libQt5Multimedia.so.5.9.2 /usr/lib64/libQt5Network.so.5.9.2 /usr/lib64/libQt5Gui.so.5.9.2 /usr/lib64/libQt5Core.so.5.9.2",
                 "linkerLanguage": "CXX",
-                "name": "matrix_events",
+                "name": "nheko",
                 "sourceDirectory": "/home/max/Program/nheko",
-                "type": "STATIC_LIBRARY"
+                "type": "EXECUTABLE"
               }
             ]
           }
         ]
       }
     ],
-    "cookie": "0.46582309898312313",
+    "cookie": "0.623174388942997",
     "inReplyTo": "codemodel",
     "type": "reply"
   }

@@ -56,11 +56,11 @@ CommunitiesListItem::paintEvent(QPaintEvent *event)
         p.setRenderHint(QPainter::Antialiasing);
 
         if (isPressed_)
-                p.fillRect(rect(), QColor("#38A3D8"));
+                p.fillRect(rect(), highlightedBackgroundColor_);
         else if (underMouse())
-                p.fillRect(rect(), QColor(200, 200, 200, 128));
+                p.fillRect(rect(), hoverBackgroundColor_);
         else
-                p.fillRect(rect(), QColor("#FFF"));
+                p.fillRect(rect(), backgroundColor_);
 
         QFont font;
         font.setPixelSize(conf::fontSize);
@@ -182,11 +182,11 @@ WorldCommunityListItem::paintEvent(QPaintEvent *event)
         p.setRenderHint(QPainter::Antialiasing);
 
         if (isPressed())
-                p.fillRect(rect(), QColor("#38A3D8"));
+                p.fillRect(rect(), highlightedBackgroundColor_);
         else if (underMouse())
-                p.fillRect(rect(), QColor(200, 200, 200, 128));
+                p.fillRect(rect(), hoverBackgroundColor_);
         else
-                p.fillRect(rect(), QColor("#FFF"));
+                p.fillRect(rect(), backgroundColor_);
 
         QBrush brush;
         brush.setStyle(Qt::SolidPattern);

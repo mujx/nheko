@@ -20,7 +20,6 @@
 #include "Avatar.h"
 #include "Config.h"
 #include "FlatButton.h"
-#include "LogoutDialog.h"
 #include "MainWindow.h"
 #include "OverlayModal.h"
 #include "UserInfoWidget.h"
@@ -43,17 +42,17 @@ UserInfoWidget::UserInfoWidget(QWidget *parent)
         textLayout_   = new QVBoxLayout();
 
         userAvatar_ = new Avatar(this);
+        userAvatar_->setObjectName("userAvatar");
         userAvatar_->setLetter(QChar('?'));
         userAvatar_->setSize(55);
-        userAvatar_->setBackgroundColor("#fff");
-        userAvatar_->setTextColor("#333333");
 
         QFont nameFont("Open Sans SemiBold");
         nameFont.setPixelSize(conf::userInfoWidget::fonts::displayName);
 
         displayNameLabel_ = new QLabel(this);
         displayNameLabel_->setFont(nameFont);
-        displayNameLabel_->setStyleSheet("padding: 0 9px; color: #171919; margin-bottom: -10px;");
+        displayNameLabel_->setObjectName("displayNameLabel");
+        displayNameLabel_->setStyleSheet("padding: 0 9px; margin-bottom: -10px;");
         displayNameLabel_->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignTop);
 
         QFont useridFont("Open Sans");
@@ -61,7 +60,8 @@ UserInfoWidget::UserInfoWidget(QWidget *parent)
 
         userIdLabel_ = new QLabel(this);
         userIdLabel_->setFont(useridFont);
-        userIdLabel_->setStyleSheet("padding: 0 8px 8px 8px; color: #555459;");
+        userIdLabel_->setObjectName("userIdLabel");
+        userIdLabel_->setStyleSheet("padding: 0 8px 8px 8px;");
         userIdLabel_->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
 
         avatarLayout_->addWidget(userAvatar_);
@@ -92,7 +92,7 @@ UserInfoWidget::UserInfoWidget(QWidget *parent)
         // Show the confirmation dialog.
         connect(logoutButton_, &QPushButton::clicked, this, [=]() {
                 if (logoutDialog_.isNull()) {
-                        logoutDialog_ = QSharedPointer<LogoutDialog>(new LogoutDialog(this));
+                        logoutDialog_ = QSharedPointer<dialogs::Logout>(new dialogs::Logout(this));
                         connect(logoutDialog_.data(),
                                 SIGNAL(closing(bool)),
                                 this,
@@ -178,4 +178,15 @@ UserInfoWidget::setUserId(const QString &userid)
 {
         user_id_ = userid;
         userIdLabel_->setText(userid);
+}
+
+void
+UserInfoWidget::paintEvent(QPaintEvent *event)
+{
+        Q_UNUSED(event);
+
+        QStyleOption opt;
+        opt.init(this);
+        QPainter p(this);
+        style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

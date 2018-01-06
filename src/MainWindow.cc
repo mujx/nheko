@@ -43,7 +43,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
         setWindowTitle("nheko");
         setObjectName("MainWindow");
-        setStyleSheet("QWidget#MainWindow {background-color: #fff}");
 
         restoreWindowSize();
 
@@ -59,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
         welcome_page_     = new WelcomePage(this);
         login_page_       = new LoginPage(client_, this);
         register_page_    = new RegisterPage(client_, this);
-        chat_page_        = new ChatPage(client_, this);
+        chat_page_        = new ChatPage(client_, userSettings_, this);
         userSettingsPage_ = new UserSettingsPage(userSettings_, this);
 
         // Initialize sliding widget manager.
@@ -213,9 +212,9 @@ MainWindow::showChatPage(QString userid, QString homeserver, QString token)
                 spinner_ = QSharedPointer<LoadingIndicator>(
                   new LoadingIndicator(this),
                   [=](LoadingIndicator *indicator) { indicator->deleteLater(); });
-                spinner_->setColor("#acc7dc");
                 spinner_->setFixedHeight(100);
                 spinner_->setFixedWidth(100);
+                spinner_->setObjectName("ChatPageLoadSpinner");
                 spinner_->start();
         }
 

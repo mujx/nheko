@@ -17,15 +17,10 @@
 
 #pragma once
 
+#include <QFileInfo>
 #include <QNetworkAccessManager>
 #include <QUrl>
-#include <QFileInfo>
-
-#include "MessageEvent.h"
-
-class SyncResponse;
-class Profile;
-class RoomMessages;
+#include <mtx.hpp>
 
 /*
  * MatrixClient provides the high level API to communicate with
@@ -40,11 +35,11 @@ public:
         // Client API.
         void initialSync() noexcept;
         void sync() noexcept;
-        void sendRoomMessage(matrix::events::MessageEventType ty,
+        void sendRoomMessage(mtx::events::MessageType ty,
                              int txnId,
                              const QString &roomid,
                              const QString &msg,
-                             const QFileInfo &fileinfo,
+                             const QFileInfo &info,
                              const QString &url = "") noexcept;
         void login(const QString &username, const QString &password) noexcept;
         void registerUser(const QString &username,
@@ -58,12 +53,18 @@ public:
         void fetchCommunityRooms(const QString &communityId);
         void fetchOwnAvatar(const QUrl &avatar_url);
         void downloadImage(const QString &event_id, const QUrl &url);
+        void downloadFile(const QString &event_id, const QUrl &url);
         void messages(const QString &room_id, const QString &from_token, int limit = 30) noexcept;
         void uploadImage(const QString &roomid, const QString &filename);
+        void uploadFile(const QString &roomid, const QString &filename);
+        void uploadAudio(const QString &roomid, const QString &filename);
         void joinRoom(const QString &roomIdOrAlias);
         void leaveRoom(const QString &roomId);
         void sendTypingNotification(const QString &roomid, int timeoutInMillis = 20000);
         void removeTypingNotification(const QString &roomid);
+        void readEvent(const QString &room_id, const QString &event_id);
+        void inviteUser(const QString &room_id, const QString &user);
+        void createRoom(const mtx::requests::CreateRoom &request);
 
         QUrl getHomeServer() { return server_; };
         int transactionId() { return txn_id_; };
@@ -89,6 +90,8 @@ signals:
         void versionError(const QString &error);
 
         void loggedOut();
+        void invitedUser(const QString &room_id, const QString &user);
+        void roomCreated(const QString &room_id);
 
         void loginSuccess(const QString &userid, const QString &homeserver, const QString &token);
         void registerSuccess(const QString &userid,
@@ -96,31 +99,40 @@ signals:
                              const QString &token);
         void versionSuccess();
         void imageUploaded(const QString &roomid, const QString &filename, const QString &url);
+        void fileUploaded(const QString &roomid, const QString &filename, const QString &url);
+        void audioUploaded(const QString &roomid, const QString &filename, const QString &url);
 
-        void roomAvatarRetrieved(const QString &roomid, const QPixmap &img);
+        void roomAvatarRetrieved(const QString &roomid,
+                                 const QPixmap &img,
+                                 const QString &url,
+                                 const QByteArray &data);
         void userAvatarRetrieved(const QString &userId, const QImage &img);
         void communityAvatarRetrieved(const QString &communityId, const QPixmap &img);
         void communityProfileRetrieved(const QString &communityId, const QJsonObject &profile);
         void communityRoomsRetrieved(const QString &communityId, const QJsonObject &rooms);
         void ownAvatarRetrieved(const QPixmap &img);
         void imageDownloaded(const QString &event_id, const QPixmap &img);
+        void fileDownloaded(const QString &event_id, const QByteArray &data);
 
         // Returned profile data for the user's account.
         void getOwnProfileResponse(const QUrl &avatar_url, const QString &display_name);
         void getOwnCommunitiesResponse(const QList<QString> &own_communities);
-        void initialSyncCompleted(const SyncResponse &response);
+        void initialSyncCompleted(const mtx::responses::Sync &response);
         void initialSyncFailed(const QString &msg);
-        void syncCompleted(const SyncResponse &response);
+        void syncCompleted(const mtx::responses::Sync &response);
         void syncFailed(const QString &msg);
         void joinFailed(const QString &msg);
         void messageSent(const QString &event_id, const QString &roomid, const int txn_id);
         void messageSendFailed(const QString &roomid, const int txn_id);
         void emoteSent(const QString &event_id, const QString &roomid, const int txn_id);
-        void messagesRetrieved(const QString &room_id, const RoomMessages &msgs);
+        void messagesRetrieved(const QString &room_id, const mtx::responses::Messages &msgs);
         void joinedRoom(const QString &room_id);
         void leftRoom(const QString &room_id);
+        void roomCreationFailed(const QString &msg);
 
 private:
+        QNetworkReply *makeUploadRequest(const QString &filename);
+
         // Client API prefix.
         QString clientApiUrl_;
 
