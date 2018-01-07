@@ -50,13 +50,13 @@ struct PendingMessage
         PendingMessage(mtx::events::MessageType ty,
                        int txn_id,
                        QString body,
-                       const QString &fn,
+                       QString filename,
                        QString event_id,
                        TimelineItem *widget)
           : ty(ty)
           , txn_id(txn_id)
           , body(body)
-          , filename(fn)
+          , filename(filename)
           , event_id(event_id)
           , widget(widget)
         {}

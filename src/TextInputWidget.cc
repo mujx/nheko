@@ -124,7 +124,7 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
         if (source->hasImage()) {
                 const auto formats = source->formats();
                 const auto idx     = formats.indexOf(
-                  QRegularExpression{"image/\\w+", QRegularExpression::CaseInsensitiveOption});
+                  QRegularExpression{"image/.+", QRegularExpression::CaseInsensitiveOption});
 
                 // Note: in the future we may want to look into what the best choice is from the
                 // formats list. For now we will default to PNG format.
