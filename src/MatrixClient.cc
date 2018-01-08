@@ -292,7 +292,6 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
         auto reply = put(request, QJsonDocument(body).toJson(QJsonDocument::Compact));
-        auto txnId = this->txn_id_;
 
         connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, txnId]() {
                 reply->deleteLater();
