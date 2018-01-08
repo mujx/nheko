@@ -57,9 +57,7 @@ CommunitiesList::CommunitiesList(QSharedPointer<MatrixClient> client, QWidget *p
                 SLOT(updateCommunityAvatar(const QString &, const QPixmap &)));
 }
 
-CommunitiesList::~CommunitiesList()
-{
-}
+CommunitiesList::~CommunitiesList() {}
 
 void
 CommunitiesList::setCommunities(const QMap<QString, QSharedPointer<Community>> &communities)

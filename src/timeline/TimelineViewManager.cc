@@ -45,9 +45,7 @@ TimelineViewManager::TimelineViewManager(QSharedPointer<MatrixClient> client, QW
                 &TimelineViewManager::messageSendFailed);
 }
 
-TimelineViewManager::~TimelineViewManager()
-{
-}
+TimelineViewManager::~TimelineViewManager() {}
 
 void
 TimelineViewManager::messageSent(const QString &event_id, const QString &roomid, int txn_id)

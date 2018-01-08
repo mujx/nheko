@@ -13,9 +13,7 @@ CommunitiesListItem::CommunitiesListItem(QSharedPointer<Community> community,
         setFixedWidth(ui::sidebar::CommunitiesSidebarSize);
 }
 
-CommunitiesListItem::~CommunitiesListItem()
-{
-}
+CommunitiesListItem::~CommunitiesListItem() {}
 
 void
 CommunitiesListItem::setCommunity(QSharedPointer<Community> community)
@@ -150,12 +148,9 @@ CommunitiesListItem::contextMenuEvent(QContextMenuEvent *event)
 
 WorldCommunityListItem::WorldCommunityListItem(QWidget *parent)
   : CommunitiesListItem(QSharedPointer<Community>(), "", parent)
-{
-}
+{}
 
-WorldCommunityListItem::~WorldCommunityListItem()
-{
-}
+WorldCommunityListItem::~WorldCommunityListItem() {}
 
 void
 WorldCommunityListItem::mousePressEvent(QMouseEvent *event)

@@ -18,9 +18,7 @@
 #include "Login.h"
 #include "Deserializable.h"
 
-LoginRequest::LoginRequest()
-{
-}
+LoginRequest::LoginRequest() {}
 
 LoginRequest::LoginRequest(QString username, QString password)
   : user_(username)

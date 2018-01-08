@@ -94,7 +94,7 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client,
         sideBarLayout_->addLayout(sideBarMainLayout_);
 
         sideBarTopWidget_ = new QWidget(sideBar_);
-        sidebarActions_ = new SideBarActions(this);
+        sidebarActions_   = new SideBarActions(this);
         connect(
           sidebarActions_, &SideBarActions::showSettings, this, &ChatPage::showUserSettingsPage);
         connect(
@@ -325,7 +325,6 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client,
                                 }
                         }
                 });
-
 
         connect(client_.data(), &MatrixClient::ownAvatarRetrieved, this, &ChatPage::setOwnAvatar);
         connect(client_.data(), &MatrixClient::joinedRoom, this, [=](const QString &room_id) {

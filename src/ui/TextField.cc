@@ -32,9 +32,7 @@ TextField::TextField(QWidget *parent)
         QCoreApplication::processEvents();
 }
 
-TextField::~TextField()
-{
-}
+TextField::~TextField() {}
 
 void
 TextField::setBackgroundColor(const QColor &color)
@@ -275,9 +273,7 @@ TextFieldStateMachine::TextFieldStateMachine(TextField *parent)
         connect(text_field_, SIGNAL(textChanged(QString)), this, SLOT(setupProperties()));
 }
 
-TextFieldStateMachine::~TextFieldStateMachine()
-{
-}
+TextFieldStateMachine::~TextFieldStateMachine() {}
 
 void
 TextFieldStateMachine::setLabel(TextFieldLabel *label)
@@ -354,9 +350,7 @@ TextFieldLabel::TextFieldLabel(TextField *parent)
         setFont(font);
 }
 
-TextFieldLabel::~TextFieldLabel()
-{
-}
+TextFieldLabel::~TextFieldLabel() {}
 
 void
 TextFieldLabel::paintEvent(QPaintEvent *)
