@@ -20,11 +20,13 @@
 
 Label::Label(QWidget *parent, Qt::WindowFlags f)
   : QLabel(parent, f)
-{}
+{
+}
 
 Label::Label(const QString &text, QWidget *parent, Qt::WindowFlags f)
   : QLabel(text, parent, f)
-{}
+{
+}
 
 void
 Label::mousePressEvent(QMouseEvent *e)

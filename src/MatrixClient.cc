@@ -1028,7 +1028,7 @@ MatrixClient::makeUploadRequest(QSharedPointer<QIODevice> iodev)
         endpoint.setQuery(query);
 
         if (!iodev->open(QIODevice::ReadOnly)) {
-                qDebug() << "Error while reading buffer" << iodev->errorString();
+                qWarning() << "Error while reading device:" << iodev->errorString();
                 return nullptr;
         }
 
@@ -1036,7 +1036,6 @@ MatrixClient::makeUploadRequest(QSharedPointer<QIODevice> iodev)
         QMimeType mime = db.mimeTypeForData(iodev.data());
 
         QNetworkRequest request(QString(endpoint.toEncoded()));
-        request.setHeader(QNetworkRequest::ContentLengthHeader, iodev->size());
         request.setHeader(QNetworkRequest::ContentTypeHeader, mime.name());
 
         auto reply = post(request, iodev.data());

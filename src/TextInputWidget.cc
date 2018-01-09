@@ -114,8 +114,7 @@ FilteredTextEdit::keyPressEvent(QKeyEvent *event)
 bool
 FilteredTextEdit::canInsertFromMimeData(const QMimeData *source) const
 {
-        return (source->hasImage() || source->hasText() ||
-                QTextEdit::canInsertFromMimeData(source));
+        return (source->hasImage() || QTextEdit::canInsertFromMimeData(source));
 }
 
 void

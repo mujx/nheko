@@ -23,7 +23,8 @@ using namespace emoji;
 PickButton::PickButton(QWidget *parent)
   : FlatButton(parent)
   , panel_{nullptr}
-{}
+{
+}
 
 void
 PickButton::enterEvent(QEvent *e)

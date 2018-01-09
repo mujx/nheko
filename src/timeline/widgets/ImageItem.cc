@@ -84,16 +84,19 @@ ImageItem::ImageItem(QSharedPointer<MatrixClient> client,
         url_                 = QString("%1/_matrix/media/r0/download/%2")
                  .arg(client_.data()->getHomeServer().toString(), media_params);
 
-        auto null  = data.isNull();
-        auto reset = data->reset();
-        QPixmap p;
-
-        if (!null && reset) {
-                p.loadFromData(data->readAll());
-        } else {
-                p.load(filename);
+        if (data.isNull()) {
+                qWarning() << "No image data to display";
+                return;
         }
-        setImage(p);
+
+        if (data->reset()) {
+                QPixmap p;
+                p.loadFromData(data->readAll());
+                setImage(p);
+        } else {
+                qWarning() << "Failed to seek to beginning of device:" << data->errorString();
+                return;
+        }
 }
 
 void
