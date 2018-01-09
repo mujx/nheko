@@ -314,6 +314,7 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
 
                 if (!json.isObject()) {
                         qDebug() << "Send message response is not a JSON object";
+                        emit messageSendFailed(roomid, txnId);
                         return;
                 }
 
@@ -321,13 +322,12 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
 
                 if (!object.contains("event_id")) {
                         qDebug() << "SendTextMessage: missing event_id from response";
+                        emit messageSendFailed(roomid, txnId);
                         return;
                 }
 
                 emit messageSent(object.value("event_id").toString(), roomid, txnId);
         });
-
-        incrementTransactionId();
 }
 
 void
