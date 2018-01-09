@@ -19,8 +19,7 @@
 
 DeserializationException::DeserializationException(const std::string &msg)
   : msg_(msg)
-{
-}
+{}
 
 const char *
 DeserializationException::what() const noexcept
