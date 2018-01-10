@@ -198,13 +198,31 @@ MatrixClient::sync() noexcept
           {"room",
            QJsonObject{
              {"include_leave", true},
-           }},
+             {"account_data",
+               QJsonObject{
+                 {"not_types", QJsonArray{"*"}},
+               },
+             },{"ephemeral",
+               QJsonObject{
+                 {"types", QJsonArray{"m.receipt","m.typing"}},
+               },
+             },
+           },
+          },{"account_data",
+            QJsonObject{
+              {"not_types", QJsonArray{"*"}},
+            },
+          },{"presence",
+            QJsonObject{
+              {"not_types", QJsonArray{"*"}},
+            },
+          },
         };
 
         QUrlQuery query;
         query.addQueryItem("set_presence", "online");
         query.addQueryItem("filter", QJsonDocument(filter).toJson(QJsonDocument::Compact));
-        query.addQueryItem("timeout", "15000");
+        query.addQueryItem("timeout", "30000");
         query.addQueryItem("access_token", token_);
 
         if (next_batch_.isEmpty()) {
