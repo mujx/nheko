@@ -67,8 +67,14 @@ public slots:
                                const QSharedPointer<QIODevice> data,
                                const QString &filename,
                                const QString &url);
-        void queueFileMessage(const QString &roomid, const QString &filename, const QString &url);
-        void queueAudioMessage(const QString &roomid, const QString &filename, const QString &url);
+        void queueFileMessage(const QString &roomid,
+                              const QSharedPointer<QIODevice> data,
+                              const QString &filename,
+                              const QString &url);
+        void queueAudioMessage(const QString &roomid,
+                               const QSharedPointer<QIODevice> data,
+                               const QString &filename,
+                               const QString &url);
 
 private slots:
         void messageSent(const QString &eventid, const QString &roomid, int txnid);

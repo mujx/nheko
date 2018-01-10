@@ -111,8 +111,14 @@ signals:
                            const QSharedPointer<QIODevice> data,
                            const QString &filename,
                            const QString &url);
-        void fileUploaded(const QString &roomid, const QString &filename, const QString &url);
-        void audioUploaded(const QString &roomid, const QString &filename, const QString &url);
+        void fileUploaded(const QString &roomid,
+                          const QSharedPointer<QIODevice> data,
+                          const QString &filename,
+                          const QString &url);
+        void audioUploaded(const QString &roomid,
+                           const QSharedPointer<QIODevice> data,
+                           const QString &filename,
+                           const QString &url);
 
         void roomAvatarRetrieved(const QString &roomid,
                                  const QPixmap &img,

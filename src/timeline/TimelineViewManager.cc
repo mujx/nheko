@@ -105,6 +105,7 @@ TimelineViewManager::queueImageMessage(const QString &roomid,
 
 void
 TimelineViewManager::queueFileMessage(const QString &roomid,
+                                      const QSharedPointer<QIODevice> data,
                                       const QString &filename,
                                       const QString &url)
 {
@@ -120,6 +121,7 @@ TimelineViewManager::queueFileMessage(const QString &roomid,
 
 void
 TimelineViewManager::queueAudioMessage(const QString &roomid,
+                                       const QSharedPointer<QIODevice> data,
                                        const QString &filename,
                                        const QString &url)
 {

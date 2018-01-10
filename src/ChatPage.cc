@@ -257,16 +257,16 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client,
         connect(client_.data(),
                 &MatrixClient::fileUploaded,
                 this,
-                [=](QString roomid, QString filename, QString url) {
+                [=](QString roomid, QSharedPointer<QIODevice> data, QString filename, QString url) {
                         text_input_->hideUploadSpinner();
-                        view_manager_->queueFileMessage(roomid, filename, url);
+                        view_manager_->queueFileMessage(roomid, data, filename, url);
                 });
         connect(client_.data(),
                 &MatrixClient::audioUploaded,
                 this,
-                [=](QString roomid, QString filename, QString url) {
+                [=](QString roomid, QSharedPointer<QIODevice> data, QString filename, QString url) {
                         text_input_->hideUploadSpinner();
-                        view_manager_->queueAudioMessage(roomid, filename, url);
+                        view_manager_->queueAudioMessage(roomid, data, filename, url);
                 });
 
         connect(room_list_, &RoomList::roomAvatarChanged, this, &ChatPage::updateTopBarAvatar);

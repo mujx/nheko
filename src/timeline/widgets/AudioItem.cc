@@ -20,7 +20,6 @@
 #include <QDesktopServices>
 #include <QFile>
 #include <QFileDialog>
-#include <QFileInfo>
 #include <QPainter>
 #include <QPixmap>
 
@@ -94,11 +93,10 @@ AudioItem::AudioItem(QSharedPointer<MatrixClient> client,
                      QWidget *parent)
   : QWidget(parent)
   , url_{url}
-  , text_{QFileInfo{filename}.fileName()}
+  , text_{filename}
   , client_{client}
 {
-        Q_UNUSED(data);
-        readableFileSize_ = calculateFileSize(QFileInfo{filename}.size());
+        readableFileSize_ = calculateFileSize(data->size());
 
         init();
 }

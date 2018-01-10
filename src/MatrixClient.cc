@@ -870,12 +870,12 @@ MatrixClient::uploadFile(const QString &roomid,
                         return;
                 }
 
-                auto data = reply->readAll();
+                auto res_data = reply->readAll();
 
-                if (data.isEmpty())
+                if (res_data.isEmpty())
                         return;
 
-                auto json = QJsonDocument::fromJson(data);
+                auto json = QJsonDocument::fromJson(res_data);
 
                 if (!json.isObject()) {
                         qDebug() << "Media upload: Response is not a json object.";
@@ -889,7 +889,7 @@ MatrixClient::uploadFile(const QString &roomid,
                         return;
                 }
 
-                emit fileUploaded(roomid, filename, object.value("content_uri").toString());
+                emit fileUploaded(roomid, data, filename, object.value("content_uri").toString());
         });
 }
 
@@ -910,12 +910,12 @@ MatrixClient::uploadAudio(const QString &roomid,
                         return;
                 }
 
-                auto data = reply->readAll();
+                auto res_data = reply->readAll();
 
-                if (data.isEmpty())
+                if (res_data.isEmpty())
                         return;
 
-                auto json = QJsonDocument::fromJson(data);
+                auto json = QJsonDocument::fromJson(res_data);
 
                 if (!json.isObject()) {
                         qDebug() << "Media upload: Response is not a json object.";
@@ -929,7 +929,7 @@ MatrixClient::uploadAudio(const QString &roomid,
                         return;
                 }
 
-                emit audioUploaded(roomid, filename, object.value("content_uri").toString());
+                emit audioUploaded(roomid, data, filename, object.value("content_uri").toString());
         });
 }
 
