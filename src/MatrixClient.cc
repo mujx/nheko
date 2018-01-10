@@ -202,10 +202,6 @@ MatrixClient::sync() noexcept
                QJsonObject{
                  {"not_types", QJsonArray{"*"}},
                },
-             },{"ephemeral",
-               QJsonObject{
-                 {"types", QJsonArray{"m.receipt","m.typing"}},
-               },
              },
            },
           },{"account_data",
