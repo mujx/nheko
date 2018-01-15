@@ -21,6 +21,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QHBoxLayout>
+#include <QMimeDatabase>
 #include <QVBoxLayout>
 
 #include "Config.h"
@@ -29,14 +30,13 @@
 
 using namespace dialogs;
 
-static constexpr const char *DEFAULT = "Upload image?";
+static constexpr const char *DEFAULT = "Upload %1?";
 static constexpr const char *ERROR   = "Failed to load image type '%1'. Continue upload?";
 
 PreviewImageOverlay::PreviewImageOverlay(QWidget *parent)
   : QWidget{parent}
-  , titleLabel_{tr(DEFAULT), this}
-  , imageLabel_{this}
-  , imageName_{tr("clipboard"), this}
+  , titleLabel_{this}
+  , fileName_{this}
   , upload_{tr("Upload"), this}
   , cancel_{tr("Cancel"), this}
 {
@@ -46,12 +46,12 @@ PreviewImageOverlay::PreviewImageOverlay(QWidget *parent)
 
         auto vlayout = new QVBoxLayout{this};
         vlayout->addWidget(&titleLabel_);
-        vlayout->addWidget(&imageLabel_);
-        vlayout->addWidget(&imageName_);
+        vlayout->addWidget(&infoLabel_);
+        vlayout->addWidget(&fileName_);
         vlayout->addLayout(hlayout);
 
         connect(&upload_, &QPushButton::clicked, [&]() {
-                emit confirmImageUpload(imageData_, imageName_.text());
+                emit confirmUpload(data_, mediaType_, fileName_.text());
                 close();
         });
         connect(&cancel_, &QPushButton::clicked, [&]() { close(); });
@@ -65,7 +65,7 @@ PreviewImageOverlay::init()
         auto center   = window->frameGeometry().center();
         auto img_size = image_.size();
 
-        imageName_.setText(QFileInfo{imagePath_}.fileName());
+        fileName_.setText(QFileInfo{filePath_}.fileName());
 
         setAutoFillBackground(true);
         setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -75,67 +75,115 @@ PreviewImageOverlay::init()
           QString{"font-weight: bold; font-size: %1px;"}.arg(conf::headerFontSize));
         titleLabel_.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         titleLabel_.setAlignment(Qt::AlignCenter);
-        imageLabel_.setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-        imageLabel_.setAlignment(Qt::AlignCenter);
-        imageName_.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-        imageName_.setAlignment(Qt::AlignCenter);
+        infoLabel_.setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        fileName_.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        fileName_.setAlignment(Qt::AlignCenter);
         upload_.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         cancel_.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         upload_.setFontSize(conf::btn::fontSize);
         cancel_.setFontSize(conf::btn::fontSize);
 
-        // Scale image preview to the size of the current window if it is larger.
-        if ((img_size.height() * img_size.width()) > (winsize.height() * winsize.width())) {
-                imageLabel_.setPixmap(image_.scaled(winsize, Qt::KeepAspectRatio));
-        } else {
-                imageLabel_.setPixmap(image_);
-                move(center.x() - (width() * 0.5), center.y() - (height() * 0.5));
-        }
-        imageLabel_.setScaledContents(false);
+        if (isImage_) {
+                infoLabel_.setAlignment(Qt::AlignCenter);
 
-        raise();
+                // Scale image preview to the size of the current window if it is larger.
+                if ((img_size.height() * img_size.width()) > (winsize.height() * winsize.width())) {
+                        infoLabel_.setPixmap(image_.scaled(winsize, Qt::KeepAspectRatio));
+                } else {
+                        infoLabel_.setPixmap(image_);
+                        move(center.x() - (width() * 0.5), center.y() - (height() * 0.5));
+                }
+        } else {
+                infoLabel_.setAlignment(Qt::AlignLeft);
+        }
+        infoLabel_.setScaledContents(false);
+
+        show();
 }
 
 void
-PreviewImageOverlay::setImageAndCreate(const QByteArray data, const QString &type)
+PreviewImageOverlay::setPreview(const QByteArray data, const QString &mime)
 {
-        imageData_  = data;
-        imagePath_  = "clipboard." + type;
-        auto loaded = image_.loadFromData(imageData_);
-        if (!loaded) {
-                titleLabel_.setText(QString{tr(ERROR)}.arg(type));
+        qDebug() << "mime type:" << mime;
+        qDebug() << "mime size:" << data.size();
+
+        auto const &split = mime.split('/');
+        auto const &type  = split[1];
+
+        data_      = data;
+        mediaType_ = split[0];
+        filePath_  = "clipboard." + type;
+        isImage_   = false;
+
+        qDebug() << "mediaType:" << mediaType_;
+
+        if (mediaType_ == "image") {
+                if (!image_.loadFromData(data_)) {
+                        titleLabel_.setText(QString{tr(ERROR)}.arg(type));
+                } else {
+                        titleLabel_.setText(QString{tr(DEFAULT)}.arg(mediaType_));
+                }
+                isImage_ = true;
         } else {
-                titleLabel_.setText(tr(DEFAULT));
+                auto const info = QString{"Media type: %1\n"
+                                          "Media size: %2\n"}
+                                    .arg(mime)
+                                    .arg(data.size());
+
+                titleLabel_.setText(QString{tr(DEFAULT)}.arg("file"));
+                infoLabel_.setText(tr(info.toLocal8Bit()));
         }
 
         init();
 }
 
 void
-PreviewImageOverlay::setImageAndCreate(const QString &path)
+PreviewImageOverlay::setPreview(const QString &path)
 {
         QFile file{path};
-        imagePath_ = path;
 
         if (!file.open(QIODevice::ReadOnly)) {
-                qWarning() << "Failed to open image from:" << path;
+                qWarning() << "Failed to open file from:" << path;
                 qWarning() << "Reason:" << file.errorString();
                 close();
                 return;
         }
 
-        if ((imageData_ = file.readAll()).isEmpty()) {
-                qWarning() << "Failed to read image:" << file.errorString();
+        QMimeDatabase db;
+        auto mime = db.mimeTypeForFileNameAndData(path, &file);
+
+        qDebug() << "mime type:" << mime.name();
+        qDebug() << "mime size:" << file.size();
+
+        if ((data_ = file.readAll()).isEmpty()) {
+                qWarning() << "Failed to read media:" << file.errorString();
                 close();
                 return;
         }
 
-        auto loaded = image_.loadFromData(imageData_);
-        if (!loaded) {
-                auto t = QFileInfo{path}.suffix();
-                titleLabel_.setText(QString{tr(ERROR)}.arg(t));
+        auto const &split = mime.name().split('/');
+
+        mediaType_ = split[0];
+        filePath_  = file.fileName();
+        isImage_   = false;
+
+        qDebug() << "mediaType:" << mediaType_;
+
+        if (mediaType_ == "image") {
+                if (!image_.loadFromData(data_)) {
+                        titleLabel_.setText(QString{tr(ERROR)}.arg(split[1]));
+                } else {
+                        titleLabel_.setText(QString{tr(DEFAULT)}.arg("image"));
+                }
+                isImage_ = true;
         } else {
-                titleLabel_.setText(tr(DEFAULT));
+                auto const info = QString{"Media type: %1\n"
+                                          "Media size: %2\n"}
+                                    .arg(mime.name())
+                                    .arg(file.size());
+
+                titleLabel_.setText(QString{tr(DEFAULT)}.arg("file"));
+                infoLabel_.setText(tr(info.toLocal8Bit()));
         }
 
         init();

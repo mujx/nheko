@@ -29,6 +29,7 @@
 #include "timeline/widgets/AudioItem.h"
 #include "timeline/widgets/FileItem.h"
 #include "timeline/widgets/ImageItem.h"
+#include "timeline/widgets/VideoItem.h"
 
 TimelineViewManager::TimelineViewManager(QSharedPointer<MatrixClient> client, QWidget *parent)
   : QStackedWidget(parent)
@@ -116,7 +117,7 @@ TimelineViewManager::queueFileMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<FileItem, mtx::events::MessageType::File>(url, filename);
+        view->addUserMessage<FileItem, mtx::events::MessageType::File>(url, filename, data);
 }
 
 void
@@ -132,7 +133,23 @@ TimelineViewManager::queueAudioMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<AudioItem, mtx::events::MessageType::Audio>(url, filename);
+        view->addUserMessage<AudioItem, mtx::events::MessageType::Audio>(url, filename, data);
+}
+
+void
+TimelineViewManager::queueVideoMessage(const QString &roomid,
+                                       const QSharedPointer<QIODevice> data,
+                                       const QString &filename,
+                                       const QString &url)
+{
+        if (!views_.contains(roomid)) {
+                qDebug() << "Cannot send m.video message to a non-managed view";
+                return;
+        }
+
+        auto view = views_[roomid];
+
+        view->addUserMessage<VideoItem, mtx::events::MessageType::Video>(url, filename, data);
 }
 
 void

@@ -316,6 +316,9 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
         case mtx::events::MessageType::Audio:
                 body = {{"msgtype", "m.audio"}, {"body", msg}, {"url", url}, {"info", info}};
                 break;
+        case mtx::events::MessageType::Video:
+                body = {{"msgtype", "m.video"}, {"body", msg}, {"url", url}, {"info", info}};
+                break;
         default:
                 qDebug() << "SendRoomMessage: Unknown message type for" << msg;
                 return;
@@ -821,33 +824,9 @@ MatrixClient::uploadImage(const QString &roomid,
                 return;
 
         connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
-                reply->deleteLater();
-
-                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-                if (status == 0 || status >= 400) {
-                        emit syncFailed(reply->errorString());
+                auto object = upload(reply);
+                if (object.isEmpty())
                         return;
-                }
-
-                auto res_data = reply->readAll();
-
-                if (res_data.isEmpty())
-                        return;
-
-                auto json = QJsonDocument::fromJson(res_data);
-
-                if (!json.isObject()) {
-                        qDebug() << "Media upload: Response is not a json object.";
-                        return;
-                }
-
-                QJsonObject object = json.object();
-                if (!object.contains("content_uri")) {
-                        qDebug() << "Media upload: Missing content_uri key";
-                        qDebug() << object;
-                        return;
-                }
 
                 emit imageUploaded(roomid, data, filename, object.value("content_uri").toString());
         });
@@ -861,33 +840,9 @@ MatrixClient::uploadFile(const QString &roomid,
         auto reply = makeUploadRequest(data);
 
         connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
-                reply->deleteLater();
-
-                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-                if (status == 0 || status >= 400) {
-                        emit syncFailed(reply->errorString());
+                auto object = upload(reply);
+                if (object.isEmpty())
                         return;
-                }
-
-                auto res_data = reply->readAll();
-
-                if (res_data.isEmpty())
-                        return;
-
-                auto json = QJsonDocument::fromJson(res_data);
-
-                if (!json.isObject()) {
-                        qDebug() << "Media upload: Response is not a json object.";
-                        return;
-                }
-
-                QJsonObject object = json.object();
-                if (!object.contains("content_uri")) {
-                        qDebug() << "Media upload: Missing content_uri key";
-                        qDebug() << object;
-                        return;
-                }
 
                 emit fileUploaded(roomid, data, filename, object.value("content_uri").toString());
         });
@@ -901,35 +856,27 @@ MatrixClient::uploadAudio(const QString &roomid,
         auto reply = makeUploadRequest(data);
 
         connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
-                reply->deleteLater();
-
-                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-                if (status == 0 || status >= 400) {
-                        emit syncFailed(reply->errorString());
+                auto object = upload(reply);
+                if (object.isEmpty())
                         return;
-                }
-
-                auto res_data = reply->readAll();
-
-                if (res_data.isEmpty())
-                        return;
-
-                auto json = QJsonDocument::fromJson(res_data);
-
-                if (!json.isObject()) {
-                        qDebug() << "Media upload: Response is not a json object.";
-                        return;
-                }
-
-                QJsonObject object = json.object();
-                if (!object.contains("content_uri")) {
-                        qDebug() << "Media upload: Missing content_uri key";
-                        qDebug() << object;
-                        return;
-                }
 
                 emit audioUploaded(roomid, data, filename, object.value("content_uri").toString());
+        });
+}
+
+void
+MatrixClient::uploadVideo(const QString &roomid,
+                          const QSharedPointer<QIODevice> data,
+                          const QString &filename)
+{
+        auto reply = makeUploadRequest(data);
+
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
+                auto object = upload(reply);
+                if (object.isEmpty())
+                        return;
+
+                emit videoUploaded(roomid, data, filename, object.value("content_uri").toString());
         });
 }
 
@@ -1226,4 +1173,40 @@ MatrixClient::makeUploadRequest(QSharedPointer<QIODevice> iodev)
         auto reply = post(request, iodev.data());
 
         return reply;
+}
+
+QJsonObject
+MatrixClient::upload(QNetworkReply *reply)
+{
+        QJsonObject object;
+
+        reply->deleteLater();
+
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        if (status == 0 || status >= 400) {
+                emit syncFailed(reply->errorString());
+                return object;
+        }
+
+        auto res_data = reply->readAll();
+
+        if (res_data.isEmpty())
+                return object;
+
+        auto json = QJsonDocument::fromJson(res_data);
+
+        if (!json.isObject()) {
+                qDebug() << "Media upload: Response is not a json object.";
+                return object;
+        }
+
+        object = json.object();
+        if (!object.contains("content_uri")) {
+                qDebug() << "Media upload: Missing content_uri key";
+                qDebug() << object;
+                return object;
+        }
+
+        return object;
 }

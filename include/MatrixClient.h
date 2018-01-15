@@ -66,6 +66,9 @@ public:
         void uploadAudio(const QString &roomid,
                          const QSharedPointer<QIODevice> data,
                          const QString &filename);
+        void uploadVideo(const QString &roomid,
+                         const QSharedPointer<QIODevice> data,
+                         const QString &filename);
         void uploadFilter(const QString &filter) noexcept;
         void joinRoom(const QString &roomIdOrAlias);
         void leaveRoom(const QString &roomId);
@@ -119,6 +122,10 @@ signals:
                            const QSharedPointer<QIODevice> data,
                            const QString &filename,
                            const QString &url);
+        void videoUploaded(const QString &roomid,
+                           const QSharedPointer<QIODevice> data,
+                           const QString &filename,
+                           const QString &url);
 
         void roomAvatarRetrieved(const QString &roomid,
                                  const QPixmap &img,
@@ -149,6 +156,7 @@ signals:
 
 private:
         QNetworkReply *makeUploadRequest(QSharedPointer<QIODevice> iodev);
+        QJsonObject upload(QNetworkReply *reply);
 
         // Client API prefix.
         QString clientApiUrl_;

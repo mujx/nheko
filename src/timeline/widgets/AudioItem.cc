@@ -96,6 +96,7 @@ AudioItem::AudioItem(QSharedPointer<MatrixClient> client,
   , text_{filename}
   , client_{client}
 {
+        qDebug() << "AudioItem::AudioItem data:" << data;
         readableFileSize_ = calculateFileSize(data->size());
 
         init();

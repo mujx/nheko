@@ -243,6 +243,12 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client,
                 [=](QSharedPointer<QIODevice> data, const QString &fn) {
                         client_->uploadAudio(current_room_, data, fn);
                 });
+        connect(text_input_,
+                &TextInputWidget::uploadVideo,
+                this,
+                [=](QSharedPointer<QIODevice> data, const QString &fn) {
+                        client_->uploadVideo(current_room_, data, fn);
+                });
 
         connect(
           client_.data(), &MatrixClient::roomCreationFailed, this, &ChatPage::showNotification);
@@ -267,6 +273,13 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client,
                 [=](QString roomid, QSharedPointer<QIODevice> data, QString filename, QString url) {
                         text_input_->hideUploadSpinner();
                         view_manager_->queueAudioMessage(roomid, data, filename, url);
+                });
+        connect(client_.data(),
+                &MatrixClient::videoUploaded,
+                this,
+                [=](QString roomid, QSharedPointer<QIODevice> data, QString filename, QString url) {
+                        text_input_->hideUploadSpinner();
+                        view_manager_->queueVideoMessage(roomid, data, filename, url);
                 });
 
         connect(room_list_, &RoomList::roomAvatarChanged, this, &ChatPage::updateTopBarAvatar);

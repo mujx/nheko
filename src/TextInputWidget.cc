@@ -58,9 +58,9 @@ FilteredTextEdit::FilteredTextEdit(QWidget *parent)
 
         connect(typingTimer_, &QTimer::timeout, this, &FilteredTextEdit::stopTyping);
         connect(&previewDialog_,
-                &dialogs::PreviewImageOverlay::confirmImageUpload,
+                &dialogs::PreviewImageOverlay::confirmUpload,
                 this,
-                &FilteredTextEdit::receiveImage);
+                &FilteredTextEdit::uploadData);
 
         previewDialog_.hide();
 }
@@ -135,28 +135,25 @@ FilteredTextEdit::canInsertFromMimeData(const QMimeData *source) const
 void
 FilteredTextEdit::insertFromMimeData(const QMimeData *source)
 {
+        const auto formats = source->formats().filter("/");
+        const auto image   = formats.filter("image/", Qt::CaseInsensitive);
+        const auto audio   = formats.filter("audio/", Qt::CaseInsensitive);
+        const auto video   = formats.filter("video/", Qt::CaseInsensitive);
+
+        qDebug() << "Paste contians formats:" << formats;
+
         if (source->hasImage()) {
-                const auto formats = source->formats();
-                const auto idx     = formats.indexOf(
-                  QRegularExpression{"image/.+", QRegularExpression::CaseInsensitiveOption});
-
-                // Note: in the future we may want to look into what the best choice is from the
-                // formats list. For now we will default to PNG format.
-                QString type = "png";
-                if (idx != -1) {
-                        type = formats.at(idx).split('/')[1];
-                }
-
-                // Encode raw pixel data of image.
-                QByteArray data = source->data("image/" + type);
-                previewDialog_.setImageAndCreate(data, type);
-                previewDialog_.show();
-        } else if (source->hasFormat("x-special/gnome-copied-files") &&
-                   QImageReader{source->text()}.canRead()) {
+                showPreview(source, image, "image", "png");
+        } else if (source->hasFormat("x-special/gnome-copied-files") ||
+                   QFileInfo{source->text()}.exists()) {
+                // Generic file for any platform.
                 // Special case for X11 users. See "Notes for X11 Users" in source.
                 // Source: http://doc.qt.io/qt-5/qclipboard.html
-                previewDialog_.setImageAndCreate(source->text());
-                previewDialog_.show();
+                previewDialog_.setPreview(source->text());
+        } else if (!audio.empty()) {
+                showPreview(source, audio, "audio", "flac");
+        } else if (!video.empty()) {
+                showPreview(source, video, "video", "webm");
         } else {
                 QTextEdit::insertFromMimeData(source);
         }
@@ -233,11 +230,42 @@ FilteredTextEdit::textChanged()
 }
 
 void
-FilteredTextEdit::receiveImage(const QByteArray img, const QString &img_name)
+FilteredTextEdit::uploadData(const QByteArray data, const QString &media, const QString &filename)
 {
         QSharedPointer<QBuffer> buffer{new QBuffer{this}};
-        buffer->setData(img);
-        emit image(buffer, img_name);
+        buffer->setData(data);
+
+        qDebug() << "FilteredTextEdit::uploadData" << media;
+
+        if (media == "image")
+                emit image(buffer, filename);
+        else if (media == "audio")
+                emit audio(buffer, filename);
+        else if (media == "video")
+                emit video(buffer, filename);
+        else
+                emit file(buffer, filename);
+}
+
+void
+FilteredTextEdit::showPreview(const QMimeData *source,
+                              const QStringList &formats,
+                              const QString &media,
+                              const QString &type)
+{
+        const auto idx = formats.indexOf(
+          QRegularExpression{media + "/.+", QRegularExpression::CaseInsensitiveOption});
+
+        // Note: in the future we may want to look into what the best choice is from the
+        // formats list. For now we will default to |type| format.
+        QString mime = media + '/' + type;
+        if (idx != -1) {
+                mime = formats.at(idx);
+        }
+
+        // Retrieve data as MIME type.
+        QByteArray data = source->data(mime);
+        previewDialog_.setPreview(data, mime);
 }
 
 TextInputWidget::TextInputWidget(QWidget *parent)
@@ -309,6 +337,9 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         connect(input_, &FilteredTextEdit::message, this, &TextInputWidget::sendTextMessage);
         connect(input_, &FilteredTextEdit::command, this, &TextInputWidget::command);
         connect(input_, &FilteredTextEdit::image, this, &TextInputWidget::uploadImage);
+        connect(input_, &FilteredTextEdit::audio, this, &TextInputWidget::uploadAudio);
+        connect(input_, &FilteredTextEdit::video, this, &TextInputWidget::uploadVideo);
+        connect(input_, &FilteredTextEdit::file, this, &TextInputWidget::uploadFile);
         connect(emojiBtn_,
                 SIGNAL(emojiSelected(const QString &)),
                 this,
@@ -376,6 +407,8 @@ TextInputWidget::openFileSelection()
                 emit uploadImage(file, fileName);
         else if (format == "audio")
                 emit uploadAudio(file, fileName);
+        else if (format == "video")
+                emit uploadVideo(file, fileName);
         else
                 emit uploadFile(file, fileName);
 

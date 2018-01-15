@@ -55,7 +55,10 @@ signals:
         void stoppedTyping();
         void message(QString);
         void command(QString name, QString args);
-        void image(const QSharedPointer<QIODevice> iodev, const QString &img_name);
+        void image(const QSharedPointer<QIODevice> data, const QString &filename);
+        void audio(const QSharedPointer<QIODevice> data, const QString &filename);
+        void video(const QSharedPointer<QIODevice> data, const QString &filename);
+        void file(const QSharedPointer<QIODevice> data, const QString &filename);
 
 protected:
         void keyPressEvent(QKeyEvent *event) override;
@@ -70,8 +73,12 @@ private:
         dialogs::PreviewImageOverlay previewDialog_;
 
         void textChanged();
-        void receiveImage(const QByteArray img, const QString &img_name);
+        void uploadData(const QByteArray data, const QString &media, const QString &filename);
         void afterCompletion(int);
+        void showPreview(const QMimeData *source,
+                         const QStringList &formats,
+                         const QString &media,
+                         const QString &type);
 };
 
 class TextInputWidget : public QWidget
@@ -95,9 +102,10 @@ signals:
         void sendTextMessage(QString msg);
         void sendEmoteMessage(QString msg);
 
-        void uploadImage(QSharedPointer<QIODevice> data, const QString &filename);
-        void uploadFile(QSharedPointer<QIODevice> data, const QString &filename);
-        void uploadAudio(QSharedPointer<QIODevice> data, const QString &filename);
+        void uploadImage(const QSharedPointer<QIODevice> data, const QString &filename);
+        void uploadFile(const QSharedPointer<QIODevice> data, const QString &filename);
+        void uploadAudio(const QSharedPointer<QIODevice> data, const QString &filename);
+        void uploadVideo(const QSharedPointer<QIODevice> data, const QString &filename);
 
         void sendJoinRoomRequest(const QString &room);
 

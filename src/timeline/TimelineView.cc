@@ -537,6 +537,7 @@ TimelineView::sendNextPendingMessage()
         switch (m.ty) {
         case mtx::events::MessageType::Audio:
         case mtx::events::MessageType::Image:
+        case mtx::events::MessageType::Video:
         case mtx::events::MessageType::File:
                 // FIXME: Improve the API
                 client_->sendRoomMessage(
