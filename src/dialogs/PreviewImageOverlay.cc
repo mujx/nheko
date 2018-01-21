@@ -25,6 +25,7 @@
 #include <QVBoxLayout>
 
 #include "Config.h"
+#include "Utils.h"
 
 #include "dialogs/PreviewImageOverlay.h"
 
@@ -128,7 +129,7 @@ PreviewImageOverlay::setPreview(const QByteArray data, const QString &mime)
                 auto const info = QString{"Media type: %1\n"
                                           "Media size: %2\n"}
                                     .arg(mime)
-                                    .arg(data.size());
+                                    .arg(utils::humanReadableFileSize(data.size()));
 
                 titleLabel_.setText(QString{tr(DEFAULT)}.arg("file"));
                 infoLabel_.setText(tr(info.toLocal8Bit()));
@@ -180,7 +181,7 @@ PreviewImageOverlay::setPreview(const QString &path)
                 auto const info = QString{"Media type: %1\n"
                                           "Media size: %2\n"}
                                     .arg(mime.name())
-                                    .arg(file.size());
+                                    .arg(utils::humanReadableFileSize(file.size()));
 
                 titleLabel_.setText(QString{tr(DEFAULT)}.arg("file"));
                 infoLabel_.setText(tr(info.toLocal8Bit()));
