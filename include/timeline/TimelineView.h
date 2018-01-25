@@ -44,6 +44,7 @@ struct PendingMessage
         int txn_id;
         QString body;
         QString filename;
+        QSharedPointer<QIODevice> media;
         QString event_id;
         TimelineItem *widget;
 
@@ -51,12 +52,14 @@ struct PendingMessage
                        int txn_id,
                        QString body,
                        QString filename,
+                       QSharedPointer<QIODevice> media,
                        QString event_id,
                        TimelineItem *widget)
           : ty(ty)
           , txn_id(txn_id)
           , body(body)
           , filename(filename)
+          , media(media)
           , event_id(event_id)
           , widget(widget)
         {}
@@ -255,7 +258,7 @@ TimelineView::addUserMessage(const QString &url,
 
         int txn_id = client_->incrementTransactionId();
 
-        PendingMessage message(MsgType, txn_id, url, filename, "", view_item);
+        PendingMessage message(MsgType, txn_id, url, filename, data, "", view_item);
         handleNewUserMessage(message);
 }
 

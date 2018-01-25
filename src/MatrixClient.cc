@@ -280,7 +280,7 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
                               int txnId,
                               const QString &roomid,
                               const QString &msg,
-                              const QFileInfo &fileinfo,
+                              const QSharedPointer<QIODevice> media,
                               const QString &url) noexcept
 {
         QUrlQuery query;
@@ -294,11 +294,25 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
         QString msgType("");
 
         QMimeDatabase db;
-        QMimeType mime =
-          db.mimeTypeForFile(fileinfo.absoluteFilePath(), QMimeDatabase::MatchContent);
+        QMimeType mime;
+        qint64 m_size = 0;
+
+        if (!media.isNull()) {
+                // Must seek to beginning of device because mimeTypeForData() does not
+                // automatically.
+                if (!media->reset()) {
+                        qWarning()
+                          << "Failed to seek to beginning of device:" << media->errorString()
+                          << '\n'
+                          << "Sending message with inaccurate MIME type...";
+                }
+
+                mime   = db.mimeTypeForData(media.data());
+                m_size = media->size();
+        }
 
         QJsonObject body;
-        QJsonObject info = {{"size", fileinfo.size()}, {"mimetype", mime.name()}};
+        QJsonObject info = {{"size", m_size}, {"mimetype", mime.name()}};
 
         switch (ty) {
         case mtx::events::MessageType::Text:

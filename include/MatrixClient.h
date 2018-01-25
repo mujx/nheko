@@ -39,7 +39,7 @@ public:
                              int txnId,
                              const QString &roomid,
                              const QString &msg,
-                             const QFileInfo &info,
+                             const QSharedPointer<QIODevice> media,
                              const QString &url = "") noexcept;
         void login(const QString &username, const QString &password) noexcept;
         void registerUser(const QString &username,
