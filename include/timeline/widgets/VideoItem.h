@@ -43,7 +43,6 @@ public:
 
 private:
         void init();
-        QString calculateFileSize(int nbytes) const;
 
         QUrl url_;
         QString text_;

@@ -23,6 +23,8 @@
 #include <QPainter>
 #include <QPixmap>
 
+#include "Utils.h"
+
 #include "timeline/widgets/AudioItem.h"
 
 constexpr int MaxWidth          = 400;
@@ -81,7 +83,7 @@ AudioItem::AudioItem(QSharedPointer<MatrixClient> client,
   , event_{event}
   , client_{client}
 {
-        readableFileSize_ = calculateFileSize(event.content.info.size);
+        readableFileSize_ = utils::humanReadableFileSize(event.content.info.size);
 
         init();
 }
@@ -96,24 +98,9 @@ AudioItem::AudioItem(QSharedPointer<MatrixClient> client,
   , text_{filename}
   , client_{client}
 {
-        readableFileSize_ = calculateFileSize(data->size());
+        readableFileSize_ = utils::humanReadableFileSize(data->size());
 
         init();
-}
-
-QString
-AudioItem::calculateFileSize(int nbytes) const
-{
-        if (nbytes == 0)
-                return QString("");
-
-        if (nbytes < 1024)
-                return QString("%1 B").arg(nbytes);
-
-        if (nbytes < 1024 * 1024)
-                return QString("%1 KB").arg(nbytes / 1024);
-
-        return QString("%1 MB").arg(nbytes / 1024 / 1024);
 }
 
 QSize
