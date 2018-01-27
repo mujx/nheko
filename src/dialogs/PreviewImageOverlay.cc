@@ -105,9 +105,6 @@ PreviewImageOverlay::init()
 void
 PreviewImageOverlay::setPreview(const QByteArray data, const QString &mime)
 {
-        qDebug() << "mime type:" << mime;
-        qDebug() << "mime size:" << data.size();
-
         auto const &split = mime.split('/');
         auto const &type  = split[1];
 
@@ -115,8 +112,6 @@ PreviewImageOverlay::setPreview(const QByteArray data, const QString &mime)
         mediaType_ = split[0];
         filePath_  = "clipboard." + type;
         isImage_   = false;
-
-        qDebug() << "mediaType:" << mediaType_;
 
         if (mediaType_ == "image") {
                 if (!image_.loadFromData(data_)) {
@@ -153,9 +148,6 @@ PreviewImageOverlay::setPreview(const QString &path)
         QMimeDatabase db;
         auto mime = db.mimeTypeForFileNameAndData(path, &file);
 
-        qDebug() << "mime type:" << mime.name();
-        qDebug() << "mime size:" << file.size();
-
         if ((data_ = file.readAll()).isEmpty()) {
                 qWarning() << "Failed to read media:" << file.errorString();
                 close();
@@ -167,8 +159,6 @@ PreviewImageOverlay::setPreview(const QString &path)
         mediaType_ = split[0];
         filePath_  = file.fileName();
         isImage_   = false;
-
-        qDebug() << "mediaType:" << mediaType_;
 
         if (mediaType_ == "image") {
                 if (!image_.loadFromData(data_)) {

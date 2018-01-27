@@ -140,8 +140,6 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
         const auto audio   = formats.filter("audio/", Qt::CaseInsensitive);
         const auto video   = formats.filter("video/", Qt::CaseInsensitive);
 
-        qDebug() << "Paste contians formats:" << formats;
-
         if (source->hasImage()) {
                 showPreview(source, image, "image", "png");
         } else if (source->hasFormat("x-special/gnome-copied-files") ||
@@ -234,8 +232,6 @@ FilteredTextEdit::uploadData(const QByteArray data, const QString &media, const 
 {
         QSharedPointer<QBuffer> buffer{new QBuffer{this}};
         buffer->setData(data);
-
-        qDebug() << "FilteredTextEdit::uploadData" << media;
 
         if (media == "image")
                 emit image(buffer, filename);
