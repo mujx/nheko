@@ -142,7 +142,7 @@ TimelineViewManager::queueVideoMessage(const QString &roomid,
                                        const QString &filename,
                                        const QString &url)
 {
-        if (!views_.contains(roomid)) {
+        if (!timelineViewExists(roomid)) {
                 qDebug() << "Cannot send m.video message to a non-managed view";
                 return;
         }
