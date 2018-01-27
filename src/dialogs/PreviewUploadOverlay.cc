@@ -27,14 +27,14 @@
 #include "Config.h"
 #include "Utils.h"
 
-#include "dialogs/PreviewImageOverlay.h"
+#include "dialogs/PreviewUploadOverlay.h"
 
 using namespace dialogs;
 
 static constexpr const char *DEFAULT = "Upload %1?";
 static constexpr const char *ERROR   = "Failed to load image type '%1'. Continue upload?";
 
-PreviewImageOverlay::PreviewImageOverlay(QWidget *parent)
+PreviewUploadOverlay::PreviewUploadOverlay(QWidget *parent)
   : QWidget{parent}
   , titleLabel_{this}
   , fileName_{this}
@@ -59,7 +59,7 @@ PreviewImageOverlay::PreviewImageOverlay(QWidget *parent)
 }
 
 void
-PreviewImageOverlay::init()
+PreviewUploadOverlay::init()
 {
         auto window   = QApplication::activeWindow();
         auto winsize  = window->frameGeometry().size();
@@ -103,7 +103,7 @@ PreviewImageOverlay::init()
 }
 
 void
-PreviewImageOverlay::setPreview(const QByteArray data, const QString &mime)
+PreviewUploadOverlay::setPreview(const QByteArray data, const QString &mime)
 {
         auto const &split = mime.split('/');
         auto const &type  = split[1];
@@ -134,7 +134,7 @@ PreviewImageOverlay::setPreview(const QByteArray data, const QString &mime)
 }
 
 void
-PreviewImageOverlay::setPreview(const QString &path)
+PreviewUploadOverlay::setPreview(const QString &path)
 {
         QFile file{path};
 

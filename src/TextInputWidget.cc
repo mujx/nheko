@@ -58,7 +58,7 @@ FilteredTextEdit::FilteredTextEdit(QWidget *parent)
 
         connect(typingTimer_, &QTimer::timeout, this, &FilteredTextEdit::stopTyping);
         connect(&previewDialog_,
-                &dialogs::PreviewImageOverlay::confirmUpload,
+                &dialogs::PreviewUploadOverlay::confirmUpload,
                 this,
                 &FilteredTextEdit::uploadData);
 

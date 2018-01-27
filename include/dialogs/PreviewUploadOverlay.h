@@ -28,11 +28,11 @@ class QMimeData;
 
 namespace dialogs {
 
-class PreviewImageOverlay : public QWidget
+class PreviewUploadOverlay : public QWidget
 {
         Q_OBJECT
 public:
-        PreviewImageOverlay(QWidget *parent = nullptr);
+        PreviewUploadOverlay(QWidget *parent = nullptr);
 
         void setPreview(const QByteArray data, const QString &mime);
         void setPreview(const QString &path);

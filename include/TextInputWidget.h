@@ -27,12 +27,12 @@
 #include "FlatButton.h"
 #include "LoadingIndicator.h"
 
-#include "dialogs/PreviewImageOverlay.h"
+#include "dialogs/PreviewUploadOverlay.h"
 
 #include "emoji/PickButton.h"
 
 namespace dialogs {
-class PreviewImageOverlay;
+class PreviewUploadOverlay;
 }
 
 class FilteredTextEdit : public QTextEdit
@@ -70,7 +70,7 @@ private:
         size_t history_index_;
         QTimer *typingTimer_;
 
-        dialogs::PreviewImageOverlay previewDialog_;
+        dialogs::PreviewUploadOverlay previewDialog_;
 
         void textChanged();
         void uploadData(const QByteArray data, const QString &media, const QString &filename);
