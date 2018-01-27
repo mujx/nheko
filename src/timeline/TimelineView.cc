@@ -540,8 +540,7 @@ TimelineView::sendNextPendingMessage()
         case mtx::events::MessageType::Video:
         case mtx::events::MessageType::File:
                 // FIXME: Improve the API
-                client_->sendRoomMessage(
-                  m.ty, m.txn_id, room_id_, m.filename, m.media, m.body);
+                client_->sendRoomMessage(m.ty, m.txn_id, room_id_, m.filename, m.media, m.body);
                 break;
         default:
                 client_->sendRoomMessage(m.ty, m.txn_id, room_id_, m.body, m.media);
