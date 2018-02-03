@@ -515,7 +515,7 @@ TimelineView::addUserMessage(mtx::events::MessageType ty, const QString &body)
         lastSender_ = local_user_;
 
         int txn_id = client_->incrementTransactionId();
-        PendingMessage message(ty, txn_id, body, "", nullptr, "", view_item);
+        PendingMessage message(ty, txn_id, body, "", QSharedPointer<QIODevice>{}, "", view_item);
         handleNewUserMessage(message);
 }
 
