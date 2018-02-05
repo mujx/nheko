@@ -135,9 +135,9 @@ utils::firstChar(const QString &input)
 }
 
 QString
-utils::humanReadableFileSize(const qlonglong bytes)
+utils::humanReadableFileSize(const uint64_t bytes)
 {
-        constexpr static const char *units[] = {"B", "KB", "MB", "GB", "TB"};
+        constexpr static const char *units[] = {"B", "KiB", "MiB", "GiB", "TiB"};
         constexpr static const int length    = sizeof(units) / sizeof(units[0]);
 
         int u       = 0;
@@ -147,5 +147,5 @@ utils::humanReadableFileSize(const qlonglong bytes)
                 size /= 1024.0;
         }
 
-        return QString::number(size, 'f', 2) + ' ' + units[u];
+        return QString::number(size, 'g', 4) + ' ' + units[u];
 }
