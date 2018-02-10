@@ -141,7 +141,7 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
         const auto video   = formats.filter("video/", Qt::CaseInsensitive);
 
         if (source->hasImage()) {
-                showPreview(source, image, "image", "png");
+                showPreview(source, image);
         } else if (source->hasFormat("x-special/gnome-copied-files") ||
                    QFileInfo{source->text()}.exists()) {
                 // Generic file for any platform.
@@ -149,9 +149,9 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
                 // Source: http://doc.qt.io/qt-5/qclipboard.html
                 previewDialog_.setPreview(source->text());
         } else if (!audio.empty()) {
-                showPreview(source, audio, "audio", "flac");
+                showPreview(source, audio);
         } else if (!video.empty()) {
-                showPreview(source, video, "video", "webm");
+                showPreview(source, video);
         } else {
                 QTextEdit::insertFromMimeData(source);
         }
@@ -244,23 +244,11 @@ FilteredTextEdit::uploadData(const QByteArray data, const QString &media, const 
 }
 
 void
-FilteredTextEdit::showPreview(const QMimeData *source,
-                              const QStringList &formats,
-                              const QString &media,
-                              const QString &type)
+FilteredTextEdit::showPreview(const QMimeData *source, const QStringList &formats)
 {
-        const auto idx = formats.indexOf(
-          QRegularExpression{media + "/.+", QRegularExpression::CaseInsensitiveOption});
-
-        // Note: in the future we may want to look into what the best choice is from the
-        // formats list. For now we will default to |type| format.
-        QString mime = media + '/' + type;
-        if (idx != -1) {
-                mime = formats.at(idx);
-        }
-
         // Retrieve data as MIME type.
-        QByteArray data = source->data(mime);
+        auto const &mime = formats.first();
+        QByteArray data  = source->data(mime);
         previewDialog_.setPreview(data, mime);
 }
 

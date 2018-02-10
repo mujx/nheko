@@ -75,10 +75,7 @@ private:
         void textChanged();
         void uploadData(const QByteArray data, const QString &media, const QString &filename);
         void afterCompletion(int);
-        void showPreview(const QMimeData *source,
-                         const QStringList &formats,
-                         const QString &media,
-                         const QString &type);
+        void showPreview(const QMimeData *source, const QStringList &formats);
 };
 
 class TextInputWidget : public QWidget
