@@ -247,8 +247,9 @@ TimelineView::addUserMessage(const QString &url,
                              const qint64 size)
 {
         auto with_sender = lastSender_ != local_user_;
+        auto trimmed     = QFileInfo{filename}.fileName(); // Trim file path.
 
-        auto widget = new Widget(client_, url, filename, size, this);
+        auto widget = new Widget(client_, url, trimmed, size, this);
 
         TimelineItem *view_item =
           new TimelineItem(widget, local_user_, with_sender, scroll_widget_);
@@ -263,7 +264,7 @@ TimelineView::addUserMessage(const QString &url,
 
         int txn_id = client_->incrementTransactionId();
 
-        PendingMessage message(MsgType, txn_id, url, filename, mime, size, "", view_item);
+        PendingMessage message(MsgType, txn_id, url, trimmed, mime, size, "", view_item);
         handleNewUserMessage(message);
 }
 
