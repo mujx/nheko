@@ -280,7 +280,8 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
                               int txnId,
                               const QString &roomid,
                               const QString &msg,
-                              const QSharedPointer<QIODevice> media,
+                              const QString &mime,
+                              const qint64 media_size,
                               const QString &url) noexcept
 {
         QUrlQuery query;
@@ -291,28 +292,8 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
                          QString("/rooms/%1/send/m.room.message/%2").arg(roomid).arg(txnId));
         endpoint.setQuery(query);
 
-        QString msgType("");
-
-        QMimeDatabase db;
-        QMimeType mime;
-        qint64 m_size = 0;
-
-        if (!media.isNull()) {
-                // Must seek to beginning of device because mimeTypeForData() does not
-                // automatically.
-                if (!media->reset()) {
-                        qWarning()
-                          << "Failed to seek to beginning of device:" << media->errorString()
-                          << '\n'
-                          << "Sending message with inaccurate MIME type...";
-                }
-
-                mime   = db.mimeTypeForData(media.data());
-                m_size = media->size();
-        }
-
         QJsonObject body;
-        QJsonObject info = {{"size", m_size}, {"mimetype", mime.name()}};
+        QJsonObject info = {{"size", media_size}, {"mimetype", mime}};
 
         switch (ty) {
         case mtx::events::MessageType::Text:
@@ -829,68 +810,97 @@ MatrixClient::messages(const QString &roomid, const QString &from_token, int lim
 
 void
 MatrixClient::uploadImage(const QString &roomid,
-                          const QSharedPointer<QIODevice> data,
-                          const QString &filename)
+                          const QString &filename,
+                          const QSharedPointer<QIODevice> data)
 {
         auto reply = makeUploadRequest(data);
 
         if (reply == nullptr)
                 return;
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
-                auto object = upload(reply);
-                if (object.isEmpty())
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename, data]() {
+                auto json = getUploadReply(reply);
+                if (json.isEmpty())
                         return;
 
-                emit imageUploaded(roomid, data, filename, object.value("content_uri").toString());
+                auto mime = reply->request().header(QNetworkRequest::ContentTypeHeader).toString();
+                auto size =
+                  reply->request().header(QNetworkRequest::ContentLengthHeader).toLongLong();
+
+                emit imageUploaded(
+                  roomid, filename, json.value("content_uri").toString(), mime, size);
         });
 }
 
 void
 MatrixClient::uploadFile(const QString &roomid,
-                         const QSharedPointer<QIODevice> data,
-                         const QString &filename)
+                         const QString &filename,
+                         const QSharedPointer<QIODevice> data)
 {
         auto reply = makeUploadRequest(data);
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
-                auto object = upload(reply);
-                if (object.isEmpty())
+        if (reply == nullptr)
+                return;
+
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename, data]() {
+                auto json = getUploadReply(reply);
+                if (json.isEmpty())
                         return;
 
-                emit fileUploaded(roomid, data, filename, object.value("content_uri").toString());
+                auto mime = reply->request().header(QNetworkRequest::ContentTypeHeader).toString();
+                auto size =
+                  reply->request().header(QNetworkRequest::ContentLengthHeader).toLongLong();
+
+                emit fileUploaded(
+                  roomid, filename, json.value("content_uri").toString(), mime, size);
         });
 }
 
 void
 MatrixClient::uploadAudio(const QString &roomid,
-                          const QSharedPointer<QIODevice> data,
-                          const QString &filename)
+                          const QString &filename,
+                          const QSharedPointer<QIODevice> data)
 {
         auto reply = makeUploadRequest(data);
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
-                auto object = upload(reply);
-                if (object.isEmpty())
+        if (reply == nullptr)
+                return;
+
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename, data]() {
+                auto json = getUploadReply(reply);
+                if (json.isEmpty())
                         return;
 
-                emit audioUploaded(roomid, data, filename, object.value("content_uri").toString());
+                auto mime = reply->request().header(QNetworkRequest::ContentTypeHeader).toString();
+                auto size =
+                  reply->request().header(QNetworkRequest::ContentLengthHeader).toLongLong();
+
+                emit audioUploaded(
+                  roomid, filename, json.value("content_uri").toString(), mime, size);
         });
 }
 
 void
 MatrixClient::uploadVideo(const QString &roomid,
-                          const QSharedPointer<QIODevice> data,
-                          const QString &filename)
+                          const QString &filename,
+                          const QSharedPointer<QIODevice> data)
 {
         auto reply = makeUploadRequest(data);
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, data, filename]() {
-                auto object = upload(reply);
-                if (object.isEmpty())
+        if (reply == nullptr)
+                return;
+
+        connect(reply, &QNetworkReply::finished, this, [this, reply, roomid, filename, data]() {
+                auto json = getUploadReply(reply);
+                if (json.isEmpty())
                         return;
 
-                emit videoUploaded(roomid, data, filename, object.value("content_uri").toString());
+                auto mime = reply->request().header(QNetworkRequest::ContentTypeHeader).toString();
+                auto size =
+                  reply->request().header(QNetworkRequest::ContentLengthHeader).toLongLong();
+
+                emit videoUploaded(
+                  roomid, filename, json.value("content_uri").toString(), mime, size);
         });
 }
 
@@ -1190,7 +1200,7 @@ MatrixClient::makeUploadRequest(QSharedPointer<QIODevice> iodev)
 }
 
 QJsonObject
-MatrixClient::upload(QNetworkReply *reply)
+MatrixClient::getUploadReply(QNetworkReply *reply)
 {
         QJsonObject object;
 

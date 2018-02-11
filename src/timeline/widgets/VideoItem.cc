@@ -67,15 +67,15 @@ VideoItem::VideoItem(QSharedPointer<MatrixClient> client,
 
 VideoItem::VideoItem(QSharedPointer<MatrixClient> client,
                      const QString &url,
-                     const QSharedPointer<QIODevice> data,
                      const QString &filename,
+                     const qint64 size,
                      QWidget *parent)
   : QWidget(parent)
   , url_{url}
   , text_{filename}
   , client_{client}
 {
-        readableFileSize_ = utils::humanReadableFileSize(data->size());
+        readableFileSize_ = utils::humanReadableFileSize(size);
 
         init();
 }

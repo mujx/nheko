@@ -515,7 +515,7 @@ TimelineView::addUserMessage(mtx::events::MessageType ty, const QString &body)
         lastSender_ = local_user_;
 
         int txn_id = client_->incrementTransactionId();
-        PendingMessage message(ty, txn_id, body, "", QSharedPointer<QIODevice>{}, "", view_item);
+        PendingMessage message(ty, txn_id, body, "", "", -1, "", view_item);
         handleNewUserMessage(message);
 }
 
@@ -540,10 +540,11 @@ TimelineView::sendNextPendingMessage()
         case mtx::events::MessageType::Video:
         case mtx::events::MessageType::File:
                 // FIXME: Improve the API
-                client_->sendRoomMessage(m.ty, m.txn_id, room_id_, m.filename, m.media, m.body);
+                client_->sendRoomMessage(
+                  m.ty, m.txn_id, room_id_, m.filename, m.mime, m.media_size, m.body);
                 break;
         default:
-                client_->sendRoomMessage(m.ty, m.txn_id, room_id_, m.body, m.media);
+                client_->sendRoomMessage(m.ty, m.txn_id, room_id_, m.body, m.mime, m.media_size);
                 break;
         }
 }

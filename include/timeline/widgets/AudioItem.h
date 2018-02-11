@@ -48,8 +48,8 @@ public:
 
         AudioItem(QSharedPointer<MatrixClient> client,
                   const QString &url,
-                  const QSharedPointer<QIODevice> data,
                   const QString &filename,
+                  const qint64 size,
                   QWidget *parent = nullptr);
 
         QSize sizeHint() const override;

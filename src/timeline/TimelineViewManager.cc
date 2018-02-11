@@ -90,9 +90,10 @@ TimelineViewManager::queueEmoteMessage(const QString &msg)
 
 void
 TimelineViewManager::queueImageMessage(const QString &roomid,
-                                       const QSharedPointer<QIODevice> data,
                                        const QString &filename,
-                                       const QString &url)
+                                       const QString &url,
+                                       const QString &mime,
+                                       const qint64 size)
 {
         if (!timelineViewExists(roomid)) {
                 qDebug() << "Cannot send m.image message to a non-managed view";
@@ -101,14 +102,15 @@ TimelineViewManager::queueImageMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<ImageItem, mtx::events::MessageType::Image>(url, filename, data);
+        view->addUserMessage<ImageItem, mtx::events::MessageType::Image>(url, filename, mime, size);
 }
 
 void
 TimelineViewManager::queueFileMessage(const QString &roomid,
-                                      const QSharedPointer<QIODevice> data,
                                       const QString &filename,
-                                      const QString &url)
+                                      const QString &url,
+                                      const QString &mime,
+                                      const qint64 size)
 {
         if (!timelineViewExists(roomid)) {
                 qDebug() << "Cannot send m.file message to a non-managed view";
@@ -117,14 +119,15 @@ TimelineViewManager::queueFileMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<FileItem, mtx::events::MessageType::File>(url, filename, data);
+        view->addUserMessage<FileItem, mtx::events::MessageType::File>(url, filename, mime, size);
 }
 
 void
 TimelineViewManager::queueAudioMessage(const QString &roomid,
-                                       const QSharedPointer<QIODevice> data,
                                        const QString &filename,
-                                       const QString &url)
+                                       const QString &url,
+                                       const QString &mime,
+                                       const qint64 size)
 {
         if (!timelineViewExists(roomid)) {
                 qDebug() << "Cannot send m.audio message to a non-managed view";
@@ -133,14 +136,15 @@ TimelineViewManager::queueAudioMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<AudioItem, mtx::events::MessageType::Audio>(url, filename, data);
+        view->addUserMessage<AudioItem, mtx::events::MessageType::Audio>(url, filename, mime, size);
 }
 
 void
 TimelineViewManager::queueVideoMessage(const QString &roomid,
-                                       const QSharedPointer<QIODevice> data,
                                        const QString &filename,
-                                       const QString &url)
+                                       const QString &url,
+                                       const QString &mime,
+                                       const qint64 size)
 {
         if (!timelineViewExists(roomid)) {
                 qDebug() << "Cannot send m.video message to a non-managed view";
@@ -149,7 +153,7 @@ TimelineViewManager::queueVideoMessage(const QString &roomid,
 
         auto view = views_[roomid];
 
-        view->addUserMessage<VideoItem, mtx::events::MessageType::Video>(url, filename, data);
+        view->addUserMessage<VideoItem, mtx::events::MessageType::Video>(url, filename, mime, size);
 }
 
 void
