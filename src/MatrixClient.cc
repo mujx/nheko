@@ -281,7 +281,7 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
                               const QString &roomid,
                               const QString &msg,
                               const QString &mime,
-                              const qint64 media_size,
+                              const int64_t media_size,
                               const QString &url) noexcept
 {
         QUrlQuery query;
@@ -293,7 +293,7 @@ MatrixClient::sendRoomMessage(mtx::events::MessageType ty,
         endpoint.setQuery(query);
 
         QJsonObject body;
-        QJsonObject info = {{"size", media_size}, {"mimetype", mime}};
+        QJsonObject info = {{"size", static_cast<qint64>(media_size)}, {"mimetype", mime}};
 
         switch (ty) {
         case mtx::events::MessageType::Text:

@@ -38,7 +38,7 @@ public:
         VideoItem(QSharedPointer<MatrixClient> client,
                   const QString &url,
                   const QString &filename,
-                  const qint64 size,
+                  const int64_t size,
                   QWidget *parent = nullptr);
 
 private:

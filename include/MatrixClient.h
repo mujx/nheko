@@ -40,7 +40,7 @@ public:
                              const QString &roomid,
                              const QString &msg,
                              const QString &mime,
-                             const qint64 media_size,
+                             const int64_t media_size,
                              const QString &url = "") noexcept;
         void login(const QString &username, const QString &password) noexcept;
         void registerUser(const QString &username,
@@ -115,22 +115,22 @@ signals:
                            const QString &filename,
                            const QString &url,
                            const QString &mime,
-                           const qint64 size);
+                           const int64_t size);
         void fileUploaded(const QString &roomid,
                           const QString &filename,
                           const QString &url,
                           const QString &mime,
-                          const qint64 size);
+                          const int64_t size);
         void audioUploaded(const QString &roomid,
                            const QString &filename,
                            const QString &url,
                            const QString &mime,
-                           const qint64 size);
+                           const int64_t size);
         void videoUploaded(const QString &roomid,
                            const QString &filename,
                            const QString &url,
                            const QString &mime,
-                           const qint64 size);
+                           const int64_t size);
         void roomAvatarRetrieved(const QString &roomid,
                                  const QPixmap &img,
                                  const QString &url,

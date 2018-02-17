@@ -78,7 +78,7 @@ FileItem::FileItem(QSharedPointer<MatrixClient> client,
 FileItem::FileItem(QSharedPointer<MatrixClient> client,
                    const QString &url,
                    const QString &filename,
-                   const qint64 size,
+                   const int64_t size,
                    QWidget *parent)
   : QWidget(parent)
   , url_{url}
