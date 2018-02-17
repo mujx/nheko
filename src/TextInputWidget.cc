@@ -165,7 +165,7 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
                         qWarning()
                           << "Clipboard does not contain any valid file paths:" << source->urls();
                 }
-        } else if ((source->hasText() || source->hasFormat("x-special/gnome-copied-files")) &&
+        } else if (source->hasFormat("x-special/gnome-copied-files") &&
                    QFileInfo{source->text()}.exists()) {
                 // Generic file for any platform.
                 // Special case for X11 users. See "Notes for X11 Users" in source.
