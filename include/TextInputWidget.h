@@ -55,10 +55,10 @@ signals:
         void stoppedTyping();
         void message(QString);
         void command(QString name, QString args);
-        void image(const QSharedPointer<QIODevice> data, const QString &filename);
-        void audio(const QSharedPointer<QIODevice> data, const QString &filename);
-        void video(const QSharedPointer<QIODevice> data, const QString &filename);
-        void file(const QSharedPointer<QIODevice> data, const QString &filename);
+        void image(QSharedPointer<QIODevice> data, const QString &filename);
+        void audio(QSharedPointer<QIODevice> data, const QString &filename);
+        void video(QSharedPointer<QIODevice> data, const QString &filename);
+        void file(QSharedPointer<QIODevice> data, const QString &filename);
 
 protected:
         void keyPressEvent(QKeyEvent *event) override;
