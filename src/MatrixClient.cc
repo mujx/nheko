@@ -1229,7 +1229,7 @@ MatrixClient::getUploadReply(QNetworkReply *reply)
         if (!object.contains("content_uri")) {
                 qDebug() << "Media upload: Missing content_uri key";
                 qDebug() << object;
-                return object;
+                return QJsonObject{};
         }
 
         return object;
