@@ -140,18 +140,37 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
         const auto audio   = formats.filter("audio/", Qt::CaseInsensitive);
         const auto video   = formats.filter("video/", Qt::CaseInsensitive);
 
-        if (source->hasImage()) {
+        if (!image.empty()) {
                 showPreview(source, image);
-        } else if (source->hasFormat("x-special/gnome-copied-files") ||
+        } else if (!audio.empty()) {
+                showPreview(source, audio);
+        } else if (!video.empty()) {
+                showPreview(source, video);
+        } else if (source->hasUrls()) {
+                QString path;
+                if (QFileInfo{source->text()}.exists()) {
+                        path = source->text();
+                } else {
+                        for (auto &&u : source->urls()) {
+                                if (u.isLocalFile()) {
+                                        path = u.toLocalFile();
+                                        break;
+                                }
+                        }
+                }
+
+                if (!path.isEmpty() && QFileInfo{path}.exists()) {
+                        previewDialog_.setPreview(path);
+                } else {
+                        qWarning()
+                          << "Clipboard does not contain any valid file paths:" << source->urls();
+                }
+        } else if ((source->hasText() || source->hasFormat("x-special/gnome-copied-files")) &&
                    QFileInfo{source->text()}.exists()) {
                 // Generic file for any platform.
                 // Special case for X11 users. See "Notes for X11 Users" in source.
                 // Source: http://doc.qt.io/qt-5/qclipboard.html
                 previewDialog_.setPreview(source->text());
-        } else if (!audio.empty()) {
-                showPreview(source, audio);
-        } else if (!video.empty()) {
-                showPreview(source, video);
         } else {
                 QTextEdit::insertFromMimeData(source);
         }
