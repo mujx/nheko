@@ -121,13 +121,13 @@ PreviewUploadOverlay::setPreview(const QByteArray data, const QString &mime)
                 }
                 isImage_ = true;
         } else {
-                auto const info = QString{"Media type: %1\n"
-                                          "Media size: %2\n"}
+                auto const info = QString{tr("Media type: %1\n"
+                                             "Media size: %2\n")}
                                     .arg(mime)
                                     .arg(utils::humanReadableFileSize(data.size()));
 
                 titleLabel_.setText(QString{tr(DEFAULT)}.arg("file"));
-                infoLabel_.setText(tr(info.toLocal8Bit()));
+                infoLabel_.setText(info);
         }
 
         init();
@@ -168,13 +168,13 @@ PreviewUploadOverlay::setPreview(const QString &path)
                 }
                 isImage_ = true;
         } else {
-                auto const info = QString{"Media type: %1\n"
-                                          "Media size: %2\n"}
+                auto const info = QString{tr("Media type: %1\n"
+                                             "Media size: %2\n")}
                                     .arg(mime.name())
                                     .arg(utils::humanReadableFileSize(file.size()));
 
                 titleLabel_.setText(QString{tr(DEFAULT)}.arg("file"));
-                infoLabel_.setText(tr(info.toLocal8Bit()));
+                infoLabel_.setText(info);
         }
 
         init();
