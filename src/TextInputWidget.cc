@@ -275,6 +275,8 @@ FilteredTextEdit::uploadData(const QByteArray data, const QString &media, const 
         QSharedPointer<QBuffer> buffer{new QBuffer{this}};
         buffer->setData(data);
 
+        emit startedUpload();
+
         if (media == "image")
                 emit image(buffer, filename);
         else if (media == "audio")
@@ -374,6 +376,9 @@ TextInputWidget::TextInputWidget(QWidget *parent)
         connect(input_, &FilteredTextEdit::startedTyping, this, &TextInputWidget::startedTyping);
 
         connect(input_, &FilteredTextEdit::stoppedTyping, this, &TextInputWidget::stoppedTyping);
+
+        connect(
+          input_, &FilteredTextEdit::startedUpload, this, &TextInputWidget::showUploadSpinner);
 }
 
 void

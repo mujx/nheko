@@ -53,6 +53,7 @@ signals:
         void heightChanged(int height);
         void startedTyping();
         void stoppedTyping();
+        void startedUpload();
         void message(QString);
         void command(QString name, QString args);
         void image(QSharedPointer<QIODevice> data, const QString &filename);
