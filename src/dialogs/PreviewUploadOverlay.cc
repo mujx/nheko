@@ -103,16 +103,8 @@ PreviewUploadOverlay::init()
 }
 
 void
-PreviewUploadOverlay::setPreview(const QByteArray data, const QString &mime)
+PreviewUploadOverlay::setLabels(const QString &type, const QString &mime, const int upload_size)
 {
-        auto const &split = mime.split('/');
-        auto const &type  = split[1];
-
-        data_      = data;
-        mediaType_ = split[0];
-        filePath_  = "clipboard." + type;
-        isImage_   = false;
-
         if (mediaType_ == "image") {
                 if (!image_.loadFromData(data_)) {
                         titleLabel_.setText(QString{tr(ERROR)}.arg(type));
@@ -124,12 +116,25 @@ PreviewUploadOverlay::setPreview(const QByteArray data, const QString &mime)
                 auto const info = QString{tr("Media type: %1\n"
                                              "Media size: %2\n")}
                                     .arg(mime)
-                                    .arg(utils::humanReadableFileSize(data.size()));
+                                    .arg(utils::humanReadableFileSize(upload_size));
 
                 titleLabel_.setText(QString{tr(DEFAULT)}.arg("file"));
                 infoLabel_.setText(info);
         }
+}
 
+void
+PreviewUploadOverlay::setPreview(const QByteArray data, const QString &mime)
+{
+        auto const &split = mime.split('/');
+        auto const &type  = split[1];
+
+        data_      = data;
+        mediaType_ = split[0];
+        filePath_  = "clipboard." + type;
+        isImage_   = false;
+
+        setLabels(type, mime, data_.size());
         init();
 }
 
@@ -160,22 +165,6 @@ PreviewUploadOverlay::setPreview(const QString &path)
         filePath_  = file.fileName();
         isImage_   = false;
 
-        if (mediaType_ == "image") {
-                if (!image_.loadFromData(data_)) {
-                        titleLabel_.setText(QString{tr(ERROR)}.arg(split[1]));
-                } else {
-                        titleLabel_.setText(QString{tr(DEFAULT)}.arg("image"));
-                }
-                isImage_ = true;
-        } else {
-                auto const info = QString{tr("Media type: %1\n"
-                                             "Media size: %2\n")}
-                                    .arg(mime.name())
-                                    .arg(utils::humanReadableFileSize(file.size()));
-
-                titleLabel_.setText(QString{tr(DEFAULT)}.arg("file"));
-                infoLabel_.setText(info);
-        }
-
+        setLabels(split[1], mime.name(), data_.size());
         init();
 }
