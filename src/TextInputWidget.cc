@@ -147,15 +147,12 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
         } else if (!video.empty()) {
                 showPreview(source, video);
         } else if (source->hasUrls()) {
+                // Generic file path for any platform.
                 QString path;
-                if (QFileInfo{source->text()}.exists()) {
-                        path = source->text();
-                } else {
-                        for (auto &&u : source->urls()) {
-                                if (u.isLocalFile()) {
-                                        path = u.toLocalFile();
-                                        break;
-                                }
+                for (auto &&u : source->urls()) {
+                        if (u.isLocalFile()) {
+                                path = u.toLocalFile();
+                                break;
                         }
                 }
 
@@ -165,9 +162,7 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
                         qWarning()
                           << "Clipboard does not contain any valid file paths:" << source->urls();
                 }
-        } else if (source->hasFormat("x-special/gnome-copied-files") &&
-                   QFileInfo{source->text()}.exists()) {
-                // Generic file for any platform.
+        } else if (source->hasFormat("x-special/gnome-copied-files")) {
                 // Special case for X11 users. See "Notes for X11 Users" in source.
                 // Source: http://doc.qt.io/qt-5/qclipboard.html
                 previewDialog_.setPreview(source->text());
