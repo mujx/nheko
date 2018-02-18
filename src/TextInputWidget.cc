@@ -165,7 +165,35 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
         } else if (source->hasFormat("x-special/gnome-copied-files")) {
                 // Special case for X11 users. See "Notes for X11 Users" in source.
                 // Source: http://doc.qt.io/qt-5/qclipboard.html
-                previewDialog_.setPreview(source->text());
+
+                // This MIME type returns a string with multiple lines separated by '\n'. The first
+                // line is the command to perform with the clipboard (not useful to us). The
+                // following lines are the file URIs.
+                //
+                // Source: the nautilus source code in file 'src/nautilus-clipboard.c' in function
+                // nautilus_clipboard_get_uri_list_from_selection_data()
+                // https://github.com/GNOME/nautilus/blob/master/src/nautilus-clipboard.c
+
+                auto data = source->data("x-special/gnome-copied-files").split('\n');
+                if (data.size() < 2) {
+                        qWarning() << "MIME format is malformed, cannot perform paste.";
+                        return;
+                }
+
+                QString path;
+                for (int i = 1; i < data.size(); ++i) {
+                        QUrl url{data[i]};
+                        if (url.isLocalFile()) {
+                                path = url.toLocalFile();
+                                break;
+                        }
+                }
+
+                if (!path.isEmpty()) {
+                        previewDialog_.setPreview(path);
+                } else {
+                        qWarning() << "Clipboard does not contain any valid file paths:" << data;
+                }
         } else {
                 QTextEdit::insertFromMimeData(source);
         }
