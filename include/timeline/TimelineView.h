@@ -65,8 +65,7 @@ struct PendingMessage
           , media_size(media_size)
           , event_id(event_id)
           , widget(widget)
-        {
-        }
+        {}
 };
 
 // In which place new TimelineItems should be inserted.
