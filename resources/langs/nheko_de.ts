@@ -16,7 +16,7 @@
     <message>
         <location filename="../../src/EmojiPanel.cc" line="126"/>
         <source>Food &amp; Drink</source>
-        <translation>Essen &amp; Tringen</translation>
+        <translation>Essen &amp; Trinken</translation>
     </message>
     <message>
         <location filename="../../src/EmojiPanel.cc" line="129"/>
@@ -54,7 +54,7 @@
     <message>
         <location filename="../../src/LoginPage.cc" line="88"/>
         <source>e.g @joe:matrix.org</source>
-        <translation>z.B. @joe:matrix.org</translation>
+        <translation>z.&thinsp;B. @joe:matrix.org</translation>
     </message>
     <message>
         <location filename="../../src/LoginPage.cc" line="92"/>
@@ -174,7 +174,7 @@
     <message>
         <location filename="../../src/WelcomePage.cc" line="38"/>
         <source>Welcome to nheko! The desktop client for the Matrix protocol.</source>
-        <translation>Willkommen bei nheko - dem Desktop-Client für das Matrix-Protokoll.</translation>
+        <translation>Willkommen bei nheko! Dem Desktop-Client für das Matrix-Protokoll.</translation>
     </message>
     <message>
         <location filename="../../src/WelcomePage.cc" line="39"/>
