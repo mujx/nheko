@@ -107,7 +107,7 @@ SuggestionsPopup::addUsers(const QVector<SearchResult> &users)
 }
 
 void
-SuggestionsPopup::cycle()
+SuggestionsPopup::cycleThroughSuggestions()
 {
         auto item = layout_->itemAt(tab_clicks_);
         if (!item) {
@@ -128,7 +128,18 @@ SuggestionsPopup::cycle()
         widget->setHovering(true);
 
         ++tab_clicks_;
-        emit itemCycled(TimelineViewManager::displayName(widget->user()));
 
         update(); // Request to update the paint event.
+}
+
+void
+SuggestionsPopup::selectHoveredSuggestion()
+{
+        // Each tab press increments the counter by one, so the element desired is one off.
+        const auto item = layout_->itemAt(tab_clicks_ - 1);
+        if (!item)
+                return;
+
+        const auto &widget = qobject_cast<PopupItem *>(item->widget());
+        emit itemSelected(TimelineViewManager::displayName(widget->user()));
 }

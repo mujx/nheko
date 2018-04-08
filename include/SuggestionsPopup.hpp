@@ -62,11 +62,11 @@ public:
 
 public slots:
         void addUsers(const QVector<SearchResult> &users);
-        void cycle();
+        void cycleThroughSuggestions();
+        void selectHoveredSuggestion();
 
 signals:
         void itemSelected(const QString &user);
-        void itemCycled(const QString &user);
 
 private:
         QVBoxLayout *layout_;
