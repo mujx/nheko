@@ -478,6 +478,8 @@ TextInputWidget::TextInputWidget(QWidget *parent)
 
                         if (items.size() >= MaxPopupItems)
                                 std::advance(end, MaxPopupItems);
+                        else if (items.size() > 0)
+                                std::advance(end, items.size());
 
                         for (auto it = items.begin(); it != end; it++) {
                                 const auto user = it->second;
