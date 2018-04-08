@@ -86,6 +86,18 @@ FilteredTextEdit::FilteredTextEdit(QWidget *parent)
                 cursor.insertText(text);
         });
 
+        // For cycling through the suggestions by hitting tab.
+        connect(this, &FilteredTextEdit::cycleSuggestions, &popup_, &SuggestionsPopup::cycle);
+        connect(&popup_, &SuggestionsPopup::itemCycled, this, [this](const QString &text) {
+                auto cursor   = textCursor();
+                const int end = cursor.position();
+
+                cursor.setPosition(atTriggerPosition_, QTextCursor::MoveAnchor);
+                cursor.setPosition(end, QTextCursor::KeepAnchor);
+                cursor.removeSelectedText();
+                cursor.insertText(text);
+        });
+
         previewDialog_.hide();
 }
 
@@ -132,6 +144,8 @@ FilteredTextEdit::keyPressEvent(QKeyEvent *event)
                 case Qt::Key_Return:
                 case Qt::Key_Escape:
                 case Qt::Key_Tab:
+                        emit cycleSuggestions();
+                        return;
                 case Qt::Key_Space:
                 case Qt::Key_Backtab: {
                         closeSuggestions();
