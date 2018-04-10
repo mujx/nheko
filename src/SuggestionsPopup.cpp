@@ -109,14 +109,7 @@ SuggestionsPopup::addUsers(const QVector<SearchResult> &users)
 void
 SuggestionsPopup::cycleThroughSuggestions()
 {
-        auto item = layout_->itemAt(tab_clicks_);
-        if (!item) {
-                tab_clicks_ = 0; // Start from the beginning again.
-                item        = layout_->itemAt(tab_clicks_);
-        }
-
-        if (!item)
-                return;
+        tab_clicks_ %= layout_->count(); // Stay within the number of items in layout.
 
         // Reset flag for hovering effect first.
         for (int i = 0; i < layout_->count(); ++i) {
@@ -124,6 +117,7 @@ SuggestionsPopup::cycleThroughSuggestions()
                 p->setHovering(false);
         }
 
+        const auto &item   = layout_->itemAt(tab_clicks_);
         const auto &widget = qobject_cast<PopupItem *>(item->widget());
         widget->setHovering(true);
 
