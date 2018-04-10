@@ -103,6 +103,8 @@ SuggestionsPopup::addUsers(const QVector<SearchResult> &users)
                 connect(user, &PopupItem::clicked, this, &SuggestionsPopup::itemSelected);
         }
 
+        tab_clicks_ = 0; // Reset to start from the beginning of pop-up window on next invocation.
+
         resize(geometry().width(), 40 * users.size());
 }
 
@@ -136,4 +138,6 @@ SuggestionsPopup::selectHoveredSuggestion()
 
         const auto &widget = qobject_cast<PopupItem *>(item->widget());
         emit itemSelected(TimelineViewManager::displayName(widget->user()));
+
+        tab_clicks_ = 0; // Reset to start from the beginning of pop-up window on next invocation.
 }
