@@ -16,7 +16,7 @@
     <message>
         <location filename="../../src/dialogs/CreateRoom.cc" line="46"/>
         <source>Topic</source>
-        <translation type="unfinished">Thema/Beschreibung</translation>
+        <translation>Thema</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/CreateRoom.cc" line="49"/>
@@ -26,12 +26,12 @@
     <message>
         <location filename="../../src/dialogs/CreateRoom.cc" line="57"/>
         <source>Room Visibility</source>
-        <translation>Raum Sichtbarkeit</translation>
+        <translation>Raumsichtbarkeit</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/CreateRoom.cc" line="66"/>
         <source>Room Preset</source>
-        <translation>Raum Vorlage</translation>
+        <translation>Raumvorlage</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/CreateRoom.cc" line="76"/>
@@ -75,7 +75,7 @@
     <message>
         <location filename="../../src/dialogs/LeaveRoom.cc" line="39"/>
         <source>Are you sure you want to leave?</source>
-        <translation></translation>
+        <translation>Bist du sicher, dass du den Raum verlassen willst?</translation>
     </message>
 </context>
 <context>
@@ -151,8 +151,8 @@
         <source>Media type: %1
 Media size: %2
 </source>
-        <translation>Medien Typ: %1
-Medien Größe: %2
+        <translation>Medien-Typ: %1
+Medien-Größe: %2
 </translation>
     </message>
 </context>
@@ -179,7 +179,7 @@ Medien Größe: %2
     <message>
         <location filename="../../src/dialogs/ReadReceipts.cc" line="92"/>
         <source>Read receipts</source>
-        <translation>Lese Bestätigungen</translation>
+        <translation>Lesebestätigungen</translation>
     </message>
 </context>
 <context>
