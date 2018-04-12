@@ -66,6 +66,7 @@ sudo apk add nheko
 - A compiler that supports C++11.
     - Clang 3.8 (or greater).
     - GCC 7 (or greater).
+- [json.hpp](https://github.com/nlohmann/json/blob/develop/single_include/nlohmann/json.hpp) from [Niels Lohmann's JSON library](https://github.com/nlohmann/).
 
 #### Linux 
 
