@@ -137,6 +137,7 @@ public slots:
         void openFileSelection();
         void hideUploadSpinner();
         void focusLineEdit() { input_->setFocus(); }
+        void setEditText(const QString &text) { input_->setText(text); }
 
 private slots:
         void addSelectedEmoji(const QString &emoji);

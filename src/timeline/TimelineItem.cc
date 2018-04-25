@@ -52,7 +52,7 @@ TimelineItem::init()
         contextMenu_      = new QMenu(this);
         showReadReceipts_ = new QAction("Read receipts", this);
         markAsRead_       = new QAction("Mark as read", this);
-        redactMsg_        = new QAction("Redact message", this);
+        redactMsg_        = new QAction("Delete message", this);
         contextMenu_->addAction(showReadReceipts_);
         contextMenu_->addAction(markAsRead_);
         contextMenu_->addAction(redactMsg_);
@@ -64,7 +64,7 @@ TimelineItem::init()
 
         connect(redactMsg_, &QAction::triggered, this, [this]() {
                 if (!event_id_.isEmpty())
-                        ChatPage::instance()->redactEvent(room_id_, event_id_);
+                        ChatPage::instance()->deleteEvent(room_id_, event_id_);
         });
 
         connect(markAsRead_, &QAction::triggered, this, [this]() { sendReadReceipt(); });
@@ -140,6 +140,8 @@ TimelineItem::TimelineItem(mtx::events::MessageType ty,
         messageLayout_->addWidget(checkmark_);
         messageLayout_->addWidget(timestamp_);
         mainLayout_->addLayout(messageLayout_);
+
+        addEditTextAction();
 }
 
 TimelineItem::TimelineItem(ImageItem *image,
@@ -295,6 +297,8 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Notice
         messageLayout_->addWidget(checkmark_);
         messageLayout_->addWidget(timestamp_);
         mainLayout_->addLayout(messageLayout_);
+
+        addEditTextAction();
 }
 
 /*
@@ -342,6 +346,8 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Emote>
         messageLayout_->addWidget(checkmark_);
         messageLayout_->addWidget(timestamp_);
         mainLayout_->addLayout(messageLayout_);
+
+        addEditTextAction();
 }
 
 /*
@@ -394,6 +400,8 @@ TimelineItem::TimelineItem(const mtx::events::RoomEvent<mtx::events::msg::Text> 
         messageLayout_->addWidget(checkmark_);
         messageLayout_->addWidget(timestamp_);
         mainLayout_->addLayout(messageLayout_);
+
+        addEditTextAction();
 }
 
 void
@@ -549,6 +557,20 @@ TimelineItem::addSaveImageAction(ImageItem *image)
 
                 connect(saveImage, &QAction::triggered, image, &ImageItem::saveAs);
         }
+}
+
+void
+TimelineItem::addEditTextAction()
+{
+    if (contextMenu_) {
+            auto editMsg_ = new QAction("Edit message", this);
+            contextMenu_->insertAction(redactMsg_, editMsg_);
+
+            connect(editMsg_, &QAction::triggered, this, [this]() {
+                if (!event_id_.isEmpty())
+                        ChatPage::instance()->editEvent(room_id_, event_id_, body_->text());
+            });
+    }
 }
 
 void
