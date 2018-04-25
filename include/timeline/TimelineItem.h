@@ -159,7 +159,7 @@ private:
         QMenu *contextMenu_;
         QAction *showReadReceipts_;
         QAction *markAsRead_;
-        QAction *redactMsg_;
+        QAction *deleteMsg_;
         QAction *editMsg_;
 
         QHBoxLayout *topLayout_     = nullptr;

@@ -52,17 +52,17 @@ TimelineItem::init()
         contextMenu_      = new QMenu(this);
         showReadReceipts_ = new QAction("Read receipts", this);
         markAsRead_       = new QAction("Mark as read", this);
-        redactMsg_        = new QAction("Delete message", this);
+        deleteMsg_        = new QAction("Delete message", this);
         contextMenu_->addAction(showReadReceipts_);
         contextMenu_->addAction(markAsRead_);
-        contextMenu_->addAction(redactMsg_);
+        contextMenu_->addAction(deleteMsg_);
 
         connect(showReadReceipts_, &QAction::triggered, this, [this]() {
                 if (!event_id_.isEmpty())
                         ChatPage::instance()->showReadReceipts(event_id_);
         });
 
-        connect(redactMsg_, &QAction::triggered, this, [this]() {
+        connect(deleteMsg_, &QAction::triggered, this, [this]() {
                 if (!event_id_.isEmpty())
                         ChatPage::instance()->deleteEvent(room_id_, event_id_);
         });
@@ -564,7 +564,7 @@ TimelineItem::addEditTextAction()
 {
     if (contextMenu_) {
             auto editMsg_ = new QAction("Edit message", this);
-            contextMenu_->insertAction(redactMsg_, editMsg_);
+            contextMenu_->insertAction(deleteMsg_, editMsg_);
 
             connect(editMsg_, &QAction::triggered, this, [this]() {
                 if (!event_id_.isEmpty())
