@@ -135,6 +135,8 @@ private:
         void init();
         //! Add a context menu option to save the image of the timeline item.
         void addSaveImageAction(ImageItem *image);
+        //! Add a context menu option to edit the text of the timeline item.
+        void addEditTextAction();
 
         template<class Widget>
         void setupLocalWidgetLayout(Widget *widget, const QString &userid, bool withSender);
@@ -158,7 +160,8 @@ private:
         QMenu *contextMenu_;
         QAction *showReadReceipts_;
         QAction *markAsRead_;
-        QAction *redactMsg_;
+        QAction *deleteMsg_;
+        QAction *editMsg_;
 
         QHBoxLayout *topLayout_     = nullptr;
         QHBoxLayout *messageLayout_ = nullptr;

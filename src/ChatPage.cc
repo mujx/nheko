@@ -339,6 +339,10 @@ ChatPage::ChatPage(QSharedPointer<MatrixClient> client,
         connect(client_.data(), &MatrixClient::redactionFailed, this, [this](const QString &error) {
                 emit showNotification(QString("Message redaction failed: %1").arg(error));
         });
+        connect(client_.data(),
+                SIGNAL(editText(const QString &)),
+                text_input_,
+                SLOT(setEditText(const QString &)));
 
         showContentTimer_ = new QTimer(this);
         showContentTimer_->setSingleShot(true);
