@@ -149,11 +149,12 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         startInTrayToggle_->setActiveColor(QColor("#38A3D8"));
         startInTrayToggle_->setInactiveColor(QColor("gray"));
         if (!settings_->isTrayEnabled())
-          startInTrayToggle_->setDisabled(true);
+                startInTrayToggle_->setDisabled(true);
         startInTrayLabel->setStyleSheet("font-size: 15px;");
 
         startInTrayOptionLayout_->addWidget(startInTrayLabel);
-        startInTrayOptionLayout_->addWidget(startInTrayToggle_, 0, Qt::AlignBottom | Qt::AlignRight);
+        startInTrayOptionLayout_->addWidget(
+          startInTrayToggle_, 0, Qt::AlignBottom | Qt::AlignRight);
 
         auto orderRoomLayout = new QHBoxLayout;
         orderRoomLayout->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -246,10 +247,9 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         connect(trayToggle_, &Toggle::toggled, this, [this](bool isDisabled) {
                 settings_->setTray(!isDisabled);
                 if (isDisabled) {
-                  startInTrayToggle_->setDisabled(true);
-                }
-                else {
-                  startInTrayToggle_->setEnabled(true);
+                        startInTrayToggle_->setDisabled(true);
+                } else {
+                        startInTrayToggle_->setEnabled(true);
                 }
                 emit trayOptionChanged(!isDisabled);
         });
