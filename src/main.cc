@@ -161,7 +161,8 @@ main(int argc, char *argv[])
         // Move the MainWindow to the center
         w.move(screenCenter(w.width(), w.height()));
 
-        if (settings.value("user/window/start_in_tray", true).toBool())
+        if (!settings.value("user/window/start_in_tray", false).toBool() ||
+            !settings.value("user/window/tray", true).toBool())
           w.show();
 
         QObject::connect(&app, &QApplication::aboutToQuit, &w, &MainWindow::saveCurrentWindowSize);

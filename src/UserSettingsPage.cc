@@ -37,7 +37,7 @@ UserSettings::load()
 {
         QSettings settings;
         isTrayEnabled_                = settings.value("user/window/tray", true).toBool();
-        isStartInTrayEnabled_         = settings.value("user/window/start_in_tray", true).toBool();
+        isStartInTrayEnabled_         = settings.value("user/window/start_in_tray", false).toBool();
         isOrderingEnabled_            = settings.value("user/room_ordering", true).toBool();
         isGroupViewEnabled_           = settings.value("user/group_view", true).toBool();
         isTypingNotificationsEnabled_ = settings.value("user/typing_notifications", true).toBool();
@@ -148,6 +148,8 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         startInTrayToggle_    = new Toggle(this);
         startInTrayToggle_->setActiveColor(QColor("#38A3D8"));
         startInTrayToggle_->setInactiveColor(QColor("gray"));
+        if (!settings_->isTrayEnabled())
+          startInTrayToggle_->setDisabled(true);
         startInTrayLabel->setStyleSheet("font-size: 15px;");
 
         startInTrayOptionLayout_->addWidget(startInTrayLabel);
@@ -243,6 +245,12 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
 
         connect(trayToggle_, &Toggle::toggled, this, [this](bool isDisabled) {
                 settings_->setTray(!isDisabled);
+                if (isDisabled) {
+                  startInTrayToggle_->setDisabled(true);
+                }
+                else {
+                  startInTrayToggle_->setEnabled(true);
+                }
                 emit trayOptionChanged(!isDisabled);
         });
 
@@ -279,6 +287,7 @@ UserSettingsPage::showEvent(QShowEvent *)
 
         // FIXME: Toggle treats true as "off"
         trayToggle_->setState(!settings_->isTrayEnabled());
+        startInTrayToggle_->setState(!settings_->isStartInTrayEnabled());
         roomOrderToggle_->setState(!settings_->isOrderingEnabled());
         groupViewToggle_->setState(!settings_->isGroupViewEnabled());
         typingNotifications_->setState(!settings_->isTypingNotificationsEnabled());
