@@ -32,5 +32,6 @@ if [ $TRAVIS_OS_NAME == linux ]; then
         qt${QT_PKG}svg \
         qt${QT_PKG}multimedia \
         cmake \
-        liblmdb-dev
+        liblmdb-dev \
+        libnotify-dev
 fi

@@ -22,7 +22,8 @@ RUN \
         cmake \
         clang-5.0 \
         clang-format-5.0 \
-        liblmdb-dev
+        liblmdb-dev \
+        libnotify-dev
 
 RUN apt-get install -y mesa-common-dev wget fuse git
 
