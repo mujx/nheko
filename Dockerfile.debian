@@ -15,7 +15,8 @@ RUN apt-get update -qq && \
         qtbase5-dev \
         qttools5-dev-tools \
         qttools5-dev \
-        qtmultimedia5-dev
+        qtmultimedia5-dev \
+        libnotify-dev
 
 RUN mkdir /build
 

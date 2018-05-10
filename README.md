@@ -89,7 +89,7 @@ Debian as the build host in an attempt to work around this [issue](https://githu
 ##### Arch Linux
 
 ```bash
-sudo pacman -S qt5-base qt5-tools qt5-multimedia qt5-svg cmake gcc fontconfig lmdb
+sudo pacman -S qt5-base qt5-tools qt5-multimedia qt5-svg cmake gcc fontconfig lmdb pkg-config libnotify
 ```
 
 ##### Gentoo Linux
