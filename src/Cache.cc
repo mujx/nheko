@@ -435,6 +435,8 @@ Cache::saveState(const mtx::responses::Sync &res)
                 updatedInfo.avatar_url =
                   getRoomAvatarUrl(txn, statesdb, membersdb, QString::fromStdString(room.first))
                     .toStdString();
+                updatedInfo.join_rule = getRoomJoinRules(txn, statesdb);
+                updatedInfo.guest_access = getRoomGuestAccess(txn, statesdb);
 
                 lmdb::dbi_put(
                   txn, roomsDb_, lmdb::val(room.first), lmdb::val(json(updatedInfo).dump()));
@@ -467,6 +469,8 @@ Cache::saveInvites(lmdb::txn &txn, const std::map<std::string, mtx::responses::I
                 updatedInfo.avatar_url =
                   getInviteRoomAvatarUrl(txn, statesdb, membersdb).toStdString();
                 updatedInfo.is_invite = true;
+                updatedInfo.join_rule = getRoomJoinRules(txn, statesdb);
+                updatedInfo.guest_access = getRoomGuestAccess(txn, statesdb);
 
                 lmdb::dbi_put(
                   txn, invitesDb_, lmdb::val(room.first), lmdb::val(json(updatedInfo).dump()));
@@ -584,12 +588,15 @@ Cache::getRoomInfo(const std::vector<std::string> &rooms)
 
         for (const auto &room : rooms) {
                 lmdb::val data;
+                auto statesdb  = getStatesDb(txn, room);
 
                 // Check if the room is joined.
                 if (lmdb::dbi_get(txn, roomsDb_, lmdb::val(room), data)) {
                         try {
                                 RoomInfo tmp = json::parse(std::string(data.data(), data.size()));
                                 tmp.member_count = getMembersDb(txn, room).size(txn);
+                                tmp.join_rule = getRoomJoinRules(txn, statesdb);
+                                tmp.guest_access = getRoomGuestAccess(txn, statesdb);
 
                                 room_info.emplace(QString::fromStdString(room), std::move(tmp));
                         } catch (const json::exception &e) {
@@ -604,6 +611,8 @@ Cache::getRoomInfo(const std::vector<std::string> &rooms)
                                         RoomInfo tmp =
                                           json::parse(std::string(data.data(), data.size()));
                                         tmp.member_count = getInviteMembersDb(txn, room).size(txn);
+                                        tmp.join_rule = getRoomJoinRules(txn, statesdb);
+                                        tmp.guest_access = getRoomGuestAccess(txn, statesdb);
 
                                         room_info.emplace(QString::fromStdString(room),
                                                           std::move(tmp));
@@ -803,6 +812,53 @@ Cache::getRoomName(lmdb::txn &txn, lmdb::dbi &statesdb, lmdb::dbi &membersdb)
                 return QString("%1 and %2 others").arg(first_member).arg(total);
 
         return "Empty Room";
+}
+
+JoinRule
+Cache::getRoomJoinRules(lmdb::txn &txn, lmdb::dbi &statesdb)
+{
+        using namespace mtx::events;
+        using namespace mtx::events::state;
+
+        lmdb::val event;
+        bool res = lmdb::dbi_get(
+          txn, statesdb, lmdb::val(to_string(mtx::events::EventType::RoomJoinRules)), event);
+
+        if (res) {
+                try {
+                        StateEvent<JoinRules> msg = json::parse(std::string(event.data(), event.size()));
+                        return msg.content.join_rule;
+                }
+                catch (const json::exception &e) {
+                        qWarning() << QString::fromStdString(e.what());
+                }
+        }
+        return JoinRule::Knock;
+}
+
+bool
+Cache::getRoomGuestAccess(lmdb::txn &txn, lmdb::dbi &statesdb)
+{
+        using namespace mtx::events;
+        using namespace mtx::events::state;
+
+        lmdb::val event;
+        bool res = lmdb::dbi_get(
+          txn, statesdb, lmdb::val(to_string(mtx::events::EventType::RoomGuestAccess)), event);
+
+        if (res) {
+                try {
+                        StateEvent<GuestAccess> msg = json::parse(std::string(event.data(), event.size()));
+                        if (msg.content.guest_access == AccessState::CanJoin)
+                                return true;
+                        else
+                                return false;
+                }
+                catch (const json::exception &e) {
+                        qWarning() << QString::fromStdString(e.what());
+                }
+        }
+        return false;
 }
 
 QString

@@ -23,6 +23,8 @@
 #include <json.hpp>
 #include <lmdb++.h>
 #include <mtx/responses.hpp>
+#include <mtx/events/join_rules.hpp>
+using mtx::events::state::JoinRule;
 
 struct RoomMember
 {
@@ -74,6 +76,9 @@ struct RoomInfo
         bool is_invite = false;
         //! Total number of members in the room.
         int16_t member_count = 0;
+        //! Who can access to the room.
+        JoinRule join_rule = JoinRule::Public;
+        bool guest_access = false;
 };
 
 inline void
@@ -164,6 +169,9 @@ public:
 
         //! Calculate & return the name of the room.
         QString getRoomName(lmdb::txn &txn, lmdb::dbi &statesdb, lmdb::dbi &membersdb);
+        //! Get room join rules
+        JoinRule getRoomJoinRules(lmdb::txn &txn, lmdb::dbi &statesdb);
+        bool getRoomGuestAccess(lmdb::txn &txn, lmdb::dbi &statesdb);
         //! Retrieve the topic of the room if any.
         QString getRoomTopic(lmdb::txn &txn, lmdb::dbi &statesdb);
         //! Retrieve the room avatar's url if any.
