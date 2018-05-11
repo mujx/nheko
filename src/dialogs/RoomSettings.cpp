@@ -22,8 +22,7 @@ RoomSettings::RoomSettings(const QString &room_id, QWidget *parent)
         setMaximumWidth(385);
 
         try {
-                auto res = cache::client()->getRoomInfo({room_id_.toStdString()});
-                info_    = res[room_id_];
+                info_ = cache::client()->singleRoomInfo(room_id_.toStdString());
 
                 setAvatar(QImage::fromData(cache::client()->image(info_.avatar_url)));
         } catch (const lmdb::error &e) {
