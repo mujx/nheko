@@ -22,8 +22,8 @@
 #include <QImage>
 #include <json.hpp>
 #include <lmdb++.h>
-#include <mtx/responses.hpp>
 #include <mtx/events/join_rules.hpp>
+#include <mtx/responses.hpp>
 using mtx::events::state::JoinRule;
 
 struct RoomMember
@@ -78,7 +78,7 @@ struct RoomInfo
         int16_t member_count = 0;
         //! Who can access to the room.
         JoinRule join_rule = JoinRule::Public;
-        bool guest_access = false;
+        bool guest_access  = false;
 };
 
 inline void

@@ -550,8 +550,8 @@ Cache::roomsWithStateUpdates(const mtx::responses::Sync &res)
 RoomInfo
 Cache::singleRoomInfo(const std::string &room_id)
 {
-        auto txn = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
-        auto statesdb  = getStatesDb(txn, room_id);
+        auto txn      = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
+        auto statesdb = getStatesDb(txn, room_id);
 
         lmdb::val data;
 
@@ -560,7 +560,7 @@ Cache::singleRoomInfo(const std::string &room_id)
                 try {
                         RoomInfo tmp     = json::parse(std::string(data.data(), data.size()));
                         tmp.member_count = getMembersDb(txn, room_id).size(txn);
-                        tmp.join_rule = getRoomJoinRule(txn, statesdb);
+                        tmp.join_rule    = getRoomJoinRule(txn, statesdb);
                         tmp.guest_access = getRoomGuestAccess(txn, statesdb);
 
                         txn.commit();
@@ -587,14 +587,14 @@ Cache::getRoomInfo(const std::vector<std::string> &rooms)
 
         for (const auto &room : rooms) {
                 lmdb::val data;
-                auto statesdb  = getStatesDb(txn, room);
+                auto statesdb = getStatesDb(txn, room);
 
                 // Check if the room is joined.
                 if (lmdb::dbi_get(txn, roomsDb_, lmdb::val(room), data)) {
                         try {
                                 RoomInfo tmp = json::parse(std::string(data.data(), data.size()));
                                 tmp.member_count = getMembersDb(txn, room).size(txn);
-                                tmp.join_rule = getRoomJoinRule(txn, statesdb);
+                                tmp.join_rule    = getRoomJoinRule(txn, statesdb);
                                 tmp.guest_access = getRoomGuestAccess(txn, statesdb);
 
                                 room_info.emplace(QString::fromStdString(room), std::move(tmp));
@@ -823,7 +823,8 @@ Cache::getRoomJoinRule(lmdb::txn &txn, lmdb::dbi &statesdb)
 
         if (res) {
                 try {
-                        StateEvent<JoinRules> msg = json::parse(std::string(event.data(), event.size()));
+                        StateEvent<JoinRules> msg =
+                          json::parse(std::string(event.data(), event.size()));
                         return msg.content.join_rule;
                 }
                 catch (const json::exception &e) {
@@ -845,10 +846,10 @@ Cache::getRoomGuestAccess(lmdb::txn &txn, lmdb::dbi &statesdb)
 
         if (res) {
                 try {
-                        StateEvent<GuestAccess> msg = json::parse(std::string(event.data(), event.size()));
+                        StateEvent<GuestAccess> msg =
+                          json::parse(std::string(event.data(), event.size()));
                         return msg.content.guest_access == AccessState::CanJoin;
-                }
-                catch (const json::exception &e) {
+                } catch (const json::exception &e) {
                         qWarning() << e.what();
                 }
         }
