@@ -64,17 +64,25 @@ RoomSettings::RoomSettings(const QString &room_id, QWidget *parent)
         accessCombo = new QComboBox(this);
         accessCombo->addItem(tr("Anyone and guests"));
         accessCombo->addItem(tr("Anyone"));
-        accessCombo->addItem(tr("Inviteds"));
+        accessCombo->addItem(tr("Invited users"));
         accessCombo->setDisabled(true);
         accessLabel->setStyleSheet("font-size: 15px;");
 
         if(info_.join_rule == JoinRule::Public)
+        {
                 if(info_.guest_access)
+                {
                         accessCombo->setCurrentIndex(0);
+                }
                 else
+                {
                         accessCombo->setCurrentIndex(1);
+                }
+        }
         else
+        {
                 accessCombo->setCurrentIndex(2);
+        }
 
         accessOptionLayout->addWidget(accessLabel);
         accessOptionLayout->addWidget(accessCombo);
