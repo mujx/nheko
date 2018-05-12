@@ -826,8 +826,7 @@ Cache::getRoomJoinRule(lmdb::txn &txn, lmdb::dbi &statesdb)
                         StateEvent<JoinRules> msg =
                           json::parse(std::string(event.data(), event.size()));
                         return msg.content.join_rule;
-                }
-                catch (const json::exception &e) {
+                } catch (const json::exception &e) {
                         qWarning() << e.what();
                 }
         }
