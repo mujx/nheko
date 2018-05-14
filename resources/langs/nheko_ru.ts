@@ -48,7 +48,7 @@
     <message>
         <location line="+1"/>
         <source>e.g @joe:matrix.org</source>
-        <translation>Например @joe:matrix.org</translation>
+        <translation>Пример: @joe:matrix.org</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -58,7 +58,7 @@
     <message>
         <location line="+19"/>
         <source>LOGIN</source>
-        <translation>ЛОГИН</translation>
+        <translation>ВОЙТИ</translation>
     </message>
     <message>
         <location line="+128"/>
@@ -181,7 +181,7 @@
     <message>
         <location filename="../../src/SideBarActions.cc" line="+36"/>
         <source>Create new room</source>
-        <translation>Созданть новую комнату</translation>
+        <translation>Создать новую комнату</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -194,7 +194,7 @@
     <message>
         <location filename="../../src/TextInputWidget.cc" line="+445"/>
         <source>Write a message...</source>
-        <translation>Пишет сообщение...</translation>
+        <translation>Написать сообщение...</translation>
     </message>
     <message>
         <location line="+108"/>
@@ -261,7 +261,7 @@
     <message>
         <location filename="../../src/UserSettingsPage.cc" line="+121"/>
         <source>User Settings</source>
-        <translation>Настройки пользователя</translation>
+        <translation>Пользовательские настройки</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -309,22 +309,22 @@
     <message>
         <location filename="../../src/WelcomePage.cc" line="+44"/>
         <source>Welcome to nheko! The desktop client for the Matrix protocol.</source>
-        <translation>Добро пожаловать в nheko, клиент для протокола Matrix!</translation>
+        <translation>Добро пожаловать в nheko, клиент протокола Matrix!</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Enjoy your stay!</source>
-        <translation>Приятного времяпрепровождения!</translation>
+        <translation>Хорошо провести время!</translation>
     </message>
     <message>
         <location line="+19"/>
         <source>REGISTER</source>
-        <translation>ЗАРЕГИСТРИРОВАН</translation>
+        <translation>РЕГИСТРАЦИЯ</translation>
     </message>
     <message>
         <location line="+6"/>
         <source>LOGIN</source>
-        <translation>ВОШЁЛ</translation>
+        <translation>ВХОД</translation>
     </message>
 </context>
 <context>
@@ -375,7 +375,7 @@
     <message>
         <location line="+11"/>
         <source>User ID to invite</source>
-        <translation>Идентификатор пользователя для приглашения</translation>
+        <translation>Идентификатор пользователя</translation>
     </message>
 </context>
 <context>
