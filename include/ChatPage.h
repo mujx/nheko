@@ -30,7 +30,6 @@
 
 #include <mtx.hpp>
 
-class MatrixClient;
 class OverlayModal;
 class QuickSwitcher;
 class RoomList;
@@ -59,9 +58,7 @@ class ChatPage : public QWidget
         Q_OBJECT
 
 public:
-        ChatPage(QSharedPointer<MatrixClient> client,
-                 QSharedPointer<UserSettings> userSettings,
-                 QWidget *parent = 0);
+        ChatPage(QSharedPointer<UserSettings> userSettings, QWidget *parent = 0);
 
         // Initialize all the components of the UI.
         void bootstrap(QString userid, QString homeserver, QString token);
@@ -70,17 +67,8 @@ public:
         QString currentRoom() const { return current_room_; }
 
         static ChatPage *instance() { return instance_; }
-        void readEvent(const QString &room_id, const QString &event_id)
-        {
-                client_->readEvent(room_id, event_id);
-        }
-        void redactEvent(const QString &room_id, const QString &event_id)
-        {
-                client_->redactEvent(room_id, event_id);
-        }
 
         QSharedPointer<UserSettings> userSettings() { return userSettings_; }
-        QSharedPointer<Cache> cache() { return cache_; }
         void deleteConfigs();
 
 signals:
@@ -117,6 +105,12 @@ private slots:
 private:
         static ChatPage *instance_;
 
+        //! Check if the given room is currently open.
+        bool isRoomActive(const QString &room_id)
+        {
+                return isActiveWindow() && currentRoom() == room_id;
+        }
+
         using UserID      = QString;
         using Membership  = mtx::events::StateEvent<mtx::events::state::Member>;
         using Memberships = std::map<std::string, Membership>;
@@ -136,6 +130,8 @@ private:
 
         //! Update the room with the new notification count.
         void updateRoomNotificationCount(const QString &room_id, uint16_t notification_count);
+        //! Send desktop notification for the received messages.
+        void sendDesktopNotifications(const mtx::responses::Notifications &);
 
         QStringList generateTypingUsers(const QString &room_id,
                                         const std::vector<std::string> &typing_users);
@@ -184,14 +180,8 @@ private:
         QSharedPointer<dialogs::ReadReceipts> receiptsDialog_;
         QSharedPointer<OverlayModal> receiptsModal_;
 
-        // Matrix Client API provider.
-        QSharedPointer<MatrixClient> client_;
-
         // Global user settings.
         QSharedPointer<UserSettings> userSettings_;
-
-        // LMDB wrapper.
-        QSharedPointer<Cache> cache_;
 };
 
 template<class Collection>

@@ -15,18 +15,32 @@
 
 using namespace dialogs;
 
-RoomSettings::RoomSettings(const QString &room_id, QSharedPointer<Cache> cache, QWidget *parent)
+TopSection::TopSection(const RoomInfo &info, const QImage &img, QWidget *parent)
+  : QWidget{parent}
+  , info_{std::move(info)}
+{
+        textColor_ = palette().color(QPalette::Text);
+        avatar_    = utils::scaleImageToPixmap(img, AvatarSize);
+}
+
+QSize
+TopSection::sizeHint() const
+{
+        QFont font;
+        font.setPixelSize(18);
+        return QSize(200, AvatarSize + QFontMetrics(font).ascent() + 6 * Padding);
+}
+
+RoomSettings::RoomSettings(const QString &room_id, QWidget *parent)
   : QFrame(parent)
-  , cache_{cache}
   , room_id_{std::move(room_id)}
 {
         setMaximumWidth(385);
 
         try {
-                auto res = cache_->getRoomInfo({room_id_.toStdString()});
-                info_    = res[room_id_];
+                info_ = cache::client()->singleRoomInfo(room_id_.toStdString());
 
-                setAvatar(QImage::fromData(cache_->image(info_.avatar_url)));
+                setAvatar(QImage::fromData(cache::client()->image(info_.avatar_url)));
         } catch (const lmdb::error &e) {
                 qWarning() << "failed to retrieve room info from cache" << room_id;
         }
@@ -60,13 +74,67 @@ RoomSettings::RoomSettings(const QString &room_id, QSharedPointer<Cache> cache, 
         notifOptionLayout_->addWidget(notifLabel);
         notifOptionLayout_->addWidget(notifCombo, 0, Qt::AlignBottom | Qt::AlignRight);
 
+        auto accessOptionLayout = new QHBoxLayout();
+        accessOptionLayout->setMargin(5);
+        auto accessLabel = new QLabel(tr("Room access"), this);
+        accessCombo = new QComboBox(this);
+        accessCombo->addItem(tr("Anyone and guests"));
+        accessCombo->addItem(tr("Anyone"));
+        accessCombo->addItem(tr("Invited users"));
+        accessCombo->setDisabled(true);
+        accessLabel->setStyleSheet("font-size: 15px;");
+
+        if(info_.join_rule == JoinRule::Public)
+        {
+                if(info_.guest_access)
+                {
+                        accessCombo->setCurrentIndex(0);
+                }
+                else
+                {
+                        accessCombo->setCurrentIndex(1);
+                }
+        }
+        else
+        {
+                accessCombo->setCurrentIndex(2);
+        }
+
+        accessOptionLayout->addWidget(accessLabel);
+        accessOptionLayout->addWidget(accessCombo);
+
         layout->addWidget(new TopSection(info_, avatarImg_, this));
         layout->addLayout(notifOptionLayout_);
         layout->addLayout(notifOptionLayout_);
+        layout->addLayout(accessOptionLayout);
         layout->addLayout(btnLayout);
 
         connect(cancelBtn_, &FlatButton::clicked, this, &RoomSettings::closing);
-        connect(saveBtn_, &FlatButton::clicked, this, [this]() { emit closing(); });
+        connect(saveBtn_, &FlatButton::clicked, this, &RoomSettings::save_and_close);
+}
+
+void
+RoomSettings::save_and_close() {
+        // TODO: Save access changes to the room
+        if (accessCombo->currentIndex()<2) {
+                if(info_.join_rule != JoinRule::Public) {
+                        // Make join_rule Public
+                }
+                if(accessCombo->currentIndex()==0) {
+                        if(!info_.guest_access) {
+                                // Make guest_access CanJoin
+                        }
+                }
+        }
+        else {
+                if(info_.join_rule != JoinRule::Invite) {
+                        // Make join_rule invite
+                }
+                if(info_.guest_access) {
+                        // Make guest_access forbidden
+                }
+        }
+        closing();
 }
 
 void

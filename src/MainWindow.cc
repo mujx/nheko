@@ -54,6 +54,9 @@ MainWindow::MainWindow(QWidget *parent)
         setWindowTitle("nheko");
         setObjectName("MainWindow");
 
+        // Initialize the http client.
+        http::init();
+
         restoreWindowSize();
 
         QFont font("Open Sans");
@@ -61,14 +64,13 @@ MainWindow::MainWindow(QWidget *parent)
         font.setStyleStrategy(QFont::PreferAntialias);
         setFont(font);
 
-        client_       = QSharedPointer<MatrixClient>(new MatrixClient("matrix.org"));
         userSettings_ = QSharedPointer<UserSettings>(new UserSettings);
         trayIcon_     = new TrayIcon(":/logos/nheko-32.png", this);
 
         welcome_page_     = new WelcomePage(this);
-        login_page_       = new LoginPage(client_, this);
-        register_page_    = new RegisterPage(client_, this);
-        chat_page_        = new ChatPage(client_, userSettings_, this);
+        login_page_       = new LoginPage(this);
+        register_page_    = new RegisterPage(this);
+        chat_page_        = new ChatPage(userSettings_, this);
         userSettingsPage_ = new UserSettingsPage(userSettings_, this);
 
         // Initialize sliding widget manager.
@@ -122,16 +124,16 @@ MainWindow::MainWindow(QWidget *parent)
         connect(
           chat_page_, &ChatPage::showUserSettingsPage, this, &MainWindow::showUserSettingsPage);
 
-        connect(client_.data(),
+        connect(http::client(),
                 SIGNAL(loginSuccess(QString, QString, QString)),
                 this,
                 SLOT(showChatPage(QString, QString, QString)));
 
-        connect(client_.data(),
+        connect(http::client(),
                 SIGNAL(registerSuccess(QString, QString, QString)),
                 this,
                 SLOT(showChatPage(QString, QString, QString)));
-        connect(client_.data(), &MatrixClient::invalidToken, this, [this]() {
+        connect(http::client(), &MatrixClient::invalidToken, this, [this]() {
                 chat_page_->deleteConfigs();
                 showLoginPage();
                 login_page_->loginError("Invalid token detected. Please try to login again.");
@@ -202,7 +204,7 @@ MainWindow::removeOverlayProgressBar()
         });
 
         // FIXME:  Snackbar doesn't work if it's initialized in the constructor.
-        QTimer::singleShot(100, this, [this]() {
+        QTimer::singleShot(0, this, [this]() {
                 snackBar_ = QSharedPointer<SnackBar>(new SnackBar(this));
                 connect(chat_page_,
                         &ChatPage::showNotification,
@@ -274,8 +276,8 @@ MainWindow::openRoomSettings(const QString &room_id)
 {
         const auto roomToSearch = room_id.isEmpty() ? chat_page_->currentRoom() : "";
 
-        roomSettingsDialog_ = QSharedPointer<dialogs::RoomSettings>(
-          new dialogs::RoomSettings(roomToSearch, chat_page_->cache(), this));
+        roomSettingsDialog_ =
+          QSharedPointer<dialogs::RoomSettings>(new dialogs::RoomSettings(roomToSearch, this));
 
         connect(roomSettingsDialog_.data(), &dialogs::RoomSettings::closing, this, [this]() {
                 roomSettingsModal_->hide();
@@ -292,8 +294,8 @@ MainWindow::openMemberListDialog(const QString &room_id)
 {
         const auto roomToSearch = room_id.isEmpty() ? chat_page_->currentRoom() : "";
 
-        memberListDialog_ = QSharedPointer<dialogs::MemberList>(
-          new dialogs::MemberList(roomToSearch, chat_page_->cache(), this));
+        memberListDialog_ =
+          QSharedPointer<dialogs::MemberList>(new dialogs::MemberList(roomToSearch, this));
 
         memberListModal_ =
           QSharedPointer<OverlayModal>(new OverlayModal(this, memberListDialog_.data()));
@@ -315,7 +317,7 @@ MainWindow::openLeaveRoomDialog(const QString &room_id)
                         leaveRoomModal_->hide();
 
                         if (leaving)
-                                client_->leaveRoom(roomToLeave);
+                                http::client()->leaveRoom(roomToLeave);
                 });
 
         leaveRoomModal_ =

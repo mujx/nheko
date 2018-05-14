@@ -33,12 +33,34 @@
 
 #include "MatrixClient.h"
 
-MatrixClient::MatrixClient(QString server, QObject *parent)
+namespace {
+std::unique_ptr<MatrixClient> instance_ = nullptr;
+}
+
+namespace http {
+
+void
+init()
+{
+        if (!instance_)
+                instance_ = std::make_unique<MatrixClient>();
+}
+
+MatrixClient *
+client()
+{
+        return instance_.get();
+}
+}
+
+MatrixClient::MatrixClient(QObject *parent)
   : QNetworkAccessManager(parent)
   , clientApiUrl_{"/_matrix/client/r0"}
   , mediaApiUrl_{"/_matrix/media/r0"}
   , serverProtocol_{"https"}
 {
+        qRegisterMetaType<mtx::responses::Sync>();
+
         QSettings settings;
         txn_id_ = settings.value("client/transaction_id", 1).toInt();
 
@@ -54,8 +76,6 @@ MatrixClient::MatrixClient(QString server, QObject *parent)
                   this,
                   [](QNetworkReply *reply, const QList<QSslError> &) { reply->ignoreSslErrors(); });
         }
-
-        setServer(server);
 
         QJsonObject default_filter{
           {
@@ -326,8 +346,7 @@ MatrixClient::sync() noexcept
                 }
 
                 try {
-                        mtx::responses::Sync response = nlohmann::json::parse(data);
-                        emit syncCompleted(response);
+                        emit syncCompleted(nlohmann::json::parse(std::move(data)));
                 } catch (std::exception &e) {
                         qWarning() << "Sync error: " << e.what();
                 }
@@ -443,7 +462,6 @@ MatrixClient::initialSync() noexcept
                         return;
                 }
 
-                qRegisterMetaType<mtx::responses::Sync>();
                 QtConcurrent::run([data = reply->readAll(), this]() {
                         try {
                                 emit initialSyncCompleted(nlohmann::json::parse(std::move(data)));
@@ -1307,6 +1325,44 @@ MatrixClient::redactEvent(const QString &room_id, const QString &event_id)
                         emit redactionCompleted(room_id, event_id);
                 } catch (const std::exception &e) {
                         emit redactionFailed(QString::fromStdString(e.what()));
+                }
+        });
+}
+
+void
+MatrixClient::getNotifications() noexcept
+{
+        QUrlQuery query;
+        query.addQueryItem("limit", "5");
+
+        QUrl endpoint(server_);
+        endpoint.setQuery(query);
+        endpoint.setPath(clientApiUrl_ + "/notifications");
+
+        QNetworkRequest request(QString(endpoint.toEncoded()));
+        setupAuth(request);
+
+        auto reply = get(request);
+        connect(reply, &QNetworkReply::finished, this, [reply, this]() {
+                reply->deleteLater();
+
+                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+                auto data  = reply->readAll();
+
+                if (status == 0 || status >= 400) {
+                        try {
+                                mtx::errors::Error res = nlohmann::json::parse(data);
+                                std::cout << nlohmann::json::parse(data).dump(2) << '\n';
+                                // TODO: Response with an error signal
+                                return;
+                        } catch (const std::exception &) {
+                        }
+                }
+
+                try {
+                        emit notificationsRetrieved(nlohmann::json::parse(data));
+                } catch (const std::exception &e) {
+                        qWarning() << "failed to parse /notifications response" << e.what();
                 }
         });
 }

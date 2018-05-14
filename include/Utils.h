@@ -8,6 +8,7 @@
 #include "timeline/widgets/VideoItem.h"
 
 #include <QDateTime>
+#include <QPixmap>
 #include <mtx/events/collections.hpp>
 
 namespace utils {
@@ -31,6 +32,9 @@ firstChar(const QString &input);
 //! Get a human readable file size with the appropriate units attached.
 QString
 humanReadableFileSize(uint64_t bytes);
+
+QString
+event_body(const mtx::events::collections::TimelineEvents &event);
 
 //! Match widgets/events with a description message.
 template<class T>
@@ -131,7 +135,41 @@ erase_if(ContainerT &items, const PredicateT &predicate)
         }
 }
 
+inline mtx::events::EventType
+event_type(const mtx::events::collections::TimelineEvents &event)
+{
+        return mpark::visit([](auto msg) { return msg.type; }, event);
+}
+
+inline std::string
+event_id(const mtx::events::collections::TimelineEvents &event)
+{
+        return mpark::visit([](auto msg) { return msg.event_id; }, event);
+}
+
+inline QString
+eventId(const mtx::events::collections::TimelineEvents &event)
+{
+        return QString::fromStdString(event_id(event));
+}
+
+inline QString
+event_sender(const mtx::events::collections::TimelineEvents &event)
+{
+        return mpark::visit([](auto msg) { return QString::fromStdString(msg.sender); }, event);
+}
+
+template<class T>
+QString
+message_body(const mtx::events::collections::TimelineEvents &event)
+{
+        return QString::fromStdString(mpark::get<T>(event).content.body);
+}
+
 //! Calculate the Levenshtein distance between two strings with character skipping.
 int
 levenshtein_distance(const std::string &s1, const std::string &s2);
+
+QPixmap
+scaleImageToPixmap(const QImage &img, int size);
 }

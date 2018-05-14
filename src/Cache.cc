@@ -30,7 +30,7 @@
 
 //! Should be changed when a breaking change occurs in the cache format.
 //! This will reset client's data.
-static const std::string CURRENT_CACHE_FORMAT_VERSION("2018.04.21");
+static const std::string CURRENT_CACHE_FORMAT_VERSION("2018.05.11");
 
 static const lmdb::val NEXT_BATCH_KEY("next_batch");
 static const lmdb::val CACHE_FORMAT_VERSION_KEY("cache_format_version");
@@ -48,9 +48,29 @@ static constexpr const char *MEDIA_DB = "media";
 static constexpr const char *SYNC_STATE_DB = "sync_state";
 //! Read receipts per room/event.
 static constexpr const char *READ_RECEIPTS_DB = "read_receipts";
+static constexpr const char *NOTIFICATIONS_DB = "sent_notifications";
 
 using CachedReceipts = std::multimap<uint64_t, std::string, std::greater<uint64_t>>;
 using Receipts       = std::map<std::string, std::map<std::string, uint64_t>>;
+
+namespace {
+std::unique_ptr<Cache> instance_ = nullptr;
+}
+
+namespace cache {
+void
+init(const QString &user_id)
+{
+        if (!instance_)
+                instance_ = std::make_unique<Cache>(user_id);
+}
+
+Cache *
+client()
+{
+        return instance_.get();
+}
+}
 
 Cache::Cache(const QString &userId, QObject *parent)
   : QObject{parent}
@@ -60,6 +80,7 @@ Cache::Cache(const QString &userId, QObject *parent)
   , invitesDb_{0}
   , mediaDb_{0}
   , readReceiptsDb_{0}
+  , notificationsDb_{0}
   , localUserId_{userId}
 {}
 
@@ -112,12 +133,13 @@ Cache::setup()
                 env_.open(statePath.toStdString().c_str());
         }
 
-        auto txn        = lmdb::txn::begin(env_);
-        syncStateDb_    = lmdb::dbi::open(txn, SYNC_STATE_DB, MDB_CREATE);
-        roomsDb_        = lmdb::dbi::open(txn, ROOMS_DB, MDB_CREATE);
-        invitesDb_      = lmdb::dbi::open(txn, INVITES_DB, MDB_CREATE);
-        mediaDb_        = lmdb::dbi::open(txn, MEDIA_DB, MDB_CREATE);
-        readReceiptsDb_ = lmdb::dbi::open(txn, READ_RECEIPTS_DB, MDB_CREATE);
+        auto txn         = lmdb::txn::begin(env_);
+        syncStateDb_     = lmdb::dbi::open(txn, SYNC_STATE_DB, MDB_CREATE);
+        roomsDb_         = lmdb::dbi::open(txn, ROOMS_DB, MDB_CREATE);
+        invitesDb_       = lmdb::dbi::open(txn, INVITES_DB, MDB_CREATE);
+        mediaDb_         = lmdb::dbi::open(txn, MEDIA_DB, MDB_CREATE);
+        readReceiptsDb_  = lmdb::dbi::open(txn, READ_RECEIPTS_DB, MDB_CREATE);
+        notificationsDb_ = lmdb::dbi::open(txn, NOTIFICATIONS_DB, MDB_CREATE);
         txn.commit();
 
         qRegisterMetaType<RoomInfo>();
@@ -525,6 +547,37 @@ Cache::roomsWithStateUpdates(const mtx::responses::Sync &res)
         return rooms;
 }
 
+RoomInfo
+Cache::singleRoomInfo(const std::string &room_id)
+{
+        auto txn      = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
+        auto statesdb = getStatesDb(txn, room_id);
+
+        lmdb::val data;
+
+        // Check if the room is joined.
+        if (lmdb::dbi_get(txn, roomsDb_, lmdb::val(room_id), data)) {
+                try {
+                        RoomInfo tmp     = json::parse(std::string(data.data(), data.size()));
+                        tmp.member_count = getMembersDb(txn, room_id).size(txn);
+                        tmp.join_rule    = getRoomJoinRule(txn, statesdb);
+                        tmp.guest_access = getRoomGuestAccess(txn, statesdb);
+
+                        txn.commit();
+
+                        return tmp;
+                } catch (const json::exception &e) {
+                        qWarning()
+                          << "failed to parse room info:" << QString::fromStdString(room_id)
+                          << QString::fromStdString(std::string(data.data(), data.size()));
+                }
+        }
+
+        txn.commit();
+
+        return RoomInfo();
+}
+
 std::map<QString, RoomInfo>
 Cache::getRoomInfo(const std::vector<std::string> &rooms)
 {
@@ -534,12 +587,15 @@ Cache::getRoomInfo(const std::vector<std::string> &rooms)
 
         for (const auto &room : rooms) {
                 lmdb::val data;
+                auto statesdb = getStatesDb(txn, room);
 
                 // Check if the room is joined.
                 if (lmdb::dbi_get(txn, roomsDb_, lmdb::val(room), data)) {
                         try {
                                 RoomInfo tmp = json::parse(std::string(data.data(), data.size()));
                                 tmp.member_count = getMembersDb(txn, room).size(txn);
+                                tmp.join_rule    = getRoomJoinRule(txn, statesdb);
+                                tmp.guest_access = getRoomGuestAccess(txn, statesdb);
 
                                 room_info.emplace(QString::fromStdString(room), std::move(tmp));
                         } catch (const json::exception &e) {
@@ -755,6 +811,50 @@ Cache::getRoomName(lmdb::txn &txn, lmdb::dbi &statesdb, lmdb::dbi &membersdb)
         return "Empty Room";
 }
 
+JoinRule
+Cache::getRoomJoinRule(lmdb::txn &txn, lmdb::dbi &statesdb)
+{
+        using namespace mtx::events;
+        using namespace mtx::events::state;
+
+        lmdb::val event;
+        bool res = lmdb::dbi_get(
+          txn, statesdb, lmdb::val(to_string(mtx::events::EventType::RoomJoinRules)), event);
+
+        if (res) {
+                try {
+                        StateEvent<JoinRules> msg =
+                          json::parse(std::string(event.data(), event.size()));
+                        return msg.content.join_rule;
+                } catch (const json::exception &e) {
+                        qWarning() << e.what();
+                }
+        }
+        return JoinRule::Knock;
+}
+
+bool
+Cache::getRoomGuestAccess(lmdb::txn &txn, lmdb::dbi &statesdb)
+{
+        using namespace mtx::events;
+        using namespace mtx::events::state;
+
+        lmdb::val event;
+        bool res = lmdb::dbi_get(
+          txn, statesdb, lmdb::val(to_string(mtx::events::EventType::RoomGuestAccess)), event);
+
+        if (res) {
+                try {
+                        StateEvent<GuestAccess> msg =
+                          json::parse(std::string(event.data(), event.size()));
+                        return msg.content.guest_access == AccessState::CanJoin;
+                } catch (const json::exception &e) {
+                        qWarning() << e.what();
+                }
+        }
+        return false;
+}
+
 QString
 Cache::getRoomTopic(lmdb::txn &txn, lmdb::dbi &statesdb)
 {
@@ -890,11 +990,17 @@ Cache::getInviteRoomTopic(lmdb::txn &txn, lmdb::dbi &db)
 QImage
 Cache::getRoomAvatar(const QString &room_id)
 {
+        return getRoomAvatar(room_id.toStdString());
+}
+
+QImage
+Cache::getRoomAvatar(const std::string &room_id)
+{
         auto txn = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
 
         lmdb::val response;
 
-        if (!lmdb::dbi_get(txn, roomsDb_, lmdb::val(room_id.toStdString()), response)) {
+        if (!lmdb::dbi_get(txn, roomsDb_, lmdb::val(room_id), response)) {
                 txn.commit();
                 return QImage();
         }
@@ -1085,6 +1191,36 @@ Cache::getMembers(const std::string &room_id, std::size_t startIndex, std::size_
         txn.commit();
 
         return members;
+}
+
+void
+Cache::markSentNotification(const std::string &event_id)
+{
+        auto txn = lmdb::txn::begin(env_);
+        lmdb::dbi_put(txn, notificationsDb_, lmdb::val(event_id), lmdb::val(std::string("")));
+        txn.commit();
+}
+
+void
+Cache::removeReadNotification(const std::string &event_id)
+{
+        auto txn = lmdb::txn::begin(env_);
+
+        lmdb::dbi_del(txn, notificationsDb_, lmdb::val(event_id), nullptr);
+
+        txn.commit();
+}
+
+bool
+Cache::isNotificationSent(const std::string &event_id)
+{
+        auto txn = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
+
+        lmdb::val value;
+        bool res = lmdb::dbi_get(txn, notificationsDb_, lmdb::val(event_id), value);
+        txn.commit();
+
+        return res;
 }
 
 QHash<QString, QString> Cache::DisplayNames;

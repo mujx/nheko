@@ -29,11 +29,8 @@
 #include "UserSettingsPage.h"
 #include "Utils.h"
 
-RoomList::RoomList(QSharedPointer<MatrixClient> client,
-                   QSharedPointer<UserSettings> userSettings,
-                   QWidget *parent)
+RoomList::RoomList(QSharedPointer<UserSettings> userSettings, QWidget *parent)
   : QWidget(parent)
-  , client_(client)
   , userSettings_{userSettings}
 {
         setStyleSheet("border: none;");
@@ -58,15 +55,15 @@ RoomList::RoomList(QSharedPointer<MatrixClient> client,
         scrollArea_->setWidget(scrollAreaContents_);
         topLayout_->addWidget(scrollArea_);
 
-        connect(client_.data(),
+        connect(http::client(),
                 &MatrixClient::roomAvatarRetrieved,
                 this,
                 [this](const QString &room_id,
                        const QPixmap &img,
                        const QString &url,
                        const QByteArray &data) {
-                        if (!cache_.isNull())
-                                cache_->saveImage(url, data);
+                        if (cache::client())
+                                cache::client()->saveImage(url, data);
 
                         updateRoomAvatar(room_id, img);
                 });
@@ -100,11 +97,11 @@ RoomList::updateAvatar(const QString &room_id, const QString &url)
 
         QByteArray savedImgData;
 
-        if (!cache_.isNull())
-                savedImgData = cache_->image(url);
+        if (cache::client())
+                savedImgData = cache::client()->image(url);
 
         if (savedImgData.isEmpty()) {
-                client_->fetchRoomAvatar(room_id, url);
+                http::client()->fetchRoomAvatar(room_id, url);
         } else {
                 QPixmap img;
                 img.loadFromData(savedImgData);
@@ -317,7 +314,7 @@ RoomList::closeJoinRoomDialog(bool isJoining, QString roomAlias)
         joinRoomModal_->hide();
 
         if (isJoining)
-                client_->joinRoom(roomAlias);
+                http::client()->joinRoom(roomAlias);
 }
 
 void

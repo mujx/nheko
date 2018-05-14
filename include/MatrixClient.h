@@ -43,7 +43,7 @@ class MatrixClient : public QNetworkAccessManager
 {
         Q_OBJECT
 public:
-        MatrixClient(QString server, QObject *parent = 0);
+        MatrixClient(QObject *parent = 0);
 
         // Client API.
         void initialSync() noexcept;
@@ -91,6 +91,7 @@ public:
         void redactEvent(const QString &room_id, const QString &event_id);
         void inviteUser(const QString &room_id, const QString &user);
         void createRoom(const mtx::requests::CreateRoom &request);
+        void getNotifications() noexcept;
 
         QUrl getHomeServer() { return server_; };
         int transactionId() { return txn_id_; };
@@ -178,6 +179,7 @@ signals:
         void redactionCompleted(const QString &room_id, const QString &event_id);
         void invalidToken();
         void syncError(const QString &error);
+        void notificationsRetrieved(const mtx::responses::Notifications &notifications);
 
 private:
         QNetworkReply *makeUploadRequest(QSharedPointer<QIODevice> iodev);
@@ -209,3 +211,13 @@ private:
         //! Filter to be send as filter-param for (initial) /sync requests.
         QString filter_;
 };
+
+namespace http {
+//! Initialize the http module
+void
+init();
+
+//! Retrieve the client instance.
+MatrixClient *
+client();
+}

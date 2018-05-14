@@ -28,7 +28,6 @@ debian-image:
 
 linux-deploy:
 	./.ci/linux/deploy.sh
-	./.ci/linux/create-packages.sh
 
 macos-deploy:
 	./.ci/macos/deploy.sh
@@ -47,7 +46,11 @@ docker-debian-appimage: debian-image
 	docker run --privileged -v `pwd`:/build nheko-debian-appimage make linux-deploy
 
 update-translations:
-	lupdate src/**/*.cc src/**/*.cpp -ts resources/langs/nheko_*.ts -no-obsolete
+	lupdate \
+		-locations relative \
+		-Iinclude/dialogs \
+		-Iinclude \
+		src/ -ts resources/langs/nheko_*.ts -no-obsolete
 
 clean:
 	rm -rf build
