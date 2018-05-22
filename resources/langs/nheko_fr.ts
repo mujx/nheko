@@ -71,7 +71,7 @@
     <message>
         <location line="+1"/>
         <source>e.g @joe:matrix.org</source>
-        <translation>ex: @joe:matrix.org</translation>
+        <translation>ex:&nbsp;@joe:matrix.org</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -109,7 +109,7 @@
     <message>
         <location line="+23"/>
         <source>Malformed response. Possibly not a Matrix server</source>
-        <translation>La réponse du serveur est malformée. il est possible qu&apos;il ne s&apos;agisse pas d&apos;un serveur Matrix</translation>
+        <translation>La réponse du serveur est malformée. Il est possible qu&apos;il ne s&apos;agisse pas d&apos;un serveur Matrix</translation>
     </message>
 </context>
 <context>
@@ -130,7 +130,7 @@
     <message>
         <location filename="../../src/QuickSwitcher.cc" line="+70"/>
         <source>Search for a room...</source>
-        <translation>Chercher un salon...</translation>
+        <translation>Chercher un salon…</translation>
     </message>
 </context>
 <context>
@@ -174,7 +174,7 @@
     <message>
         <location line="+2"/>
         <source>Passwords don&apos;t match</source>
-        <translation>Les mots de passes ne sont pas identiques</translation>
+        <translation>Les mots de passe ne sont pas identiques</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -223,7 +223,7 @@
     <message>
         <location line="+108"/>
         <source>Select a file</source>
-        <translation>Choisissez un fichier</translation>
+        <translation>Sélectionnez un fichier</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -446,7 +446,7 @@
     <message>
         <location filename="../../src/dialogs/PreviewUploadOverlay.cc" line="+41"/>
         <source>Upload</source>
-        <translation>Téléverser</translation>
+        <translation>Envoyer</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -458,8 +458,8 @@
         <source>Media type: %1
 Media size: %2
 </source>
-        <translation>Type de média: %1
-Taille du média: %2
+        <translation>Type de média:&nbsp;%1
+Taille du média:&nbsp;%2
 </translation>
     </message>
 </context>
@@ -542,7 +542,7 @@ Taille du média: %2
     <message>
         <location filename="../../src/emoji/Panel.cc" line="+125"/>
         <source>Smileys &amp; People</source>
-        <translation>Smileys &amp; personnes</translation>
+        <translation>Smileys &amp; Personnes</translation>
     </message>
     <message>
         <location line="+4"/>
