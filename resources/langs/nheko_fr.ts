@@ -71,7 +71,7 @@
     <message>
         <location line="+1"/>
         <source>e.g @joe:matrix.org</source>
-        <translation>ex:&nbsp;@joe:matrix.org</translation>
+        <translation>ex : @joe:matrix.org</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -458,8 +458,8 @@
         <source>Media type: %1
 Media size: %2
 </source>
-        <translation>Type de média:&nbsp;%1
-Taille du média:&nbsp;%2
+        <translation>Type de média : %1
+Taille du média : %2
 </translation>
     </message>
 </context>
