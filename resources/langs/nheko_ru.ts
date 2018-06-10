@@ -37,7 +37,7 @@
     <message>
         <location line="+9"/>
         <source>Name</source>
-        <translation type="unfinished">Название</translation>
+        <translation>Название</translation>
     </message>
     <message>
         <location line="+2"/>
