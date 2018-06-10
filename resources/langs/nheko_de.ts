@@ -6,7 +6,7 @@
     <message>
         <location filename="../../src/timeline/widgets/AudioItem.cc" line="+125"/>
         <source>Save File</source>
-        <translation type="unfinished">Datei speichern</translation>
+        <translation>Datei speichern</translation>
     </message>
 </context>
 <context>
@@ -14,12 +14,12 @@
     <message>
         <location filename="../../src/timeline/TimelineView.cc" line="+54"/>
         <source>Today</source>
-        <translation type="unfinished">Heute</translation>
+        <translation>Heute</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Yesterday</source>
-        <translation type="unfinished">Gestern</translation>
+        <translation>Gestern</translation>
     </message>
 </context>
 <context>
@@ -27,22 +27,22 @@
     <message>
         <location filename="../../src/dialogs/RoomSettings.cpp" line="+34"/>
         <source>APPLY</source>
-        <translation type="unfinished">EINSETZEN</translation>
+        <translation>EINSETZEN</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>CANCEL</source>
-        <translation type="unfinished">ABBRECHEN</translation>
+        <translation>ABBRECHEN</translation>
     </message>
     <message>
         <location line="+9"/>
         <source>Name</source>
-        <translation type="unfinished">Titel</translation>
+        <translation>Titel</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Topic</source>
-        <translation type="unfinished">Thema</translation>
+        <translation>Thema</translation>
     </message>
 </context>
 <context>
@@ -50,7 +50,7 @@
     <message>
         <location filename="../../src/timeline/widgets/FileItem.cc" line="+111"/>
         <source>Save File</source>
-        <translation type="unfinished">Datei speichern</translation>
+        <translation>Datei speichern</translation>
     </message>
 </context>
 <context>
@@ -58,7 +58,7 @@
     <message>
         <location filename="../../src/timeline/widgets/ImageItem.cc" line="+229"/>
         <source>Save image</source>
-        <translation type="unfinished">Bild speichern</translation>
+        <translation>Bild speichern</translation>
     </message>
 </context>
 <context>
@@ -117,12 +117,12 @@
     <message>
         <location filename="../../src/dialogs/MemberList.cpp" line="+79"/>
         <source>Room members</source>
-        <translation type="unfinished">Teilnehmer Liste</translation>
+        <translation>Teilnehmer Liste</translation>
     </message>
     <message>
         <location line="+10"/>
         <source>SHOW MORE</source>
-        <translation type="unfinished">MEHR ZEIGEN</translation>
+        <translation>MEHR ZEIGEN</translation>
     </message>
 </context>
 <context>
@@ -130,7 +130,7 @@
     <message>
         <location filename="../../src/QuickSwitcher.cc" line="+70"/>
         <source>Search for a room...</source>
-        <translation type="unfinished">Raum suchen...</translation>
+        <translation>Raum suchen...</translation>
     </message>
 </context>
 <context>
@@ -186,17 +186,17 @@
     <message>
         <location filename="../../src/RoomInfoListItem.cc" line="+78"/>
         <source>Leave room</source>
-        <translation type="unfinished">Raum verlassen</translation>
+        <translation>Raum verlassen</translation>
     </message>
     <message>
         <location line="+153"/>
         <source>Accept</source>
-        <translation type="unfinished">Akzeptieren </translation>
+        <translation>Akzeptieren </translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Decline</source>
-        <translation type="unfinished">Untersagen</translation>
+        <translation>Untersagen</translation>
     </message>
 </context>
 <context>
@@ -204,12 +204,12 @@
     <message>
         <location filename="../../src/SideBarActions.cc" line="+36"/>
         <source>Create new room</source>
-        <translation type="unfinished">Neuen Raum erstellen</translation>
+        <translation>Neuen Raum erstellen</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Join a room</source>
-        <translation type="unfinished">In Raum eintreten</translation>
+        <translation>In Raum eintreten</translation>
     </message>
 </context>
 <context>
@@ -222,12 +222,12 @@
     <message>
         <location line="+108"/>
         <source>Select a file</source>
-        <translation type="unfinished">Datei auswählen</translation>
+        <translation>Datei auswählen</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>All Files (*)</source>
-        <translation type="unfinished">Alle Dateien (*)</translation>
+        <translation>Alle Dateien (*)</translation>
     </message>
 </context>
 <context>
@@ -235,22 +235,22 @@
     <message>
         <location filename="../../src/TopRoomBar.cc" line="+87"/>
         <source>Invite users</source>
-        <translation type="unfinished">Nutzer einladen</translation>
+        <translation>Nutzer einladen</translation>
     </message>
     <message>
         <location line="+6"/>
         <source>Members</source>
-        <translation type="unfinished">Teilnehmer</translation>
+        <translation>Teilnehmer</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>Leave room</source>
-        <translation type="unfinished">Raum verlassen</translation>
+        <translation>Raum verlassen</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>Settings</source>
-        <translation type="unfinished">Einstellungen</translation>
+        <translation>Einstellungen</translation>
     </message>
 </context>
 <context>
@@ -271,12 +271,12 @@
     <message>
         <location filename="../../src/TypingDisplay.cc" line="+26"/>
         <source> is typing</source>
-        <translation type="unfinished"> tippt ein</translation>
+        <translation> tippt ein</translation>
     </message>
     <message>
         <location line="+2"/>
         <source> are typing</source>
-        <translation type="unfinished"> tippen ein</translation>
+        <translation> tippen ein</translation>
     </message>
 </context>
 <context>
@@ -284,7 +284,7 @@
     <message>
         <location filename="../../src/UserSettingsPage.cc" line="+121"/>
         <source>User Settings</source>
-        <translation type="unfinished">Nutzer Einstellungen</translation>
+        <translation>Nutzer Einstellungen</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -299,32 +299,32 @@
     <message>
         <location line="+12"/>
         <source>Re-order rooms based on activity</source>
-        <translation type="unfinished">Räume nach Aktivität sortieren</translation>
+        <translation>Räume nach Aktivität sortieren</translation>
     </message>
     <message>
         <location line="+9"/>
         <source>Group&apos;s sidebar</source>
-        <translation type="unfinished">Gruppen-Seiten-Panel</translation>
+        <translation>Gruppen-Seiten-Panel</translation>
     </message>
     <message>
         <location line="+9"/>
         <source>Typing notifications</source>
-        <translation type="unfinished">Schreibbenachrichtigungen</translation>
+        <translation>Schreibbenachrichtigungen</translation>
     </message>
     <message>
         <location line="+9"/>
         <source>Read receipts</source>
-        <translation type="unfinished">Lesebestätigungen</translation>
+        <translation>Lesebestätigungen</translation>
     </message>
     <message>
         <location line="+9"/>
         <source>Theme</source>
-        <translation type="unfinished">Thema</translation>
+        <translation>Thema</translation>
     </message>
     <message>
         <location line="+10"/>
         <source>GENERAL</source>
-        <translation type="unfinished">ALLGEMEINES</translation>
+        <translation>ALLGEMEINES</translation>
     </message>
 </context>
 <context>
@@ -498,12 +498,12 @@ Medien-Größe: %2
     <message>
         <location line="+12"/>
         <source>Notifications</source>
-        <translation type="unfinished">Benachrichtigungen</translation>
+        <translation>Benachrichtigungen</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>Muted</source>
-        <translation type="unfinished">Stumm</translation>
+        <translation>Stumm</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -513,27 +513,27 @@ Medien-Größe: %2
     <message>
         <location line="+1"/>
         <source>All messages</source>
-        <translation type="unfinished">Alle Nachrichten</translation>
+        <translation>Alle Nachrichten</translation>
     </message>
     <message>
         <location line="+8"/>
         <source>Room access</source>
-        <translation type="unfinished">Raum Zugang</translation>
+        <translation>Raum Zugang</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Anyone and guests</source>
-        <translation type="unfinished">Alle, denen der Raum-Link bekannt ist (auch Gäste)</translation>
+        <translation>Alle, denen der Raum-Link bekannt ist (auch Gäste)</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Anyone</source>
-        <translation type="unfinished">Alle, denen der Raum-Link bekannt ist (ausgenommen Gäste)</translation>
+        <translation>Alle, denen der Raum-Link bekannt ist (ausgenommen Gäste)</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Invited users</source>
-        <translation type="unfinished">Nur Personen, die eingeladen wurden</translation>
+        <translation>Nur Personen, die eingeladen wurden</translation>
     </message>
 </context>
 <context>
