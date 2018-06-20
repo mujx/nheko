@@ -55,6 +55,7 @@ ChatPage::ChatPage(QSharedPointer<UserSettings> userSettings, QWidget *parent)
   : QWidget(parent)
   , isConnected_(true)
   , userSettings_{userSettings}
+  , notificationsManager(this)
 {
         setObjectName("chatPage");
 
@@ -544,6 +545,15 @@ ChatPage::ChatPage(QSharedPointer<UserSettings> userSettings, QWidget *parent)
                         else
                                 room_list_->setRoomFilter(communities_[communityId]->getRoomList());
                 });
+                
+        connect(&notificationsManager,
+                &NotificationsManager::notificationClicked,
+                this,
+                [this](const QString &roomid, const QString &eventid) {
+                        Q_UNUSED(eventid)
+                        room_list_->highlightSelectedRoom(roomid);
+                        activateWindow();
+                });
 
         setGroupViewState(userSettings_->isGroupViewEnabled());
 
@@ -1003,11 +1013,14 @@ ChatPage::sendDesktopNotifications(const mtx::responses::Notifications &res)
                                 if (isRoomActive(room_id))
                                         continue;
 
-                                NotificationsManager::postNotification(
-                                  QString::fromStdString(
-                                    cache::client()->singleRoomInfo(item.room_id).name),
-                                  Cache::displayName(room_id, user_id),
-                                  utils::event_body(item.event));
+                                notificationsManager.postNotification(
+                                        room_id,
+                                        QString::fromStdString(event_id),
+                                        QString::fromStdString(
+                                                cache::client()->singleRoomInfo(item.room_id).name),
+                                        Cache::displayName(room_id, user_id),
+                                        utils::event_body(item.event),
+                                        cache::client()->getRoomAvatar(room_id));
                         }
                 } catch (const lmdb::error &e) {
                         nhlog::db()->warn("error while sending desktop notification: {}", e.what());
