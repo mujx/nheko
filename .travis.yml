@@ -67,8 +67,9 @@ before_install:
 - export CXX=${CXX_COMPILER}
 - export CC=${C_COMPILER}
 install:
-- "./.ci/install.sh"
-- export PATH="/usr/local/bin:$PATH"
+    - export PATH="/usr/local/bin:$PATH"
+    - ./.ci/install.sh
+
 script:
 - "./.ci/script.sh"
 - "./.ci/linux/deploy.sh"
