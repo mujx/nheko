@@ -46,7 +46,15 @@ include(LMDB)
 #
 # Discover Qt dependencies.
 #
-find_package(Qt5 COMPONENTS Core Widgets LinguistTools Concurrent Svg Multimedia REQUIRED)
+find_package(Qt5 COMPONENTS
+    Concurrent
+    Core
+    LinguistTools
+    Multimedia
+    Network
+    Svg
+    Widgets
+    REQUIRED)
 
 if (APPLE)
     find_package(Qt5MacExtras REQUIRED)

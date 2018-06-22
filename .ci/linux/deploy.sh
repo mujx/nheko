@@ -32,6 +32,14 @@ unset LD_LIBRARY_PATH
 
 export ARCH=$(uname -m)
 
+ldd build/nheko
+
+cp .deps/usr/lib/lib* .
+cp .deps/usr/lib/lib* ${DIR}/usr/lib
+cp /opt/qt510/lib/lib* ${DIR}/usr/lib
+
+LD_LIBRARY_PATH=".deps/usr/lib/:$LD_LIBRARY_PATH"
+
 ./linuxdeployqt*.AppImage ${DIR}/usr/share/applications/*.desktop -bundle-non-qt-libs
 ./linuxdeployqt*.AppImage ${DIR}/usr/share/applications/*.desktop -appimage
 
