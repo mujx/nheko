@@ -32,10 +32,10 @@ unset LD_LIBRARY_PATH
 
 export ARCH=$(uname -m)
 
-cp .deps/usr/lib/lib* ${DIR}/usr/lib
-cp /opt/qt${QT_PKG}/lib/lib* ${DIR}/usr/lib
+source /opt/qt510/bin/qt510-env.sh
 
-LD_LIBRARY_PATH=".deps/usr/lib/:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH=".deps/usr/lib/:${LD_LIBRARY_PATH}"
+export PATH=/usr/local/bin:${PATH}
 
 ./linuxdeployqt*.AppImage ${DIR}/usr/share/applications/*.desktop -bundle-non-qt-libs
 ./linuxdeployqt*.AppImage ${DIR}/usr/share/applications/*.desktop -appimage

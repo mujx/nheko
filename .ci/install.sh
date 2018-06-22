@@ -31,7 +31,7 @@ if [ $TRAVIS_OS_NAME == linux ]; then
     sudo add-apt-repository -y ppa:chris-lea/libsodium
     sudo add-apt-repository -y ppa:beineri/opt-qt${QT_VERSION}-trusty
     sudo apt-get update -qq
-    sudo apt-get install -qq -y \
+    sudo apt-get install -qq -y --allow-unauthenticated \
         qt${QT_PKG}base \
         qt${QT_PKG}tools \
         qt${QT_PKG}svg \
