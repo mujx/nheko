@@ -32,15 +32,6 @@ unset LD_LIBRARY_PATH
 
 export ARCH=$(uname -m)
 
-ldd build/nheko
-find /opt/qt510/ -type f | grep plugin
-
-#cp .deps/usr/lib/lib* .
-#cp .deps/usr/lib/lib* ${DIR}/usr/lib
-#cp /opt/qt510/lib/lib* ${DIR}/usr/lib
-
-env
-
 source /opt/qt510/bin/qt510-env.sh
 LD_LIBRARY_PATH=".deps/usr/lib/:$LD_LIBRARY_PATH"
 
