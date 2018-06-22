@@ -32,6 +32,11 @@ unset LD_LIBRARY_PATH
 
 export ARCH=$(uname -m)
 
+cp .deps/usr/lib/lib* ${DIR}/usr/lib
+cp /opt/qt${QT_PKG}/lib/lib* ${DIR}/usr/lib
+
+LD_LIBRARY_PATH=".deps/usr/lib/:$LD_LIBRARY_PATH"
+
 ./linuxdeployqt*.AppImage ${DIR}/usr/share/applications/*.desktop -bundle-non-qt-libs
 ./linuxdeployqt*.AppImage ${DIR}/usr/share/applications/*.desktop -appimage
 
