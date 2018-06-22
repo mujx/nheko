@@ -65,6 +65,9 @@ install:
     - ./.ci/install.sh
     - export PATH="/usr/local/bin:$PATH"
 
+    # Access the cmake installation.
+    - export PATH="/usr/local/bin:$PATH"
+
 script:
     - ./.ci/script.sh
     - ./.ci/linux/deploy.sh
