@@ -43,15 +43,17 @@ private:
 
         // notification ID to (room ID, event ID)
         QMap<uint, roomEventId> notificationIds;
+#endif
 
-slots:
+// these slots are platform specific (D-Bus only)
+// but Qt slot declarations can not be inside an ifdef!
+private slots:
         void actionInvoked(
                 uint id,
                 QString action);
         void notificationClosed(
                 uint id,
         uint reason);
-#endif
 };
 
 #if defined(Q_OS_LINUX)
