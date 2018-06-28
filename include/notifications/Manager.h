@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QObject>
 #include <QImage>
+#include <QObject>
 #include <QString>
 
 #if defined(Q_OS_LINUX)
@@ -9,7 +9,8 @@
 #include <QtDBus/QDBusInterface>
 #endif
 
-struct roomEventId {
+struct roomEventId
+{
         QString roomId;
         QString eventId;
 };
@@ -20,43 +21,35 @@ class NotificationsManager : public QObject
 public:
         NotificationsManager(QObject *parent = nullptr);
 
-        void postNotification(
-                const QString &roomId,
-                const QString &eventId,
-                const QString &roomName,
-                const QString &senderName,
-                const QString &text,
-                const QImage &icon);
+        void postNotification(const QString &roomId,
+                              const QString &eventId,
+                              const QString &roomName,
+                              const QString &senderName,
+                              const QString &text,
+                              const QImage &icon);
 
 signals:
-        void notificationClicked(
-                const QString roomId,
-                const QString eventId);
+        void notificationClicked(const QString roomId, const QString eventId);
 
 #if defined(Q_OS_LINUX)
 private:
         QDBusInterface dbus;
-        uint showNotification(
-                const QString summary,
-                const QString text,
-                const QImage image);
+        uint showNotification(const QString summary, const QString text, const QImage image);
 
         // notification ID to (room ID, event ID)
         QMap<uint, roomEventId> notificationIds;
 #endif
 
-// these slots are platform specific (D-Bus only)
-// but Qt slot declarations can not be inside an ifdef!
+        // these slots are platform specific (D-Bus only)
+        // but Qt slot declarations can not be inside an ifdef!
 private slots:
-        void actionInvoked(
-                uint id,
-                QString action);
-        void notificationClosed(
-                uint id,
-        uint reason);
+        void actionInvoked(uint id, QString action);
+        void notificationClosed(uint id, uint reason);
 };
 
 #if defined(Q_OS_LINUX)
-QDBusArgument& operator<<(QDBusArgument& arg, const QImage& image);
-const QDBusArgument& operator>>(const QDBusArgument& arg, QImage&);
+QDBusArgument &
+operator<<(QDBusArgument &arg, const QImage &image);
+const QDBusArgument &
+operator>>(const QDBusArgument &arg, QImage &);
 #endif

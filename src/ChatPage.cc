@@ -545,7 +545,7 @@ ChatPage::ChatPage(QSharedPointer<UserSettings> userSettings, QWidget *parent)
                         else
                                 room_list_->setRoomFilter(communities_[communityId]->getRoomList());
                 });
-                
+
         connect(&notificationsManager,
                 &NotificationsManager::notificationClicked,
                 this,
@@ -1014,13 +1014,13 @@ ChatPage::sendDesktopNotifications(const mtx::responses::Notifications &res)
                                         continue;
 
                                 notificationsManager.postNotification(
-                                        room_id,
-                                        QString::fromStdString(event_id),
-                                        QString::fromStdString(
-                                                cache::client()->singleRoomInfo(item.room_id).name),
-                                        Cache::displayName(room_id, user_id),
-                                        utils::event_body(item.event),
-                                        cache::client()->getRoomAvatar(room_id));
+                                  room_id,
+                                  QString::fromStdString(event_id),
+                                  QString::fromStdString(
+                                    cache::client()->singleRoomInfo(item.room_id).name),
+                                  Cache::displayName(room_id, user_id),
+                                  utils::event_body(item.event),
+                                  cache::client()->getRoomAvatar(room_id));
                         }
                 } catch (const lmdb::error &e) {
                         nhlog::db()->warn("error while sending desktop notification: {}", e.what());
