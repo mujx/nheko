@@ -137,7 +137,7 @@ signals:
                            const QString &roomname,
                            const QString &sender,
                            const QString &message,
-                                const QImage &icon);
+                           const QImage &icon);
 
 private slots:
         void showUnreadMessageNotification(int count);
