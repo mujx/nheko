@@ -7,7 +7,6 @@
 - (void)set_identityImage:(NSImage *)image;
 @end
 
-void
 NotificationsManager::NotificationsManager(QObject *parent): QObject(parent)
 
 void
