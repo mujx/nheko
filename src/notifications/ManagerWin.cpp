@@ -27,8 +27,18 @@ init()
 }
 }
 
+NotificationsManager::NotificationsManager(QObject *parent): QObject(parent)
+{
+
+}
+
 void
-NotificationsManager::postNotification(const QString &room, const QString &user, const QString &msg)
+NotificationsManager::postNotification(const QString &, //roomid
+                                const QString &,        //eventid
+                                const QString &roomname,
+                                const QString &sender,
+                                const QString &text,
+                                const QImage &)         //icon
 {
         if (!isInitialized)
                 init();
