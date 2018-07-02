@@ -44,8 +44,8 @@ NotificationsManager::postNotification(const QString &, //roomid
                 init();
 
         auto templ = WinToastTemplate(WinToastTemplate::ImageAndText02);
-        if (room != user)
-                templ.setTextField(QString("%1 - %2").arg(user).arg(room).toStdWString(),
+        if (roomname != sender)
+                templ.setTextField(QString("%1 - %2").arg(sender).arg(roomname).toStdWString(),
                                    WinToastTemplate::FirstLine);
         else
                 templ.setTextField(QString("%1").arg(user).toStdWString(),
