@@ -293,8 +293,8 @@ TimelineView::parseEncryptedEvent(const mtx::events::EncryptedEvent<mtx::events:
                         // TODO: request megolm session_id & session_key from the sender.
                         return {dummy, false};
                 }
-        } catch (const lmdb::error &e) {
-                nhlog::db()->critical("failed to check megolm session's existence: {}", e.what());
+        } catch (const lmdb::error &err) {
+                nhlog::db()->critical("failed to check megolm session's existence: {}", err.what());
                 dummy.content.body = "-- Decryption Error (failed to communicate with DB) --";
                 return {dummy, false};
         }
@@ -304,22 +304,22 @@ TimelineView::parseEncryptedEvent(const mtx::events::EncryptedEvent<mtx::events:
                 auto session = cache::client()->getInboundMegolmSession(index);
                 auto res     = olm::client()->decrypt_group_message(session, e.content.ciphertext);
                 msg_str      = std::string((char *)res.data.data(), res.data.size());
-        } catch (const lmdb::error &e) {
+        } catch (const lmdb::error &err) {
                 nhlog::db()->critical("failed to retrieve megolm session with index ({}, {}, {})",
                                       index.room_id,
                                       index.session_id,
                                       index.sender_key,
-                                      e.what());
+                                      err.what());
                 dummy.content.body =
                   "-- Decryption Error (failed to retrieve megolm keys from db) --";
                 return {dummy, false};
-        } catch (const mtx::crypto::olm_exception &e) {
+        } catch (const mtx::crypto::olm_exception &err) {
                 nhlog::crypto()->critical("failed to decrypt message with index ({}, {}, {}): {}",
                                           index.room_id,
                                           index.session_id,
                                           index.sender_key,
-                                          e.what());
-                dummy.content.body = "-- Decryption Error (" + std::string(e.what()) + ") --";
+                                          err.what());
+                dummy.content.body = "-- Decryption Error (" + std::string(err.what()) + ") --";
                 return {dummy, false};
         }
 
@@ -1187,14 +1187,14 @@ TimelineView::prepareEncryptedMessage(const PendingMessage &msg)
         try {
                 // Check if we have already an outbound megolm session then we can use.
                 if (cache::client()->outboundMegolmSessionExists(room_id)) {
-                        auto data = olm::encrypt_group_message(
+                        auto cryptdata = olm::encrypt_group_message(
                           room_id, http::v2::client()->device_id(), doc.dump());
 
                         http::v2::client()
                           ->send_room_message<msg::Encrypted, EventType::RoomEncrypted>(
                             room_id,
                             msg.txn_id,
-                            data,
+                            cryptdata,
                             std::bind(&TimelineView::sendRoomMessageHandler,
                                       this,
                                       msg.txn_id,
@@ -1231,14 +1231,14 @@ TimelineView::prepareEncryptedMessage(const PendingMessage &msg)
                 auto keeper = std::make_shared<StateKeeper>(
                   [megolm_payload, room_id, doc, txn_id = msg.txn_id, this]() {
                           try {
-                                  auto data = olm::encrypt_group_message(
+                                  auto cryptdata = olm::encrypt_group_message(
                                     room_id, http::v2::client()->device_id(), doc.dump());
 
                                   http::v2::client()
                                     ->send_room_message<msg::Encrypted, EventType::RoomEncrypted>(
                                       room_id,
                                       txn_id,
-                                      data,
+                                      cryptdata,
                                       std::bind(&TimelineView::sendRoomMessageHandler,
                                                 this,
                                                 txn_id,
@@ -1443,12 +1443,12 @@ TimelineView::handleClaimedKeys(std::shared_ptr<StateKeeper> keeper,
         nhlog::net()->info("send_to_device: {}", user_id);
 
         http::v2::client()->send_to_device(
-          "m.room.encrypted", body, [keeper](mtx::http::RequestErr err) {
-                  if (err) {
+          "m.room.encrypted", body, [keeper](mtx::http::RequestErr rqerr) {
+                  if (rqerr) {
                           nhlog::net()->warn("failed to send "
                                              "send_to_device "
                                              "message: {}",
-                                             err->matrix_error.error);
+                                             rqerr->matrix_error.error);
                   }
 
                   (void)keeper;

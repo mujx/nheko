@@ -33,28 +33,28 @@
 void
 ImageItem::downloadMedia(const QUrl &url)
 {
-        http::v2::client()->download(url.toString().toStdString(),
-                                     [this, url](const std::string &data,
-                                                 const std::string &,
-                                                 const std::string &,
-                                                 mtx::http::RequestErr err) {
-                                             if (err) {
-                                                     nhlog::net()->warn(
-                                                       "failed to retrieve image {}: {} {}",
-                                                       url.toString().toStdString(),
-                                                       err->matrix_error.error,
-                                                       static_cast<int>(err->status_code));
-                                                     return;
-                                             }
+        http::v2::client()->download(
+          url.toString().toStdString(),
+          [this, url](const std::string &dldata,
+                      const std::string &,
+                      const std::string &,
+                      mtx::http::RequestErr err) {
+                  if (err) {
+                          nhlog::net()->warn("failed to retrieve image {}: {} {}",
+                                             url.toString().toStdString(),
+                                             err->matrix_error.error,
+                                             static_cast<int>(err->status_code));
+                          return;
+                  }
 
-                                             QPixmap img;
-                                             img.loadFromData(QByteArray(data.data(), data.size()));
-                                             emit imageDownloaded(img);
-                                     });
+                  QPixmap img;
+                  img.loadFromData(QByteArray(dldata.data(), dldata.size()));
+                  emit imageDownloaded(img);
+          });
 }
 
 void
-ImageItem::saveImage(const QString &filename, const QByteArray &data)
+ImageItem::saveImage(const QString &filename, const QByteArray &dldata)
 {
         try {
                 QFile file(filename);
@@ -62,7 +62,7 @@ ImageItem::saveImage(const QString &filename, const QByteArray &data)
                 if (!file.open(QIODevice::WriteOnly))
                         return;
 
-                file.write(data);
+                file.write(dldata);
                 file.close();
         } catch (const std::exception &e) {
                 nhlog::ui()->warn("Error while saving file to: {}", e.what());
@@ -246,7 +246,7 @@ ImageItem::saveAs()
 
         http::v2::client()->download(
           url,
-          [this, filename, url](const std::string &data,
+          [this, filename, url](const std::string &dldata,
                                 const std::string &,
                                 const std::string &,
                                 mtx::http::RequestErr err) {
@@ -258,6 +258,6 @@ ImageItem::saveAs()
                           return;
                   }
 
-                  emit imageSaved(filename, QByteArray(data.data(), data.size()));
+                  emit imageSaved(filename, QByteArray(dldata.data(), dldata.size()));
           });
 }

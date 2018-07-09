@@ -122,12 +122,12 @@ PreviewUploadOverlay::setLabels(const QString &type, const QString &mime, uint64
 }
 
 void
-PreviewUploadOverlay::setPreview(const QByteArray data, const QString &mime)
+PreviewUploadOverlay::setPreview(const QByteArray previewdata, const QString &mime)
 {
         auto const &split = mime.split('/');
         auto const &type  = split[1];
 
-        data_      = data;
+        data_      = previewdata;
         mediaType_ = split[0];
         filePath_  = "clipboard." + type;
         isImage_   = false;

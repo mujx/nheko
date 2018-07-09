@@ -33,12 +33,12 @@
 
 //! Should be changed when a breaking change occurs in the cache format.
 //! This will reset client's data.
-static const std::string CURRENT_CACHE_FORMAT_VERSION("2018.06.10");
-static const std::string SECRET("secret");
+static std::string CURRENT_CACHE_FORMAT_VERSION("2018.06.10");
+static std::string SECRET("secret");
 
-static const lmdb::val NEXT_BATCH_KEY("next_batch");
-static const lmdb::val OLM_ACCOUNT_KEY("olm_account");
-static const lmdb::val CACHE_FORMAT_VERSION_KEY("cache_format_version");
+static lmdb::val NEXT_BATCH_KEY("next_batch");
+static lmdb::val OLM_ACCOUNT_KEY("olm_account");
+static lmdb::val CACHE_FORMAT_VERSION_KEY("cache_format_version");
 
 constexpr size_t MAX_RESTORED_MESSAGES = 30;
 

@@ -66,8 +66,8 @@ RoomList::addRoom(const QString &room_id, const RoomInfo &info)
         room_item->setRoomName(QString::fromStdString(std::move(info.name)));
 
         connect(room_item, &RoomInfoListItem::clicked, this, &RoomList::highlightSelectedRoom);
-        connect(room_item, &RoomInfoListItem::leaveRoom, this, [](const QString &room_id) {
-                MainWindow::instance()->openLeaveRoomDialog(room_id);
+        connect(room_item, &RoomInfoListItem::leaveRoom, this, [](const QString &leave_room_id) {
+                MainWindow::instance()->openLeaveRoomDialog(leave_room_id);
         });
 
         rooms_.emplace(room_id, QSharedPointer<RoomInfoListItem>(room_item));
@@ -107,9 +107,8 @@ RoomList::updateAvatar(const QString &room_id, const QString &url)
                           if (cache::client())
                                   cache::client()->saveImage(opts.mxc_url, res);
 
-                          auto data = QByteArray(res.data(), res.size());
                           QPixmap pixmap;
-                          pixmap.loadFromData(data);
+                          pixmap.loadFromData(QByteArray(res.data(), res.size()));
 
                           emit updateRoomAvatarCb(room_id, pixmap);
                   });

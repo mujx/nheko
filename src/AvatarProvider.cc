@@ -44,10 +44,11 @@ resolve(const QString &room_id, const QString &user_id, QObject *receiver, Avata
         }
 
         auto proxy = std::make_shared<AvatarProxy>();
-        QObject::connect(proxy.get(),
-                         &AvatarProxy::avatarDownloaded,
-                         receiver,
-                         [callback](const QByteArray &data) { callback(QImage::fromData(data)); });
+        QObject::connect(
+          proxy.get(),
+          &AvatarProxy::avatarDownloaded,
+          receiver,
+          [callback](const QByteArray &connectdata) { callback(QImage::fromData(connectdata)); });
 
         mtx::http::ThumbOpts opts;
         opts.mxc_url = avatarUrl.toStdString();
@@ -65,8 +66,7 @@ resolve(const QString &room_id, const QString &user_id, QObject *receiver, Avata
 
                   cache::client()->saveImage(opts.mxc_url, res);
 
-                  auto data = QByteArray(res.data(), res.size());
-                  emit proxy->avatarDownloaded(data);
+                  emit proxy->avatarDownloaded(QByteArray(res.data(), res.size()));
           });
 }
 }

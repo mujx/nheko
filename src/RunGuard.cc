@@ -17,8 +17,8 @@ generateKeyHash(const QString &key, const QString &salt)
 }
 }
 
-RunGuard::RunGuard(const QString &key)
-  : key(key)
+RunGuard::RunGuard(const QString &_key)
+  : key(_key)
   , memLockKey(generateKeyHash(key, "_memLockKey"))
   , sharedmemKey(generateKeyHash(key, "_sharedmemKey"))
   , sharedMem(sharedmemKey)

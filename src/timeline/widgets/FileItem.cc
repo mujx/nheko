@@ -116,7 +116,7 @@ FileItem::mousePressEvent(QMouseEvent *event)
 
                 http::v2::client()->download(
                   url_.toString().toStdString(),
-                  [this](const std::string &data,
+                  [this](const std::string &dldata,
                          const std::string &,
                          const std::string &,
                          mtx::http::RequestErr err) {
@@ -126,7 +126,7 @@ FileItem::mousePressEvent(QMouseEvent *event)
                                   return;
                           }
 
-                          emit fileDownloadedCb(QByteArray(data.data(), data.size()));
+                          emit fileDownloadedCb(QByteArray(dldata.data(), dldata.size()));
                   });
         } else {
                 openUrl();
@@ -134,7 +134,7 @@ FileItem::mousePressEvent(QMouseEvent *event)
 }
 
 void
-FileItem::fileDownloaded(const QByteArray &data)
+FileItem::fileDownloaded(const QByteArray &dldata)
 {
         try {
                 QFile file(filenameToSave_);
@@ -142,7 +142,7 @@ FileItem::fileDownloaded(const QByteArray &data)
                 if (!file.open(QIODevice::WriteOnly))
                         return;
 
-                file.write(data);
+                file.write(dldata);
                 file.close();
         } catch (const std::exception &e) {
                 nhlog::ui()->warn("Error while saving file to: {}", e.what());

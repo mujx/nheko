@@ -145,10 +145,8 @@ CommunitiesList::fetchCommunityAvatar(const QString &id, const QString &avatarUr
 
                   cache::client()->saveImage(opts.mxc_url, res);
 
-                  auto data = QByteArray(res.data(), res.size());
-
                   QPixmap pix;
-                  pix.loadFromData(data);
+                  pix.loadFromData(QByteArray(res.data(), res.size()));
 
                   emit avatarRetrieved(id, pix);
           });

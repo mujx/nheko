@@ -451,31 +451,31 @@ send_megolm_key_to_device(const std::string &user_id,
                   http::v2::client()->claim_keys(
                     user_id,
                     {device_id},
-                    [room_key, user_id, device_id, pks](const mtx::responses::ClaimKeys &res,
-                                                        mtx::http::RequestErr err) {
-                            if (err) {
+                    [room_key, user_id, device_id, pks](const mtx::responses::ClaimKeys &keyres,
+                                                        mtx::http::RequestErr rqerr) {
+                            if (rqerr) {
                                     nhlog::net()->warn("claim keys error: {} {} {}",
-                                                       err->matrix_error.error,
-                                                       err->parse_error,
-                                                       static_cast<int>(err->status_code));
+                                                       rqerr->matrix_error.error,
+                                                       rqerr->parse_error,
+                                                       static_cast<int>(rqerr->status_code));
                                     return;
                             }
 
                             nhlog::net()->info("claimed keys for {}", user_id);
 
-                            if (res.one_time_keys.size() == 0) {
+                            if (keyres.one_time_keys.size() == 0) {
                                     nhlog::net()->info("no one-time keys found for user_id: {}",
                                                        user_id);
                                     return;
                             }
 
-                            if (res.one_time_keys.find(user_id) == res.one_time_keys.end()) {
+                            if (keyres.one_time_keys.find(user_id) == keyres.one_time_keys.end()) {
                                     nhlog::net()->info("no one-time keys found for user_id: {}",
                                                        user_id);
                                     return;
                             }
 
-                            auto retrieved_devices = res.one_time_keys.at(user_id);
+                            auto retrieved_devices = keyres.one_time_keys.at(user_id);
                             if (retrieved_devices.empty()) {
                                     nhlog::net()->info("claiming keys for {}: no retrieved devices",
                                                        device_id);
@@ -485,14 +485,14 @@ send_megolm_key_to_device(const std::string &user_id,
                             json body;
                             body["messages"][user_id] = json::object();
 
-                            auto device = retrieved_devices.begin()->second;
-                            nhlog::net()->info("{} : \n {}", device_id, device.dump(2));
+                            auto peerdevice = retrieved_devices.begin()->second;
+                            nhlog::net()->info("{} : \n {}", device_id, peerdevice.dump(2));
 
                             json device_msg;
 
                             try {
                                     auto olm_session = olm::client()->create_outbound_session(
-                                      pks.curve25519, device.begin()->at("key"));
+                                      pks.curve25519, peerdevice.begin()->at("key"));
 
                                     device_msg = olm::client()->create_olm_encrypted_content(
                                       olm_session.get(), room_key, pks.curve25519);
@@ -514,12 +514,12 @@ send_megolm_key_to_device(const std::string &user_id,
                             nhlog::net()->info(
                               "sending m.room_key event to {}:{}", user_id, device_id);
                             http::v2::client()->send_to_device(
-                              "m.room.encrypted", body, [user_id](mtx::http::RequestErr err) {
-                                      if (err) {
+                              "m.room.encrypted", body, [user_id](mtx::http::RequestErr cryptrqerr) {
+                                      if (cryptrqerr) {
                                               nhlog::net()->warn("failed to send "
                                                                  "send_to_device "
                                                                  "message: {}",
-                                                                 err->matrix_error.error);
+                                                                 cryptrqerr->matrix_error.error);
                                       }
 
                                       nhlog::net()->info("m.room_key send to {}", user_id);
