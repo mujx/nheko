@@ -122,7 +122,7 @@ AudioItem::mousePressEvent(QMouseEvent *event)
 
                 http::v2::client()->download(
                   url_.toString().toStdString(),
-                  [this](const std::string &data,
+                  [this](const std::string &dldata,
                          const std::string &,
                          const std::string &,
                          mtx::http::RequestErr err) {
@@ -132,13 +132,13 @@ AudioItem::mousePressEvent(QMouseEvent *event)
                                   return;
                           }
 
-                          emit fileDownloadedCb(QByteArray(data.data(), data.size()));
+                          emit fileDownloadedCb(QByteArray(dldata.data(), dldata.size()));
                   });
         }
 }
 
 void
-AudioItem::fileDownloaded(const QByteArray &data)
+AudioItem::fileDownloaded(const QByteArray &dldata)
 {
         try {
                 QFile file(filenameToSave_);
@@ -146,7 +146,7 @@ AudioItem::fileDownloaded(const QByteArray &data)
                 if (!file.open(QIODevice::WriteOnly))
                         return;
 
-                file.write(data);
+                file.write(dldata);
                 file.close();
         } catch (const std::exception &e) {
                 nhlog::ui()->warn("error while saving file: {}", e.what());

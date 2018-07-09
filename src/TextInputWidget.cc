@@ -286,15 +286,15 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
                 // nautilus_clipboard_get_uri_list_from_selection_data()
                 // https://github.com/GNOME/nautilus/blob/master/src/nautilus-clipboard.c
 
-                auto data = source->data("x-special/gnome-copied-files").split('\n');
-                if (data.size() < 2) {
+                auto mimedata = source->data("x-special/gnome-copied-files").split('\n');
+                if (mimedata.size() < 2) {
                         qWarning() << "MIME format is malformed, cannot perform paste.";
                         return;
                 }
 
                 QString path;
-                for (int i = 1; i < data.size(); ++i) {
-                        QUrl url{data[i]};
+                for (int i = 1; i < mimedata.size(); ++i) {
+                        QUrl url{mimedata[i]};
                         if (url.isLocalFile()) {
                                 path = url.toLocalFile();
                                 break;
@@ -304,7 +304,7 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
                 if (!path.isEmpty()) {
                         previewDialog_.setPreview(path);
                 } else {
-                        qWarning() << "Clipboard does not contain any valid file paths:" << data;
+                        qWarning() << "Clipboard does not contain any valid file paths:" << mimedata;
                 }
         } else {
                 QTextEdit::insertFromMimeData(source);
@@ -382,10 +382,10 @@ FilteredTextEdit::textChanged()
 }
 
 void
-FilteredTextEdit::uploadData(const QByteArray data, const QString &media, const QString &filename)
+FilteredTextEdit::uploadData(const QByteArray updata, const QString &media, const QString &filename)
 {
         QSharedPointer<QBuffer> buffer{new QBuffer{this}};
-        buffer->setData(data);
+        buffer->setData(updata);
 
         emit startedUpload();
 
@@ -404,8 +404,7 @@ FilteredTextEdit::showPreview(const QMimeData *source, const QStringList &format
 {
         // Retrieve data as MIME type.
         auto const &mime = formats.first();
-        QByteArray data  = source->data(mime);
-        previewDialog_.setPreview(data, mime);
+        previewDialog_.setPreview(source->data(mime), mime);
 }
 
 TextInputWidget::TextInputWidget(QWidget *parent)

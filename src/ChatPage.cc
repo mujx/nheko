@@ -1280,9 +1280,9 @@ ChatPage::getProfileInfo()
                   emit setUserDisplayName(QString::fromStdString(res.display_name));
 
                   if (cache::client()) {
-                          auto data = cache::client()->image(res.avatar_url);
-                          if (!data.isNull()) {
-                                  emit setUserAvatar(QImage::fromData(data));
+                          auto imagedata = cache::client()->image(res.avatar_url);
+                          if (!imagedata.isNull()) {
+                                  emit setUserAvatar(QImage::fromData(imagedata));
                                   return;
                           }
                   }
@@ -1292,23 +1292,23 @@ ChatPage::getProfileInfo()
 
                   http::v2::client()->download(
                     res.avatar_url,
-                    [this, res](const std::string &data,
+                    [this, res](const std::string &dldata,
                                 const std::string &,
                                 const std::string &,
-                                mtx::http::RequestErr err) {
-                            if (err) {
+                                mtx::http::RequestErr rqerr) {
+                            if (rqerr) {
                                     nhlog::net()->warn(
                                       "failed to download user avatar: {} - {}",
-                                      mtx::errors::to_string(err->matrix_error.errcode),
-                                      err->matrix_error.error);
+                                      mtx::errors::to_string(rqerr->matrix_error.errcode),
+                                      rqerr->matrix_error.error);
                                     return;
                             }
 
                             if (cache::client())
-                                    cache::client()->saveImage(res.avatar_url, data);
+                                    cache::client()->saveImage(res.avatar_url, dldata);
 
                             emit setUserAvatar(
-                              QImage::fromData(QByteArray(data.data(), data.size())));
+                              QImage::fromData(QByteArray(dldata.data(), dldata.size())));
                     });
           });
         // TODO http::client()->getOwnCommunities();

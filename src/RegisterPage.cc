@@ -228,21 +228,21 @@ RegisterPage::onRegisterButtonClicked()
                                     username,
                                     password,
                                     [this, username, password](
-                                      const mtx::responses::RegistrationFlows &res,
-                                      mtx::http::RequestErr err) {
-                                            if (res.session.empty() && err) {
+                                      const mtx::responses::RegistrationFlows &registerres,
+                                      mtx::http::RequestErr registererr) {
+                                            if (registerres.session.empty() && registererr) {
                                                     nhlog::net()->warn(
                                                       "failed to retrieve registration flows: ({}) "
                                                       "{}",
-                                                      static_cast<int>(err->status_code),
-                                                      err->matrix_error.error);
+                                                      static_cast<int>(registererr->status_code),
+                                                      registererr->matrix_error.error);
                                                     emit errorOccurred();
                                                     emit registerErrorCb(QString::fromStdString(
-                                                      err->matrix_error.error));
+                                                      registererr->matrix_error.error));
                                                     return;
                                             }
 
-                                            emit registrationFlow(username, password, res.session);
+                                            emit registrationFlow(username, password, registerres.session);
                                     });
                                   return;
                           }
