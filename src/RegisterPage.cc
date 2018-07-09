@@ -242,7 +242,8 @@ RegisterPage::onRegisterButtonClicked()
                                                     return;
                                             }
 
-                                            emit registrationFlow(username, password, registerres.session);
+                                            emit registrationFlow(
+                                              username, password, registerres.session);
                                     });
                                   return;
                           }

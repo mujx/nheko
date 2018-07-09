@@ -304,7 +304,8 @@ FilteredTextEdit::insertFromMimeData(const QMimeData *source)
                 if (!path.isEmpty()) {
                         previewDialog_.setPreview(path);
                 } else {
-                        qWarning() << "Clipboard does not contain any valid file paths:" << mimedata;
+                        qWarning()
+                          << "Clipboard does not contain any valid file paths:" << mimedata;
                 }
         } else {
                 QTextEdit::insertFromMimeData(source);

@@ -33,24 +33,24 @@
 void
 ImageItem::downloadMedia(const QUrl &url)
 {
-        http::v2::client()->download(url.toString().toStdString(),
-                                     [this, url](const std::string &dldata,
-                                                 const std::string &,
-                                                 const std::string &,
-                                                 mtx::http::RequestErr err) {
-                                             if (err) {
-                                                     nhlog::net()->warn(
-                                                       "failed to retrieve image {}: {} {}",
-                                                       url.toString().toStdString(),
-                                                       err->matrix_error.error,
-                                                       static_cast<int>(err->status_code));
-                                                     return;
-                                             }
+        http::v2::client()->download(
+          url.toString().toStdString(),
+          [this, url](const std::string &dldata,
+                      const std::string &,
+                      const std::string &,
+                      mtx::http::RequestErr err) {
+                  if (err) {
+                          nhlog::net()->warn("failed to retrieve image {}: {} {}",
+                                             url.toString().toStdString(),
+                                             err->matrix_error.error,
+                                             static_cast<int>(err->status_code));
+                          return;
+                  }
 
-                                             QPixmap img;
-                                             img.loadFromData(QByteArray(dldata.data(), dldata.size()));
-                                             emit imageDownloaded(img);
-                                     });
+                  QPixmap img;
+                  img.loadFromData(QByteArray(dldata.data(), dldata.size()));
+                  emit imageDownloaded(img);
+          });
 }
 
 void
