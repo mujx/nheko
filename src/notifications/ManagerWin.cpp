@@ -56,3 +56,14 @@ NotificationsManager::postNotification(const QString &, //roomid
 
         WinToast::instance()->showToast(templ, new CustomHandler());
 }
+
+//unused
+void
+NotificationsManager::actionInvoked(uint, QString)
+{
+}
+
+void
+NotificationsManager::notificationClosed(uint, uint)
+{
+}

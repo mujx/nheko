@@ -8,6 +8,9 @@
 @end
 
 NotificationsManager::NotificationsManager(QObject *parent): QObject(parent)
+{
+
+}
 
 void
 NotificationsManager::postNotification(
@@ -31,4 +34,15 @@ NotificationsManager::postNotification(
 
     [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification: notif];
     [notif autorelease];
+}
+
+//unused
+void
+NotificationsManager::actionInvoked(uint, QString)
+{
+}
+
+void
+NotificationsManager::notificationClosed(uint, uint)
+{
 }
