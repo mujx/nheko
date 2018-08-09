@@ -115,6 +115,8 @@ struct RoomInfo
         bool guest_access  = false;
         //! Metadata describing the last message in the timeline.
         DescInfo msgInfo;
+        //! The list of tags associated with this room
+        std::vector<std::string> tags;
 };
 
 inline void
@@ -129,6 +131,9 @@ to_json(json &j, const RoomInfo &info)
 
         if (info.member_count != 0)
                 j["member_count"] = info.member_count;
+
+        if (info.tags.size() != 0)
+                j["tags"] = info.tags;
 }
 
 inline void
@@ -143,6 +148,9 @@ from_json(const json &j, RoomInfo &info)
 
         if (j.count("member_count"))
                 info.member_count = j.at("member_count");
+
+        if (j.count("tags"))
+                info.tags = j.at("tags").get<std::vector<std::string>>();
 }
 
 //! Basic information per member;
