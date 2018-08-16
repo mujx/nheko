@@ -24,6 +24,8 @@
 #include <QSettings>
 
 #include "Config.h"
+#include "Olm.h"
+#include "MatrixClient.h"
 #include "UserSettingsPage.h"
 #include "Utils.h"
 #include "ui/FlatButton.h"
@@ -229,7 +231,37 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         themeOptionLayout_->addWidget(themeLabel_);
         themeOptionLayout_->addWidget(themeCombo_, 0, Qt::AlignBottom | Qt::AlignRight);
 
+        auto encryptionLayout_ = new QVBoxLayout;
+        encryptionLayout_->setContentsMargins(0, OptionMargin, 0, OptionMargin);
+
+        auto deviceIdWidget = new QHBoxLayout;
+        deviceIdWidget->setContentsMargins(0, OptionMargin, 0, OptionMargin);
+        auto deviceIdLabel = new QLabel(tr("Device ID"), this);
+        deviceIdLabel->setFont(font);
+        deviceIdValue_ = new QLabel(QString("Loading..."));
+        deviceIdValue_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        deviceIdWidget->addWidget(deviceIdLabel);
+        deviceIdWidget->addWidget(deviceIdValue_);
+
+        auto deviceFingerprintWidget = new QHBoxLayout;
+        deviceFingerprintWidget->setContentsMargins(0, OptionMargin, 0, OptionMargin);
+        auto deviceFingerprintLabel = new QLabel(tr("Device Fingerprint"), this);
+        deviceIdLabel->setFont(font);
+        deviceFingerprintValue_ = new QLabel(QString("Loading..."));
+        deviceFingerprintValue_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        deviceFingerprintWidget->addWidget(deviceFingerprintLabel);
+        deviceFingerprintWidget->addWidget(deviceFingerprintValue_);
+
+        encryptionLayout_->addLayout(deviceIdWidget);
+        encryptionLayout_->addLayout(deviceFingerprintWidget);
+
+
         font.setWeight(65);
+
+        auto encryptionLabel_ = new QLabel(tr("Encryption"), this);
+        encryptionLabel_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+        encryptionLabel_->setFont(font);
+
         auto general_ = new QLabel(tr("GENERAL"), this);
         general_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         general_->setFont(font);
@@ -263,6 +295,10 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
 
         mainLayout_->addLayout(themeOptionLayout_);
         mainLayout_->addWidget(new HorizontalLine(this));
+
+        mainLayout_->addWidget(encryptionLabel_, 1, Qt::AlignLeft | Qt::AlignBottom);
+        mainLayout_->addWidget(new HorizontalLine(this));
+        mainLayout_->addLayout(encryptionLayout_);
         mainLayout_->addStretch(1);
 
         auto scrollArea_ = new QScrollArea(this);
@@ -343,6 +379,16 @@ UserSettingsPage::showEvent(QShowEvent *)
         typingNotifications_->setState(!settings_->isTypingNotificationsEnabled());
         readReceipts_->setState(!settings_->isReadReceiptsEnabled());
         desktopNotifications_->setState(!settings_->hasDesktopNotifications());
+        deviceIdValue_->setText(QString::fromStdString(http::client()->device_id()));
+
+        // TODO: Do the HumanReadable part somewhere else
+        QString fingerprint = QString::fromStdString(olm::client()->identity_keys().ed25519);
+        QStringList fingerprintList;
+        for(int i = 0; i< fingerprint.length(); i = i+4) {
+                fingerprintList << fingerprint.mid(i, 4);
+        }
+        deviceFingerprintValue_->setText(fingerprintList.join(" "));
+
 }
 
 void

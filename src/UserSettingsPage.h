@@ -22,6 +22,7 @@
 #include <QLayout>
 #include <QSharedPointer>
 #include <QWidget>
+#include <QLabel>
 
 class Toggle;
 
@@ -151,6 +152,8 @@ private:
         Toggle *typingNotifications_;
         Toggle *readReceipts_;
         Toggle *desktopNotifications_;
+        QLabel *deviceFingerprintValue_;
+        QLabel *deviceIdValue_;
 
         QComboBox *themeCombo_;
         QComboBox *scaleFactorCombo_;
