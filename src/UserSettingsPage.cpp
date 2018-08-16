@@ -24,8 +24,8 @@
 #include <QSettings>
 
 #include "Config.h"
-#include "Olm.h"
 #include "MatrixClient.h"
+#include "Olm.h"
 #include "UserSettingsPage.h"
 #include "Utils.h"
 #include "ui/FlatButton.h"
@@ -255,7 +255,6 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         encryptionLayout_->addLayout(deviceIdWidget);
         encryptionLayout_->addLayout(deviceFingerprintWidget);
 
-
         font.setWeight(65);
 
         auto encryptionLabel_ = new QLabel(tr("Encryption"), this);
@@ -384,11 +383,10 @@ UserSettingsPage::showEvent(QShowEvent *)
         // TODO: Do the HumanReadable part somewhere else
         QString fingerprint = QString::fromStdString(olm::client()->identity_keys().ed25519);
         QStringList fingerprintList;
-        for(int i = 0; i< fingerprint.length(); i = i+4) {
+        for (int i = 0; i < fingerprint.length(); i = i + 4) {
                 fingerprintList << fingerprint.mid(i, 4);
         }
         deviceFingerprintValue_->setText(fingerprintList.join(" "));
-
 }
 
 void

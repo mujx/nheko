@@ -19,10 +19,10 @@
 
 #include <QComboBox>
 #include <QFrame>
+#include <QLabel>
 #include <QLayout>
 #include <QSharedPointer>
 #include <QWidget>
-#include <QLabel>
 
 class Toggle;
 
