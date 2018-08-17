@@ -22,6 +22,7 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSettings>
+#include <QSpacerItem>
 
 #include "Config.h"
 #include "MatrixClient.h"
@@ -234,22 +235,30 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         auto encryptionLayout_ = new QVBoxLayout;
         encryptionLayout_->setContentsMargins(0, OptionMargin, 0, OptionMargin);
 
+        QFont monospaceFont = QFont(font);
+        monospaceFont.setFamily("Courier New");
+        monospaceFont.setStyleHint(QFont::Courier);
+
         auto deviceIdWidget = new QHBoxLayout;
         deviceIdWidget->setContentsMargins(0, OptionMargin, 0, OptionMargin);
+
         auto deviceIdLabel = new QLabel(tr("Device ID"), this);
         deviceIdLabel->setFont(font);
+        deviceIdLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Ignored);
         deviceIdValue_ = new QLabel(QString("Loading..."));
         deviceIdValue_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        deviceIdValue_->setFont(monospaceFont);
         deviceIdWidget->addWidget(deviceIdLabel);
         deviceIdWidget->addWidget(deviceIdValue_);
 
         auto deviceFingerprintWidget = new QHBoxLayout;
         deviceFingerprintWidget->setContentsMargins(0, OptionMargin, 0, OptionMargin);
         auto deviceFingerprintLabel = new QLabel(tr("Device Fingerprint"), this);
-        deviceIdLabel->setFont(font);
+        
         deviceFingerprintValue_ = new QLabel(QString("Loading..."));
         deviceFingerprintValue_->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        deviceFingerprintWidget->addWidget(deviceFingerprintLabel);
+        deviceFingerprintValue_->setFont(monospaceFont);
+        deviceFingerprintWidget->addWidget(deviceFingerprintLabel, 1);
         deviceFingerprintWidget->addWidget(deviceFingerprintValue_);
 
         encryptionLayout_->addLayout(deviceIdWidget);
