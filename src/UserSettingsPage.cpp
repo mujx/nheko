@@ -22,7 +22,6 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSettings>
-#include <QSpacerItem>
 
 #include "Config.h"
 #include "MatrixClient.h"
@@ -244,17 +243,17 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
 
         auto deviceIdLabel = new QLabel(tr("Device ID"), this);
         deviceIdLabel->setFont(font);
-        deviceIdLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Ignored);
         deviceIdValue_ = new QLabel(QString("Loading..."));
         deviceIdValue_->setTextInteractionFlags(Qt::TextSelectableByMouse);
         deviceIdValue_->setFont(monospaceFont);
-        deviceIdWidget->addWidget(deviceIdLabel);
+        deviceIdWidget->addWidget(deviceIdLabel, 1);
         deviceIdWidget->addWidget(deviceIdValue_);
 
         auto deviceFingerprintWidget = new QHBoxLayout;
         deviceFingerprintWidget->setContentsMargins(0, OptionMargin, 0, OptionMargin);
+
         auto deviceFingerprintLabel = new QLabel(tr("Device Fingerprint"), this);
-        
+        deviceFingerprintLabel->setFont(font);
         deviceFingerprintValue_ = new QLabel(QString("Loading..."));
         deviceFingerprintValue_->setTextInteractionFlags(Qt::TextSelectableByMouse);
         deviceFingerprintValue_->setFont(monospaceFont);
