@@ -1109,6 +1109,27 @@ Cache::roomsWithStateUpdates(const mtx::responses::Sync &res)
         return rooms;
 }
 
+std::vector<std::string>
+Cache::roomsWithTagUpdates(const mtx::responses::Sync &res)
+{
+        using namespace mtx::events;
+
+        std::vector<std::string> rooms;
+        for (const auto &room : res.rooms.join) {
+                bool hasUpdates = false;
+                for (const auto &evt : room.second.account_data.events) {
+                        if (evt.type() == typeid(Event<account_data::Tag>)) {
+                                hasUpdates = true;
+                        }
+                }
+
+                if (hasUpdates)
+                        rooms.emplace_back(room.first);
+        }
+
+        return rooms;
+}
+
 RoomInfo
 Cache::singleRoomInfo(const std::string &room_id)
 {

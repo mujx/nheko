@@ -4,6 +4,7 @@
 #include <QSharedPointer>
 #include <QVBoxLayout>
 
+#include "Cache.h"
 #include "CommunitiesListItem.h"
 #include "ui/Theme.h"
 
@@ -19,6 +20,9 @@ public:
         void addCommunity(const std::string &id);
         void removeCommunity(const QString &id) { communities_.erase(id); };
         std::map<QString, bool> roomList(const QString &id) const;
+
+        void syncTags(const std::map<QString, RoomInfo> &info);
+        void setTagsForRoom(const QString &id, const std::vector<std::string> &tags);
 
 signals:
         void communityChanged(const QString &id);

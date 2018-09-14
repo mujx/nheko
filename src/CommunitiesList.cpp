@@ -47,7 +47,15 @@ CommunitiesList::CommunitiesList(QWidget *parent)
 void
 CommunitiesList::setCommunities(const mtx::responses::JoinedGroups &response)
 {
-        communities_.clear();
+        // remove all non-tag communities
+        auto it = communities_.begin();
+        while (it != communities_.end()) {
+                if (it->second->is_tag()) {
+                        ++it;
+                } else {
+                        it = communities_.erase(it);
+                }
+        }
 
         addGlobalItem();
 
@@ -56,6 +64,49 @@ CommunitiesList::setCommunities(const mtx::responses::JoinedGroups &response)
 
         communities_["world"]->setPressedState(true);
         emit communityChanged("world");
+}
+
+void
+CommunitiesList::syncTags(const std::map<QString, RoomInfo> &info)
+{
+        for (const auto &room : info)
+                setTagsForRoom(room.first, room.second.tags);
+}
+
+void
+CommunitiesList::setTagsForRoom(const QString &room_id, const std::vector<std::string> &tags)
+{
+        // create missing tag if any
+        for (const auto &tag : tags) {
+                QString name = QString("tag:") + QString::fromStdString(tag);
+                if (!communityExists(name)) {
+                        addCommunity(std::string("tag:") + tag);
+                }
+        }
+        // update membership of the room for all tags
+        auto it = communities_.begin();
+        while (it != communities_.end()) {
+                // Skip if the community is not a tag
+                if (!it->second->is_tag()) {
+                        ++it;
+                        continue;
+                }
+                // insert or remove the room from the tag as appropriate
+                std::string current_tag = it->first.right(it->first.size() - 4).toStdString();
+                if (std::find(tags.begin(), tags.end(), current_tag) != tags.end()) {
+                        // the room has this tag
+                        it->second->addRoom(room_id);
+                } else {
+                        // the room does not have this tag
+                        it->second->delRoom(room_id);
+                }
+                // Check if the tag is now empty, if yes delete it
+                if (it->second->rooms().empty()) {
+                        it = communities_.erase(it);
+                } else {
+                        ++it;
+                }
+        }
 }
 
 void

@@ -392,10 +392,15 @@ public:
 
         RoomInfo singleRoomInfo(const std::string &room_id);
         std::vector<std::string> roomsWithStateUpdates(const mtx::responses::Sync &res);
+        std::vector<std::string> roomsWithTagUpdates(const mtx::responses::Sync &res);
         std::map<QString, RoomInfo> getRoomInfo(const std::vector<std::string> &rooms);
         std::map<QString, RoomInfo> roomUpdates(const mtx::responses::Sync &sync)
         {
                 return getRoomInfo(roomsWithStateUpdates(sync));
+        }
+        std::map<QString, RoomInfo> roomTagUpdates(const mtx::responses::Sync &sync)
+        {
+                return getRoomInfo(roomsWithTagUpdates(sync));
         }
 
         //! Calculates which the read status of a room.

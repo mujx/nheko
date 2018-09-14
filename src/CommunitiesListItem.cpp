@@ -19,6 +19,8 @@ CommunitiesListItem::CommunitiesListItem(QString group_id, QWidget *parent)
 
         if (groupId_ == "world")
                 avatar_ = QPixmap(":/icons/icons/ui/world.png");
+        if (groupId_.startsWith("tag:"))
+                avatar_ = QPixmap(":/icons/icons/ui/tag.png");
 }
 
 void
@@ -98,7 +100,8 @@ CommunitiesListItem::resolveName() const
 {
         if (!name_.isEmpty())
                 return name_;
-
+        if (groupId_.startsWith("tag:"))
+                return groupId_.right(groupId_.size() - 4);
         if (!groupId_.startsWith("+"))
                 return QString("Group"); // Group with no name or id.
 
