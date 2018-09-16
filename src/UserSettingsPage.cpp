@@ -145,7 +145,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         trayToggle_ = new Toggle(this);
 
         trayOptionLayout_->addWidget(trayLabel);
-        trayOptionLayout_->addWidget(trayToggle_, 0, Qt::AlignBottom | Qt::AlignRight);
+        trayOptionLayout_->addWidget(trayToggle_, 0, Qt::AlignRight);
 
         auto startInTrayOptionLayout_ = new QHBoxLayout;
         startInTrayOptionLayout_->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -156,8 +156,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
                 startInTrayToggle_->setDisabled(true);
 
         startInTrayOptionLayout_->addWidget(startInTrayLabel);
-        startInTrayOptionLayout_->addWidget(
-          startInTrayToggle_, 0, Qt::AlignBottom | Qt::AlignRight);
+        startInTrayOptionLayout_->addWidget(startInTrayToggle_, 0, Qt::AlignRight);
 
         auto orderRoomLayout = new QHBoxLayout;
         orderRoomLayout->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -166,7 +165,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         roomOrderToggle_ = new Toggle(this);
 
         orderRoomLayout->addWidget(orderLabel);
-        orderRoomLayout->addWidget(roomOrderToggle_, 0, Qt::AlignBottom | Qt::AlignRight);
+        orderRoomLayout->addWidget(roomOrderToggle_, 0, Qt::AlignRight);
 
         auto groupViewLayout = new QHBoxLayout;
         groupViewLayout->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -175,7 +174,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         groupViewToggle_ = new Toggle(this);
 
         groupViewLayout->addWidget(groupViewLabel);
-        groupViewLayout->addWidget(groupViewToggle_, 0, Qt::AlignBottom | Qt::AlignRight);
+        groupViewLayout->addWidget(groupViewToggle_, 0, Qt::AlignRight);
 
         auto typingLayout = new QHBoxLayout;
         typingLayout->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -184,7 +183,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         typingNotifications_ = new Toggle(this);
 
         typingLayout->addWidget(typingLabel);
-        typingLayout->addWidget(typingNotifications_, 0, Qt::AlignBottom | Qt::AlignRight);
+        typingLayout->addWidget(typingNotifications_, 0, Qt::AlignRight);
 
         auto receiptsLayout = new QHBoxLayout;
         receiptsLayout->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -193,7 +192,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         readReceipts_ = new Toggle(this);
 
         receiptsLayout->addWidget(receiptsLabel);
-        receiptsLayout->addWidget(readReceipts_, 0, Qt::AlignBottom | Qt::AlignRight);
+        receiptsLayout->addWidget(readReceipts_, 0, Qt::AlignRight);
 
         auto desktopLayout = new QHBoxLayout;
         desktopLayout->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -202,7 +201,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         desktopNotifications_ = new Toggle(this);
 
         desktopLayout->addWidget(desktopLabel);
-        desktopLayout->addWidget(desktopNotifications_, 0, Qt::AlignBottom | Qt::AlignRight);
+        desktopLayout->addWidget(desktopNotifications_, 0, Qt::AlignRight);
 
         auto scaleFactorOptionLayout = new QHBoxLayout;
         scaleFactorOptionLayout->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -220,7 +219,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         scaleFactorCombo_->addItem("3");
 
         scaleFactorOptionLayout->addWidget(scaleFactorLabel);
-        scaleFactorOptionLayout->addWidget(scaleFactorCombo_, 0, Qt::AlignBottom | Qt::AlignRight);
+        scaleFactorOptionLayout->addWidget(scaleFactorCombo_, 0, Qt::AlignRight);
 
         auto themeOptionLayout_ = new QHBoxLayout;
         themeOptionLayout_->setContentsMargins(0, OptionMargin, 0, OptionMargin);
@@ -232,15 +231,15 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         themeCombo_->addItem("System");
 
         themeOptionLayout_->addWidget(themeLabel_);
-        themeOptionLayout_->addWidget(themeCombo_, 0, Qt::AlignBottom | Qt::AlignRight);
+        themeOptionLayout_->addWidget(themeCombo_, 0, Qt::AlignRight);
 
         auto encryptionLayout_ = new QVBoxLayout;
         encryptionLayout_->setContentsMargins(0, OptionMargin, 0, OptionMargin);
-        encryptionLayout_->setAlignment(Qt::AlignVCenter | Qt::AlignBottom);
+        encryptionLayout_->setAlignment(Qt::AlignVCenter);
 
-        QFont monospaceFont = QFont(font);
-        monospaceFont.setFamily("Courier New");
-        monospaceFont.setStyleHint(QFont::Courier);
+        QFont monospaceFont;
+        monospaceFont.setFamily("Monospace");
+        monospaceFont.setStyleHint(QFont::Monospace);
         monospaceFont.setPointSizeF(monospaceFont.pointSizeF() * 0.9);
 
         auto deviceIdLayout = new QHBoxLayout;
@@ -248,6 +247,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
 
         auto deviceIdLabel = new QLabel(tr("Device ID"), this);
         deviceIdLabel->setFont(font);
+        deviceIdLabel->setMargin(0);
         deviceIdValue_ = new QLabel{this};
         deviceIdValue_->setTextInteractionFlags(Qt::TextSelectableByMouse);
         deviceIdValue_->setFont(monospaceFont);
@@ -259,6 +259,7 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
 
         auto deviceFingerprintLabel = new QLabel(tr("Device Fingerprint"), this);
         deviceFingerprintLabel->setFont(font);
+        deviceFingerprintLabel->setMargin(0);
         deviceFingerprintValue_ = new QLabel{this};
         deviceFingerprintValue_->setTextInteractionFlags(Qt::TextSelectableByMouse);
         deviceFingerprintValue_->setFont(monospaceFont);
@@ -271,18 +272,18 @@ UserSettingsPage::UserSettingsPage(QSharedPointer<UserSettings> settings, QWidge
         sessionKeysLabel->setFont(font);
         sessionKeysLayout->addWidget(sessionKeysLabel, 1);
 
-        auto sessionKeysImportBtn = new FlatButton(tr("IMPORT"), this);
+        auto sessionKeysImportBtn = new QPushButton{tr("IMPORT"), this};
         connect(
           sessionKeysImportBtn, &QPushButton::clicked, this, &UserSettingsPage::importSessionKeys);
-        auto sessionKeysExportBtn = new FlatButton(tr("EXPORT"), this);
+        auto sessionKeysExportBtn = new QPushButton{tr("EXPORT"), this};
         connect(
           sessionKeysExportBtn, &QPushButton::clicked, this, &UserSettingsPage::exportSessionKeys);
-        sessionKeysLayout->addWidget(sessionKeysExportBtn);
-        sessionKeysLayout->addWidget(sessionKeysImportBtn);
+        sessionKeysLayout->addWidget(sessionKeysExportBtn, 0, Qt::AlignRight);
+        sessionKeysLayout->addWidget(sessionKeysImportBtn, 0, Qt::AlignRight);
 
         encryptionLayout_->addLayout(deviceIdLayout);
         encryptionLayout_->addLayout(deviceFingerprintLayout);
-        encryptionLayout_->addWidget(new HorizontalLine(this));
+        encryptionLayout_->addWidget(new HorizontalLine{this});
         encryptionLayout_->addLayout(sessionKeysLayout);
 
         font.setWeight(65);
@@ -493,8 +494,10 @@ UserSettingsPage::importSessionKeys()
                                               QLineEdit::Password,
                                               "",
                                               &ok);
+        if (!ok)
+                return;
 
-        if (!ok || password.isEmpty()) {
+        if (password.isEmpty()) {
                 QMessageBox::warning(this, tr("Error"), tr("The password cannot be empty"));
                 return;
         }
@@ -523,8 +526,10 @@ UserSettingsPage::exportSessionKeys()
                                               QLineEdit::Password,
                                               "",
                                               &ok);
+        if (!ok)
+                return;
 
-        if (!ok || password.isEmpty()) {
+        if (password.isEmpty()) {
                 QMessageBox::warning(this, tr("Error"), tr("The password cannot be empty"));
                 return;
         }

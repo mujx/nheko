@@ -722,6 +722,8 @@ void
 TimelineItem::generateTimestamp(const QDateTime &time)
 {
         QFont timestampFont;
+        timestampFont.setFamily("Monospace");
+        timestampFont.setStyleHint(QFont::Monospace);
         timestampFont.setPixelSize(conf::timeline::fonts::timestamp);
 
         timestamp_ = new QLabel(this);
