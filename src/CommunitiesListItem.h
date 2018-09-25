@@ -28,7 +28,7 @@ class CommunitiesListItem : public QWidget
 public:
         CommunitiesListItem(QString group_id, QWidget *parent = nullptr);
 
-        void setName(QString name) { name_ = name; }
+        void setName(QString name);
         bool isPressed() const { return isPressed_; }
         void setAvatar(const QImage &img);
 
@@ -72,6 +72,7 @@ private:
         const int IconSize = 36;
 
         QString resolveName() const;
+        void updateTooltip();
 
         std::map<QString, bool> room_ids_;
 

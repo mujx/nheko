@@ -25,6 +25,15 @@ CommunitiesListItem::CommunitiesListItem(QString group_id, QWidget *parent)
                 avatar_ = QPixmap(":/icons/icons/ui/lowprio.png");
         else if (groupId_.startsWith("tag:"))
                 avatar_ = QPixmap(":/icons/icons/ui/tag.png");
+
+        updateTooltip();
+}
+
+void
+CommunitiesListItem::setName(QString name)
+{
+        name_ = name;
+        updateTooltip();
 }
 
 void
@@ -112,4 +121,25 @@ CommunitiesListItem::resolveName() const
         // Extract the localpart of the group.
         auto firstPart = groupId_.split(':').at(0);
         return firstPart.right(firstPart.size() - 1);
+}
+
+void
+CommunitiesListItem::updateTooltip()
+{
+        if (groupId_ == "world")
+                setToolTip(tr("All rooms"));
+        else if (is_tag()) {
+                QString tag = groupId_.right(groupId_.size() - 4);
+                if (tag == "m.favourite")
+                        setToolTip(tr("Favourite rooms"));
+                else if (tag == "m.lowpriority")
+                        setToolTip(tr("Low priority rooms"));
+                else if (tag.startsWith("u."))
+                        setToolTip(tag.right(tag.size() - 2) + tr(" (tag)"));
+                else
+                        setToolTip(tag + tr(" (tag)"));
+        } else {
+                QString name = resolveName();
+                setToolTip(name + tr(" (community)"));
+        }
 }

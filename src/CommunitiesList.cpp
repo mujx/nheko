@@ -78,6 +78,14 @@ CommunitiesList::setTagsForRoom(const QString &room_id, const std::vector<std::s
 {
         // create missing tag if any
         for (const auto &tag : tags) {
+                // filter out tags we should ignore according to the spec
+                // https://matrix.org/docs/spec/client_server/r0.4.0.html#id154
+                // nheko currently does not make use of internal tags
+                // so we ignore any tag containig a `.` (which would indicate a tag
+                // in the form `tld.domain.*`) except for `m.*` and `u.*`.
+                if (tag.find(".") != ::std::string::npos && tag.compare(0, 2, "m.") &&
+                    tag.compare(0, 2, "m."))
+                        continue;
                 QString name = QString("tag:") + QString::fromStdString(tag);
                 if (!communityExists(name)) {
                         addCommunity(std::string("tag:") + tag);
