@@ -19,7 +19,11 @@ CommunitiesListItem::CommunitiesListItem(QString group_id, QWidget *parent)
 
         if (groupId_ == "world")
                 avatar_ = QPixmap(":/icons/icons/ui/world.png");
-        if (groupId_.startsWith("tag:"))
+        else if (groupId_ == "tag:m.favourite")
+                avatar_ = QPixmap(":/icons/icons/ui/star.png");
+        else if (groupId_ == "tag:m.lowpriority")
+                avatar_ = QPixmap(":/icons/icons/ui/lowprio.png");
+        else if (groupId_.startsWith("tag:"))
                 avatar_ = QPixmap(":/icons/icons/ui/tag.png");
 }
 
