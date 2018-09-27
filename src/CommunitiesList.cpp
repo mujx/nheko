@@ -264,7 +264,7 @@ CommunitiesList::sortEntries()
         std::vector<CommunitiesListItem *> footer;
         // remove all the contents and sort them in the 4 vectors
         for (auto &entry : communities_) {
-                CommunitiesListItem *item = entry.second.get();
+                CommunitiesListItem *item = entry.second.data();
                 contentsLayout_->removeWidget(item);
                 // world is handled separately
                 if (entry.first == "world")
@@ -281,7 +281,7 @@ CommunitiesList::sortEntries()
                         communities.push_back(item);
         }
 
-        contentsLayout_->insertWidget(contentsLayout_->count() - 1, communities_["world"].get());
+        contentsLayout_->insertWidget(contentsLayout_->count() - 1, communities_["world"].data());
         for (auto item : header)
                 contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
         for (auto item : communities)
