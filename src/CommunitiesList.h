@@ -38,6 +38,7 @@ public slots:
 private:
         void fetchCommunityAvatar(const QString &id, const QString &avatarUrl);
         void addGlobalItem() { addCommunity("world"); }
+        void sortEntries();
 
         //! Check whether or not a community id is currently managed.
         bool communityExists(const QString &id) const

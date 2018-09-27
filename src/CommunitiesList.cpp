@@ -64,6 +64,7 @@ CommunitiesList::setCommunities(const mtx::responses::JoinedGroups &response)
 
         communities_["world"]->setPressedState(true);
         emit communityChanged("world");
+        sortEntries();
 }
 
 void
@@ -71,6 +72,7 @@ CommunitiesList::syncTags(const std::map<QString, RoomInfo> &info)
 {
         for (const auto &room : info)
                 setTagsForRoom(room.first, room.second.tags);
+        sortEntries();
 }
 
 void
@@ -251,4 +253,41 @@ CommunitiesList::roomList(const QString &id) const
                 return communities_.at(id)->rooms();
 
         return {};
+}
+
+void
+CommunitiesList::sortEntries()
+{
+        std::vector<CommunitiesListItem *> header;
+        std::vector<CommunitiesListItem *> communities;
+        std::vector<CommunitiesListItem *> tags;
+        std::vector<CommunitiesListItem *> footer;
+        // remove all the contents and sort them in the 4 vectors
+        for (auto &entry : communities_) {
+                CommunitiesListItem *item = entry.second.get();
+                contentsLayout_->removeWidget(item);
+                // world is handled separately
+                if (entry.first == "world")
+                        continue;
+                // sort the rest
+                if (item->is_tag())
+                        if (entry.first == "tag:m.favourite")
+                                header.push_back(item);
+                        else if (entry.first == "tag:m.lowpriority")
+                                footer.push_back(item);
+                        else
+                                tags.push_back(item);
+                else
+                        communities.push_back(item);
+        }
+
+        contentsLayout_->insertWidget(contentsLayout_->count() - 1, communities_["world"].get());
+        for (auto item : header)
+                contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
+        for (auto item : communities)
+                contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
+        for (auto item : tags)
+                contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
+        for (auto item : footer)
+                contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
 }
