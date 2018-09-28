@@ -1081,8 +1081,7 @@ ChatPage::trySync()
                           emit syncTopBar(updates);
                           emit syncRoomlist(updates);
 
-                          auto tag_updates = cache::client()->roomTagUpdates(res);
-                          emit syncTags(tag_updates);
+                          emit syncTags(cache::client()->roomTagUpdates(res));
 
                           cache::client()->deleteOldData();
                   } catch (const lmdb::map_full_error &e) {

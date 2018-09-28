@@ -86,7 +86,7 @@ CommunitiesList::setTagsForRoom(const QString &room_id, const std::vector<std::s
                 // so we ignore any tag containig a `.` (which would indicate a tag
                 // in the form `tld.domain.*`) except for `m.*` and `u.*`.
                 if (tag.find(".") != ::std::string::npos && tag.compare(0, 2, "m.") &&
-                    tag.compare(0, 2, "m."))
+                    tag.compare(0, 2, "u."))
                         continue;
                 QString name = QString("tag:") + QString::fromStdString(tag);
                 if (!communityExists(name)) {
@@ -102,7 +102,8 @@ CommunitiesList::setTagsForRoom(const QString &room_id, const std::vector<std::s
                         continue;
                 }
                 // insert or remove the room from the tag as appropriate
-                std::string current_tag = it->first.right(it->first.size() - 4).toStdString();
+                std::string current_tag =
+                  it->first.right(it->first.size() - strlen("tag:")).toStdString();
                 if (std::find(tags.begin(), tags.end(), current_tag) != tags.end()) {
                         // the room has this tag
                         it->second->addRoom(room_id);
@@ -281,13 +282,20 @@ CommunitiesList::sortEntries()
                         communities.push_back(item);
         }
 
-        contentsLayout_->insertWidget(contentsLayout_->count() - 1, communities_["world"].data());
-        for (auto item : header)
-                contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
-        for (auto item : communities)
-                contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
-        for (auto item : tags)
-                contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
-        for (auto item : footer)
-                contentsLayout_->insertWidget(contentsLayout_->count() - 1, item);
+        // now there remains only the stretch in the layout, remove it
+        QLayoutItem *stretch = contentsLayout_->itemAt(0);
+        contentsLayout_->removeItem(stretch);
+
+        contentsLayout_->addWidget(communities_["world"].data());
+
+        auto insert_widgets = [this](auto &vec) {
+                for (auto item : vec)
+                        contentsLayout_->addWidget(item);
+        };
+        insert_widgets(header);
+        insert_widgets(communities);
+        insert_widgets(tags);
+        insert_widgets(footer);
+
+        contentsLayout_->addItem(stretch);
 }
